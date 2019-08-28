@@ -17,10 +17,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 import webbrowser
 
-if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
-    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
-    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
 class Ui_ConfigWindow(object):
     def setupUiConfigWindow(self, ConfigWindow):
         ConfigWindow.setObjectName("ConfigWindow")
