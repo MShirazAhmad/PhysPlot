@@ -2,8 +2,8 @@
     File name: PhysPlot.py
     Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
     Date created: 8/20/2019
-    Date last modified: 8/27/2019
-    Script Version: 1.1.1 (Bleeding Edge)
+    Date last modified: 8/29/2019
+    Script Version: 1.1.2 (Bleeding Edge)
     Python Version: 3.7.3
 '''
 import PyQt5
@@ -16,7 +16,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
 import webbrowser
-
 
 class Ui_ConfigWindow(object):
     def setupUiConfigWindow(self, ConfigWindow):
@@ -1218,7 +1217,6 @@ class pick_file_to_append(QWidget):
         files, _ = QFileDialog.getOpenFileName(self, "Pick Variables File", "",
                                                 "All Files (*);;Excel Files (*.xlsx);; CSV (*.csv);;TSV (*.txt)", options=options)
 
-
 class SaveFile(QWidget):
 
     def __init__(self):
@@ -1936,6 +1934,8 @@ class Ui_MainWindow(object):
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Delete:
             self.delRows()
+            self.Rows_lineEdit.setText(str(self.tableWidget.rowCount()))
+            self.Columns_lineEdit.setText(str(self.tableWidget.columnCount()))
         else:
             e.ignore()
     def delRows(self):
@@ -2045,14 +2045,11 @@ class Ui_MainWindow(object):
         except Exception as e:
             self.errMessage("writeTableRow:", str(e))
     def btn_LoadData(self):
-        try:
+        pick_file_to_append()
+        if files:
             import numpy as np
             import pandas as pd
             global tableLabels
-            tableLabels = np.zeros(100)
-
-            pick_file_to_append()
-
             import os.path
             global data
             try:
@@ -2067,11 +2064,8 @@ class Ui_MainWindow(object):
                 else:
                     data = np.loadtxt(files)
                 self.printTOTable()
-            except Exception as e:
-                self.errMessage("Loading data to Variable:", str(e))
-        except Exception as e:
-            self.errMessage("Printing to Table:", str(e))
-
+            except:
+                pass
     def printTOTable(self): #Prints data file to table
         try:
             import numpy as np
@@ -2413,38 +2407,26 @@ class Ui_MainWindow(object):
 
 
     def btn_combobox_index(self, value):
-        try:
-            global plot_AxisIndex
-            plot_AxisIndex=value
-            #print("btn_combobox_index:", plot_AxisIndex)
-        except Exception as e:
-            self.errMessage("Combo Box Index:", str(e))
-
+        global plot_AxisIndex
+        plot_AxisIndex=value
+        #print("btn_combobox_index:", plot_AxisIndex)
     def btn_combobox_changed(self, value):
-        try:
-            global combobox_Val
-            btn_combobox_Val = value
-            index = plot_AxisIndex
-
-            if value == 1:
-                global xIndex
-                xIndex = plot_AxisIndex
-            if value == 2:
-                global uxIndex
-                uxIndex = plot_AxisIndex
-            if value == 3:
-                global yIndex
-                yIndex = plot_AxisIndex
-            if value == 4:
-                global uyIndex
-                uyIndex = plot_AxisIndex
-
-            tableLabels[int(plot_AxisIndex)] = int(value)
-            #print("tableLabels,", tableLabels)
-        except Exception as e:
-            self.errMessage("ComboBox Values:", str(e))
-
-
+        global combobox_Val
+        btn_combobox_Val = value
+        index = plot_AxisIndex
+        if value == 1:
+            global xIndex
+            xIndex = plot_AxisIndex
+        if value == 2:
+            global uxIndex
+            uxIndex = plot_AxisIndex
+        if value == 3:
+            global yIndex
+            yIndex = plot_AxisIndex
+        if value == 4:
+            global uyIndex
+            uyIndex = plot_AxisIndex
+        tableLabels[int(plot_AxisIndex)] = int(value)
     def btn_ClearTable(self):
 
         ##print("Clear Table")
@@ -2787,7 +2769,7 @@ class Ui_MainWindow(object):
     def readTable(self):
         try:
             global OutPut_Table
-            tableDimensions = [int(self.tableWidget.rowCount()), int(self.tableWidget.rowCount())]
+            tableDimensions = [int(self.tableWidget.rowCount()), int(self.tableWidget.columnCount())]
             OutPut_Table = np.zeros((tableDimensions[0]-1, tableDimensions[1]))
             i = 0
             while i < tableDimensions[1]:
