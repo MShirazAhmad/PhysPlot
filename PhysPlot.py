@@ -2,20 +2,21 @@
     File name: PhysPlot.py
     Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
     Date created: 8/20/2019
-    Date last modified: 8/29/2019
-    Script Version: 1.1.2 (Bleeding Edge)
+    Date last modified: 1/10/2020
+    Script Version: 1.1.3 (Bleeding Edge)
     Python Version: 3.7.3
 '''
-import PyQt5
-from PyQt5 import QtCore, QtWidgets,QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QApplication, QTableWidgetItem
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import webbrowser
+
 import matplotlib.pyplot as plt
 import numpy as np
+from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QTableWidgetItem
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from scipy.optimize import curve_fit
-import webbrowser
+
 
 class Ui_ConfigWindow(object):
     def setupUiConfigWindow(self, ConfigWindow):
@@ -84,7 +85,7 @@ class Ui_ConfigWindow(object):
         self.verticalLayout.addWidget(self.comboBox_Grid_Style)
         self.lineEdit_Grid_Width = QtWidgets.QLineEdit(self.groupBox)
         self.lineEdit_Grid_Width.setValidator(validator)
-        self.lineEdit_Grid_Width.setInputMethodHints(QtCore.Qt.ImhDigitsOnly|QtCore.Qt.ImhFormattedNumbersOnly)
+        self.lineEdit_Grid_Width.setInputMethodHints(QtCore.Qt.ImhDigitsOnly | QtCore.Qt.ImhFormattedNumbersOnly)
         self.lineEdit_Grid_Width.setObjectName("lineEdit_Grid_Width")
         self.verticalLayout.addWidget(self.lineEdit_Grid_Width)
         self.comboBox_Grid_Color = QtWidgets.QComboBox(self.groupBox)
@@ -146,7 +147,7 @@ class Ui_ConfigWindow(object):
         self.verticalLayout_3.addWidget(self.comboBox_Marker_Style)
         self.lineEdit_Marker_Size = QtWidgets.QLineEdit(self.groupBox_2)
         self.lineEdit_Marker_Size.setValidator(validator)
-        self.lineEdit_Marker_Size.setInputMethodHints(QtCore.Qt.ImhDigitsOnly|QtCore.Qt.ImhFormattedNumbersOnly)
+        self.lineEdit_Marker_Size.setInputMethodHints(QtCore.Qt.ImhDigitsOnly | QtCore.Qt.ImhFormattedNumbersOnly)
         self.lineEdit_Marker_Size.setObjectName("lineEdit_Marker_Size")
         self.verticalLayout_3.addWidget(self.lineEdit_Marker_Size)
         self.comboBox_Marker_Color = QtWidgets.QComboBox(self.groupBox_2)
@@ -190,7 +191,7 @@ class Ui_ConfigWindow(object):
         self.verticalLayout_6.addWidget(self.comboBox_Line_Style)
         self.lineEdit_Line_Width = QtWidgets.QLineEdit(self.groupBox_3)
         self.lineEdit_Line_Width.setValidator(validator)
-        self.lineEdit_Line_Width.setInputMethodHints(QtCore.Qt.ImhDigitsOnly|QtCore.Qt.ImhFormattedNumbersOnly)
+        self.lineEdit_Line_Width.setInputMethodHints(QtCore.Qt.ImhDigitsOnly | QtCore.Qt.ImhFormattedNumbersOnly)
         self.lineEdit_Line_Width.setObjectName("lineEdit_Line_Width")
         self.verticalLayout_6.addWidget(self.lineEdit_Line_Width)
         self.comboBox_Line_Color = QtWidgets.QComboBox(self.groupBox_3)
@@ -702,6 +703,7 @@ class Ui_ConfigWindow(object):
         self.tabWidget1.setTabText(self.tabWidget1.indexOf(self.tab_2), _translate("ConfigWindow", "Curve Fitting"))
 
         self.sourceScript()
+
     def sourceScript(self):
 
         # delayCmd.delay(self)
@@ -844,6 +846,7 @@ class Ui_ConfigWindow(object):
         Label_lineEdit_crvft_10 = str(self.lineEdit_crvft_10.text())
         Label_lineEdit_crvft_11 = str(self.lineEdit_crvft_11.text())
         """
+
     def readFitType(self):
         if self.checkBox__crvft_1.isChecked() == True:
             plt_LableData[0, 0] = True
@@ -889,6 +892,7 @@ class Ui_ConfigWindow(object):
             plt_LableData[10, 0] = True
         else:
             plt_LableData[10, 0] = False
+
     def onClicked_radioButton_off_crvft_1(self):
         self.radioButton_off_crvft_1.setChecked(True)
         self.radioButton_Equation_crvft_1.setChecked(False)
@@ -896,6 +900,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[0, 1] = True
         plt_LableData[0, 2] = False
         plt_LableData[0, 3] = False
+
     def onClicked_radioButton_Equation_crvft_1(self):
         self.radioButton_Equation_crvft_1.setChecked(True)
         self.radioButton_off_crvft_1.setChecked(False)
@@ -903,6 +908,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[0, 1] = False
         plt_LableData[0, 2] = True
         plt_LableData[0, 3] = False
+
     def onClicked_radioButton_Label_crvft_1(self):
         self.radioButton_Label_crvft_1.setChecked(True)
         self.radioButton_off_crvft_1.setChecked(False)
@@ -910,6 +916,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[0, 1] = False
         plt_LableData[0, 2] = False
         plt_LableData[0, 3] = True
+
     def onClicked_radioButton_off_crvft_2(self):
         self.radioButton__off_crvft_2.setChecked(True)
         self.radioButton_Equation_crvft_2.setChecked(False)
@@ -917,6 +924,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[1, 1] = True
         plt_LableData[1, 2] = False
         plt_LableData[1, 3] = False
+
     def onClicked_radioButton_Equation_crvft_2(self):
         self.radioButton_Equation_crvft_2.setChecked(True)
         self.radioButton__off_crvft_2.setChecked(False)
@@ -924,6 +932,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[1, 1] = False
         plt_LableData[1, 2] = True
         plt_LableData[1, 3] = False
+
     def onClicked_radioButton_Label_crvft_2(self):
         self.radioButton_Label_crvft_2.setChecked(True)
         self.radioButton__off_crvft_2.setChecked(False)
@@ -931,6 +940,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[1, 1] = False
         plt_LableData[1, 2] = False
         plt_LableData[1, 3] = True
+
     def onClicked_radioButton_off_crvft_3(self):
         self.radioButton__off_crvft_3.setChecked(True)
         self.radioButton_Equation_crvft_3.setChecked(False)
@@ -938,6 +948,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[2, 1] = True
         plt_LableData[2, 2] = False
         plt_LableData[2, 3] = False
+
     def onClicked_radioButton_Equation_crvft_3(self):
         self.radioButton_Equation_crvft_3.setChecked(True)
         self.radioButton__off_crvft_3.setChecked(False)
@@ -945,6 +956,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[2, 1] = False
         plt_LableData[2, 2] = True
         plt_LableData[2, 3] = False
+
     def onClicked_radioButton_Label_crvft_3(self):
         self.radioButton_Label_crvft_3.setChecked(True)
         self.radioButton__off_crvft_3.setChecked(False)
@@ -952,6 +964,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[2, 1] = False
         plt_LableData[2, 2] = False
         plt_LableData[2, 3] = True
+
     def onClicked_radioButton_off_crvft_4(self):
         self.radioButton__off_crvft_4.setChecked(True)
         self.radioButton_Equation_crvft_4.setChecked(False)
@@ -959,6 +972,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[3, 1] = True
         plt_LableData[3, 2] = False
         plt_LableData[3, 3] = False
+
     def onClicked_radioButton_Equation_crvft_4(self):
         self.radioButton_Equation_crvft_4.setChecked(True)
         self.radioButton__off_crvft_4.setChecked(False)
@@ -966,6 +980,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[3, 1] = False
         plt_LableData[3, 2] = True
         plt_LableData[3, 3] = False
+
     def onClicked_radioButton_Label_crvft_4(self):
         self.radioButton_Label_crvft_4.setChecked(True)
         self.radioButton__off_crvft_4.setChecked(False)
@@ -973,6 +988,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[3, 1] = False
         plt_LableData[3, 2] = False
         plt_LableData[3, 3] = True
+
     def onClicked_radioButton_off_crvft_5(self):
         self.radioButton__off_crvft_5.setChecked(True)
         self.radioButton_Equation_crvft_5.setChecked(False)
@@ -980,6 +996,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[4, 1] = True
         plt_LableData[4, 2] = False
         plt_LableData[4, 3] = False
+
     def onClicked_radioButton_Equation_crvft_5(self):
         self.radioButton_Equation_crvft_5.setChecked(True)
         self.radioButton__off_crvft_5.setChecked(False)
@@ -987,6 +1004,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[4, 1] = False
         plt_LableData[4, 2] = True
         plt_LableData[4, 3] = False
+
     def onClicked_radioButton_Label_crvft_5(self):
         self.radioButton_Label_crvft_5.setChecked(True)
         self.radioButton__off_crvft_5.setChecked(False)
@@ -994,6 +1012,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[4, 1] = False
         plt_LableData[4, 2] = False
         plt_LableData[4, 3] = True
+
     def onClicked_radioButton_off_crvft_6(self):
         self.radioButton__off_crvft_6.setChecked(True)
         self.radioButton_Equation_crvft_6.setChecked(False)
@@ -1001,6 +1020,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[5, 1] = True
         plt_LableData[5, 2] = False
         plt_LableData[5, 3] = False
+
     def onClicked_radioButton_Equation_crvft_6(self):
         self.radioButton_Equation_crvft_6.setChecked(True)
         self.radioButton__off_crvft_6.setChecked(False)
@@ -1008,6 +1028,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[5, 1] = False
         plt_LableData[5, 2] = True
         plt_LableData[5, 3] = False
+
     def onClicked_radioButton_Label_crvft_6(self):
         self.radioButton_Label_crvft_6.setChecked(True)
         self.radioButton__off_crvft_6.setChecked(False)
@@ -1015,6 +1036,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[5, 1] = False
         plt_LableData[5, 2] = False
         plt_LableData[5, 3] = True
+
     def onClicked_radioButton_off_crvft_7(self):
         self.radioButton__off_crvft_7.setChecked(True)
         self.radioButton_Equation_crvft_7.setChecked(False)
@@ -1022,6 +1044,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[6, 1] = True
         plt_LableData[6, 2] = False
         plt_LableData[6, 3] = False
+
     def onClicked_radioButton_Equation_crvft_7(self):
         self.radioButton_Equation_crvft_7.setChecked(True)
         self.radioButton__off_crvft_7.setChecked(False)
@@ -1029,6 +1052,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[6, 1] = False
         plt_LableData[6, 2] = True
         plt_LableData[6, 3] = False
+
     def onClicked_radioButton_Label_crvft_7(self):
         self.radioButton_Label_crvft_7.setChecked(True)
         self.radioButton__off_crvft_7.setChecked(False)
@@ -1036,6 +1060,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[6, 1] = False
         plt_LableData[6, 2] = False
         plt_LableData[6, 3] = True
+
     def onClicked_radioButton_off_crvft_8(self):
         self.radioButton__off_crvft_8.setChecked(True)
         self.radioButton_Equation_crvft_8.setChecked(False)
@@ -1043,6 +1068,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[7, 1] = True
         plt_LableData[7, 2] = False
         plt_LableData[7, 3] = False
+
     def onClicked_radioButton_Equation_crvft_8(self):
         self.radioButton_Equation_crvft_8.setChecked(True)
         self.radioButton__off_crvft_8.setChecked(False)
@@ -1050,6 +1076,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[7, 1] = False
         plt_LableData[7, 2] = True
         plt_LableData[7, 3] = False
+
     def onClicked_radioButton_Label_crvft_8(self):
         self.radioButton_Label_crvft_8.setChecked(True)
         self.radioButton__off_crvft_8.setChecked(False)
@@ -1057,6 +1084,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[7, 1] = False
         plt_LableData[7, 2] = False
         plt_LableData[7, 3] = True
+
     def onClicked_radioButton_off_crvft_9(self):
         self.radioButton__off_crvft_9.setChecked(True)
         self.radioButton_Equation_crvft_9.setChecked(False)
@@ -1064,6 +1092,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[8, 1] = True
         plt_LableData[8, 2] = False
         plt_LableData[8, 3] = False
+
     def onClicked_radioButton_Equation_crvft_9(self):
         self.radioButton_Equation_crvft_9.setChecked(True)
         self.radioButton__off_crvft_9.setChecked(False)
@@ -1071,6 +1100,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[8, 1] = False
         plt_LableData[8, 2] = True
         plt_LableData[8, 3] = False
+
     def onClicked_radioButton_Label_crvft_9(self):
         self.radioButton_Label_crvft_9.setChecked(True)
         self.radioButton__off_crvft_9.setChecked(False)
@@ -1078,6 +1108,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[8, 1] = False
         plt_LableData[8, 2] = False
         plt_LableData[8, 3] = True
+
     def onClicked_radioButton_off_crvft_10(self):
         self.radioButton__off_crvft_10.setChecked(True)
         self.radioButton_Equation_crvft_10.setChecked(False)
@@ -1085,6 +1116,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[9, 1] = True
         plt_LableData[9, 2] = False
         plt_LableData[9, 3] = False
+
     def onClicked_radioButton_Equation_crvft_10(self):
         self.radioButton_Equation_crvft_10.setChecked(True)
         self.radioButton__off_crvft_10.setChecked(False)
@@ -1092,6 +1124,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[9, 1] = False
         plt_LableData[9, 2] = True
         plt_LableData[9, 3] = False
+
     def onClicked_radioButton_Label_crvft_10(self):
         self.radioButton_Label_crvft_10.setChecked(True)
         self.radioButton__off_crvft_10.setChecked(False)
@@ -1099,6 +1132,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[9, 1] = False
         plt_LableData[9, 2] = False
         plt_LableData[9, 3] = True
+
     def onClicked_radioButton_off_crvft_11(self):
         self.radioButton__off_crvft_11.setChecked(True)
         self.radioButton_Equation_crvft_11.setChecked(False)
@@ -1106,6 +1140,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[10, 1] = True
         plt_LableData[10, 2] = False
         plt_LableData[10, 3] = False
+
     def onClicked_radioButton_Equation_crvft_11(self):
         self.radioButton_Equation_crvft_11.setChecked(True)
         self.radioButton__off_crvft_11.setChecked(False)
@@ -1113,6 +1148,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[10, 1] = False
         plt_LableData[10, 2] = True
         plt_LableData[10, 3] = False
+
     def onClicked_radioButton_Label_crvft_11(self):
         self.radioButton_Label_crvft_11.setChecked(True)
         self.radioButton__off_crvft_11.setChecked(False)
@@ -1120,6 +1156,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[10, 1] = False
         plt_LableData[10, 2] = False
         plt_LableData[10, 3] = True
+
     def definePlotParameters(self):
         global Grid_Style
         global Grid_Width
@@ -1145,10 +1182,10 @@ class Ui_ConfigWindow(object):
         global Label_PlotxLabel
         global Label_PlotyLabel
         global Label_PlotLegend
-        Label_PlotLabel= str(self.lineEdit_PlotLabel.text())
-        Label_PlotxLabel= str(self.lineEdit_PlotxLabel.text())
-        Label_PlotyLabel= str(self.lineEdit_PlotyLabel.text())
-        Label_PlotLegend= str(self.lineEdit_PlotLegend.text())
+        Label_PlotLabel = str(self.lineEdit_PlotLabel.text())
+        Label_PlotxLabel = str(self.lineEdit_PlotxLabel.text())
+        Label_PlotyLabel = str(self.lineEdit_PlotyLabel.text())
+        Label_PlotLegend = str(self.lineEdit_PlotLegend.text())
         Label_lineEdit_crvft_1 = str(self.lineEdit_crvft_1.text())
         Label_lineEdit_crvft_2 = str(self.lineEdit_crvft_2.text())
         Label_lineEdit_crvft_3 = str(self.lineEdit_crvft_3.text())
@@ -1160,15 +1197,15 @@ class Ui_ConfigWindow(object):
         Label_lineEdit_crvft_9 = str(self.lineEdit_crvft_9.text())
         Label_lineEdit_crvft_10 = str(self.lineEdit_crvft_10.text())
         Label_lineEdit_crvft_11 = str(self.lineEdit_crvft_11.text())
-        Grid_Style       =    self.comboBox_Grid_Style.currentText()
-        Grid_Width   =     self.lineEdit_Grid_Width.text()
+        Grid_Style = self.comboBox_Grid_Style.currentText()
+        Grid_Width = self.lineEdit_Grid_Width.text()
         Grid_Color = self.comboBox_Grid_Color.currentText()
-        Marker_Style=self.comboBox_Marker_Style.currentText()
-        Marker_Size=self.lineEdit_Marker_Size.text()
-        Marker_Color=self.comboBox_Marker_Color.currentText()
-        Line_Style=self.comboBox_Line_Style.currentText()
-        Line_Width=self.lineEdit_Line_Width.text()
-        Line_Color=self.comboBox_Line_Color.currentText()
+        Marker_Style = self.comboBox_Marker_Style.currentText()
+        Marker_Size = self.lineEdit_Marker_Size.text()
+        Marker_Color = self.comboBox_Marker_Color.currentText()
+        Line_Style = self.comboBox_Line_Style.currentText()
+        Line_Width = self.lineEdit_Line_Width.text()
+        Line_Color = self.comboBox_Line_Color.currentText()
         try:
             if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 3).count(True) == 1:
                 Plot_Window().show()
@@ -1180,11 +1217,11 @@ class about_gui(QWidget):
 
     def __init__(self):
         super().__init__()
-    #    self.title = ''
-    #    self.left = 1
-    #    self.top = 1
-    #    self.width = 1
-    #    self.height = 1
+        #    self.title = ''
+        #    self.left = 1
+        #    self.top = 1
+        #    self.width = 1
+        #    self.height = 1
         self.setWindowIcon(QtGui.QIcon('ico.ico'))
         self.initUI()
 
@@ -1204,18 +1241,22 @@ class pick_file_to_append(QWidget):
         self.width = 640
         self.height = 480
         self.initUI()
+
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setWindowIcon(QtGui.QIcon('ico.ico'))
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.openFileNamesDialog()
         self.show()
+
     def openFileNamesDialog(self):
         global files
         options = QFileDialog.Options()
         options |= QFileDialog.DontConfirmOverwrite
         files, _ = QFileDialog.getOpenFileName(self, "Pick Variables File", "",
-                                                "All Files (*);;Excel Files (*.xlsx);; CSV (*.csv);;TSV (*.txt)", options=options)
+                                               "All Files (*);;Excel Files (*.xlsx);; CSV (*.csv);;TSV (*.txt)",
+                                               options=options)
+
 
 class SaveFile(QWidget):
 
@@ -1264,7 +1305,8 @@ class Plot_Window(QDialog):
                    "Tri-Right": "4", "Octagon": "8", "Square": "s", "Pentagon": "p", "Star": "*", "Hexagon1": "h",
                    "Hexagon2": "H", "Plus": "+", "x": "x", "Diamond": "D", "Thin-Diamond": "d", "V-Line": "|",
                    "H-Line": "_", "Draw Nothing": "None"}
-        Linestyle = {"Solid Line":"-", "Dashed Line": "--", "Dash-Dotted Line": "-.", "Dotted Line": ":", "Draw Nothing": "None"}
+        Linestyle = {"Solid Line": "-", "Dashed Line": "--", "Dash-Dotted Line": "-.", "Dotted Line": ":",
+                     "Draw Nothing": "None"}
         Color = {"Blue": "b", "Green": "g", "Red": "r", "Cyan": "c", "Magenta": "m", "Yellow": "y", "Black": "k",
                  "White": "w"}
         layout = QVBoxLayout()
@@ -1285,25 +1327,13 @@ class Plot_Window(QDialog):
         ax = self.figure.add_subplot(111)
         ax.grid(color=Color[Grid_Color], linestyle=Linestyle[Grid_Style], linewidth=float(Grid_Width))
         try:
-#        slope, intercept, r_value, p_value, stderr = linregress(x, y)
-#        Equation = 'y = ' + str(np.round(slope, 7)) + 'x + ' + str(np.round(intercept, 7))
-            if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 2).count(True) == 1 and list(tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 1:
+            #        slope, intercept, r_value, p_value, stderr = linregress(x, y)
+            #        Equation = 'y = ' + str(np.round(slope, 7)) + 'x + ' + str(np.round(intercept, 7))
+            if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 2).count(True) == 1 and list(
+                    tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 1:
                 plt.errorbar(x, y, yerr=yerr, xerr=xerr,
                              marker=Markers[Marker_Style],
-                             markeredgecolor=Color[Marker_Color],
-                             markersize=float(Marker_Size),
-                             linestyle=Linestyle[Line_Style],
-                             Linewidth=float(Line_Width),
-                             color=Color[Line_Color],
-                             elinewidth=1,
-                             capsize=5,
-                             capthick=1,
-                             label=Label_PlotLegend,)
-
-            if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 2).count(True) == 0 and list(
-                    tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 1:
-                plt.errorbar(x, y, yerr=yerr,
-                             marker=Markers[Marker_Style],
+                             markerfacecolor=Color[Marker_Color],
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
@@ -1314,11 +1344,26 @@ class Plot_Window(QDialog):
                              capthick=1,
                              label=Label_PlotLegend, )
 
+            if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 2).count(True) == 0 and list(
+                    tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 1:
+                plt.errorbar(x, y, yerr=yerr,
+                             marker=Markers[Marker_Style],
+                             markerfacecolor=Color[Marker_Color],
+                             markeredgecolor=Color[Marker_Color],
+                             markersize=float(Marker_Size),
+                             linestyle=Linestyle[Line_Style],
+                             Linewidth=float(Line_Width),
+                             color=Color[Line_Color],
+                             elinewidth=1,
+                             capsize=5,
+                             capthick=1,
+                             label=Label_PlotLegend, )
 
             if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 2).count(True) == 1 and list(
                     tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 0:
                 plt.errorbar(x, y, xerr=xerr,
                              marker=Markers[Marker_Style],
+                             markerfacecolor=Color[Marker_Color],
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
@@ -1333,6 +1378,7 @@ class Plot_Window(QDialog):
                     tableLabels == 3).count(True) == 1 and list(tableLabels == 4).count(True) == 0:
                 plt.errorbar(x, y,
                              marker=Markers[Marker_Style],
+                             markerfacecolor=Color[Marker_Color],
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
@@ -1351,7 +1397,7 @@ class Plot_Window(QDialog):
                 if plt_LableData[0, 0] == True:
                     z01 = np.polyfit(x, y, 1)
                     if plt_LableData[0, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[0, 3] == True:
                         Label = Label_lineEdit_crvft_1
                     if plt_LableData[0, 2] == True:
@@ -1367,7 +1413,7 @@ class Plot_Window(QDialog):
                     z02 = np.polyfit(x, y, 2)
                     p02 = np.poly1d(z02)
                     if plt_LableData[1, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[1, 3] == True:
                         Label = Label_lineEdit_crvft_2
                     if plt_LableData[1, 2] == True:
@@ -1382,7 +1428,7 @@ class Plot_Window(QDialog):
                     z03 = np.polyfit(x, y, 3)
                     p03 = np.poly1d(z03)
                     if plt_LableData[2, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[2, 3] == True:
                         Label = Label_lineEdit_crvft_3
                     if plt_LableData[2, 2] == True:
@@ -1397,11 +1443,12 @@ class Plot_Window(QDialog):
                     z04 = np.polyfit(x, y, 4)
                     p04 = np.poly1d(z04)
                     if plt_LableData[3, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[3, 3] == True:
                         Label = Label_lineEdit_crvft_4
                     if plt_LableData[3, 2] == True:
-                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}'.format(B=z04)
+                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}'.format(
+                            B=z04)
                     plt.plot(x, p04(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("4th Order Fit:", str(e))
@@ -1412,11 +1459,12 @@ class Plot_Window(QDialog):
                     z05 = np.polyfit(x, y, 5)
                     p05 = np.poly1d(z05)
                     if plt_LableData[4, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[4, 3] == True:
                         Label = Label_lineEdit_crvft_5
                     if plt_LableData[4, 2] == True:
-                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}, f={B[5]:2.2g}'.format(B=z05)
+                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}, f={B[5]:2.2g}'.format(
+                            B=z05)
                     plt.plot(x, p05(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("5th Order Fit:", str(e))
@@ -1427,11 +1475,12 @@ class Plot_Window(QDialog):
                     z06 = np.polyfit(x, y, 6)
                     p06 = np.poly1d(z06)
                     if plt_LableData[5, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[5, 3] == True:
                         Label = Label_lineEdit_crvft_6
                     if plt_LableData[5, 2] == True:
-                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}, f={B[5]:2.2g}, g={B[6]:2.2g}'.format(B=z06)
+                        Label = 'fit: a={B[0]:2.2g}, b={B[1]:2.2g}, c={B[2]:2.2g}, d={B[3]:2.2g}, e={B[4]:2.2g}, f={B[5]:2.2g}, g={B[6]:2.2g}'.format(
+                            B=z06)
                     plt.plot(x, p06(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("6th Order Fit:", str(e))
@@ -1441,11 +1490,12 @@ class Plot_Window(QDialog):
                     z07 = np.polyfit(x, y, 7)
                     p07 = np.poly1d(z07)
                     if plt_LableData[6, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[6, 3] == True:
                         Label = Label_lineEdit_crvft_7
                     if plt_LableData[6, 2] == True:
-                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}'.format(B=z07)
+                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}'.format(
+                            B=z07)
                     plt.plot(x, p07(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("7th Order Fit:", str(e))
@@ -1455,11 +1505,12 @@ class Plot_Window(QDialog):
                     z08 = np.polyfit(x, y, 8)
                     p08 = np.poly1d(z08)
                     if plt_LableData[7, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[7, 3] == True:
                         Label = Label_lineEdit_crvft_8
                     if plt_LableData[7, 2] == True:
-                        Label = 'fit: a={B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}'.format(B=z08)
+                        Label = 'fit: a={B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}'.format(
+                            B=z08)
                     plt.plot(x, p08(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("8th Order Fit:", str(e))
@@ -1469,11 +1520,12 @@ class Plot_Window(QDialog):
                     z09 = np.polyfit(x, y, 9)
                     p09 = np.poly1d(z09)
                     if plt_LableData[8, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[8, 3] == True:
                         Label = Label_lineEdit_crvft_9
                     if plt_LableData[8, 2] == True:
-                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}, {B[9]:2.2g}'.format(B=z09)
+                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}, {B[9]:2.2g}'.format(
+                            B=z09)
                     plt.plot(x, p09(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("9th Order Fit:", str(e))
@@ -1483,11 +1535,12 @@ class Plot_Window(QDialog):
                     z10 = np.polyfit(x, y, 10)
                     p10 = np.poly1d(z10)
                     if plt_LableData[9, 1] == True:
-                        Label=""
+                        Label = ""
                     if plt_LableData[9, 3] == True:
                         Label = Label_lineEdit_crvft_10
                     if plt_LableData[9, 2] == True:
-                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}, {B[9]:2.2g}, {B[10]:2.2g}'.format(B=z10)
+                        Label = 'fit: {B[0]:2.2g}, {B[1]:2.2g}, {B[2]:2.2g}, {B[3]:2.2g}, {B[4]:2.2g}, {B[5]:2.2g}, {B[6]:2.2g}, {B[7]:2.2g}, {B[8]:2.2g}, {B[9]:2.2g}, {B[10]:2.2g}'.format(
+                            B=z10)
                     plt.plot(x, p10(x), '-', label=Label)
             except Exception as e:
                 self.errMessage("10th Order Fit:", str(e))
@@ -1496,8 +1549,9 @@ class Plot_Window(QDialog):
                 if plt_LableData[10, 0] == True:
                     def funcGaus(x, a, b):
                         return a * np.exp(b * x)
+
                     popt, pcov = curve_fit(funcGaus, x, y)
-                    #print(popt)
+                    # print(popt)
                     if plt_LableData[10, 1] == True:
                         Label = ""
                     if plt_LableData[10, 3] == True:
@@ -1507,15 +1561,16 @@ class Plot_Window(QDialog):
                     plt.plot(x, funcGaus(x, *popt), label=Label)
             except Exception as e:
                 self.errMessage("A*exp(-b Fit):", str(e))
-            #print(plt_LableData)
+            # print(plt_LableData)
         except Exception as e:
             self.errMessage("Curve Fitting:", str(e))
 
         props = dict(facecolor='wheat', alpha=0.5)
- #       ax.text(0.05, 0.95, Equation, transform=ax.transAxes, fontsize=11,
-  #              verticalalignment='top')
-        plt.legend(loc='upper left',fontsize  = 'small')
+        #       ax.text(0.05, 0.95, Equation, transform=ax.transAxes, fontsize=11,
+        #              verticalalignment='top')
+        plt.legend(loc='upper left', fontsize='small')
         self.canvas.draw()
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -1528,7 +1583,8 @@ class Ui_MainWindow(object):
         MainWindow.setAutoFillBackground(False)
         MainWindow.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.Pakistan))
         MainWindow.setInputMethodHints(QtCore.Qt.ImhNone)
-        MainWindow.setDockOptions(QtWidgets.QMainWindow.AllowTabbedDocks|QtWidgets.QMainWindow.AnimatedDocks|QtWidgets.QMainWindow.VerticalTabs)
+        MainWindow.setDockOptions(
+            QtWidgets.QMainWindow.AllowTabbedDocks | QtWidgets.QMainWindow.AnimatedDocks | QtWidgets.QMainWindow.VerticalTabs)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setTabletTracking(True)
         self.centralwidget.setFocusPolicy(QtCore.Qt.ClickFocus)
@@ -1557,7 +1613,8 @@ class Ui_MainWindow(object):
         self.tableWidget.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.tableWidget.setAutoFillBackground(True)
         self.tableWidget.setInputMethodHints(QtCore.Qt.ImhNone)
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.AnyKeyPressed|QtWidgets.QAbstractItemView.DoubleClicked|QtWidgets.QAbstractItemView.EditKeyPressed)
+        self.tableWidget.setEditTriggers(
+            QtWidgets.QAbstractItemView.AnyKeyPressed | QtWidgets.QAbstractItemView.DoubleClicked | QtWidgets.QAbstractItemView.EditKeyPressed)
         self.tableWidget.setDragEnabled(True)
         self.tableWidget.setAlternatingRowColors(True)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
@@ -1568,8 +1625,6 @@ class Ui_MainWindow(object):
         font.setPointSize(11)
         font.setBold(True)
         self.tableWidget.horizontalHeader().font()
-
-
 
         self.tableWidget.horizontalHeader().setVisible(True)
         self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
@@ -1628,7 +1683,6 @@ class Ui_MainWindow(object):
         self.Columns_lineEdit = QtWidgets.QLineEdit(self.groupBox_3)
         self.Columns_lineEdit.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.Columns_lineEdit.setObjectName("Columns_lineEdit")
-
 
         validator = QtGui.QDoubleValidator()
 
@@ -1863,11 +1917,12 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        validator1 = QtGui.QIntValidator(0,100)
+        validator1 = QtGui.QIntValidator(0, 100)
         self.Rows_lineEdit_2.setValidator(validator1)
         self.Columns_lineEdit_2.setValidator(validator1)
         self.Rows_lineEdit_2.setText("0")
         self.Columns_lineEdit_2.setText("0")
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "PhysPlot"))
@@ -1938,48 +1993,60 @@ class Ui_MainWindow(object):
             self.Columns_lineEdit.setText(str(self.tableWidget.columnCount()))
         else:
             e.ignore()
+
     def delRows(self):
         indices = self.tableWidget.selectionModel().selectedRows()
         for index in sorted(indices, reverse=True):
             if index != 0:
                 self.tableWidget.removeRow(index.row())
+
     def shiftVal(self):
         if int(self.Rows_lineEdit_2.text()) > int(self.tableWidget.columnCount()):
             self.Rows_lineEdit_2.setText("0")
         if int(self.Columns_lineEdit_2.text()) > int(self.tableWidget.columnCount()):
             self.Columns_lineEdit_2.setText("0")
+
     def btn_RP(self):
-        self.tableWidget.setRowCount(self.tableWidget.rowCount()+1)
+        self.tableWidget.setRowCount(self.tableWidget.rowCount() + 1)
         self.Rows_lineEdit.setText(str(self.tableWidget.rowCount()))
+
     def btn_RM(self):
         if int(self.tableWidget.rowCount()) > 4:
-            self.tableWidget.setRowCount(self.tableWidget.rowCount()-1)
+            self.tableWidget.setRowCount(self.tableWidget.rowCount() - 1)
             self.Rows_lineEdit.setText(str(self.tableWidget.rowCount()))
+
     def btn_CP(self):
-        self.tableWidget.setColumnCount(self.tableWidget.columnCount()+1)
+        self.tableWidget.setColumnCount(self.tableWidget.columnCount() + 1)
         self.Columns_lineEdit.setText(str(self.tableWidget.columnCount()))
         combo = QtWidgets.QComboBox()
         combo.addItems(["Ignore", "X-axis", "Xerr", "Y-axis", "Yerr"])
-        self.tableWidget.setCellWidget(0, self.tableWidget.columnCount()-1, combo)
-        self.tableWidget.cellWidget(0, self.tableWidget.columnCount()-1).currentIndexChanged.connect(lambda: self.btn_combobox_index(self.tableWidget.columnCount() - 1))
-        self.tableWidget.cellWidget(0, self.tableWidget.columnCount()-1).currentIndexChanged.connect(self.btn_combobox_changed)
+        self.tableWidget.setCellWidget(0, self.tableWidget.columnCount() - 1, combo)
+        self.tableWidget.cellWidget(0, self.tableWidget.columnCount() - 1).currentIndexChanged.connect(
+            lambda: self.btn_combobox_index(self.tableWidget.columnCount() - 1))
+        self.tableWidget.cellWidget(0, self.tableWidget.columnCount() - 1).currentIndexChanged.connect(
+            self.btn_combobox_changed)
         self.shiftVal()
+
     def btn_CM(self):
         if int(self.tableWidget.columnCount()) > 2:
-            #print("CM", self.tableWidget.columnCount())
+            # print("CM", self.tableWidget.columnCount())
             tableLabels[self.tableWidget.columnCount():99] = 0
-            self.tableWidget.setColumnCount(self.tableWidget.columnCount()-1)
+            self.tableWidget.setColumnCount(self.tableWidget.columnCount() - 1)
             self.Columns_lineEdit.setText(str(self.tableWidget.columnCount()))
             self.shiftVal()
+
     def readRow(self):
-        if (int(self.Rows_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (int(self.Columns_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (int(self.Rows_lineEdit_2.text()) > 0) and (int(self.Columns_lineEdit_2.text()) > 0):
-            #print("Condition True")
+        if (int(self.Rows_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (
+                int(self.Columns_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (
+                int(self.Rows_lineEdit_2.text()) > 0) and (int(self.Columns_lineEdit_2.text()) > 0):
+            # print("Condition True")
             global inputRow
             global outputRow
-            inputRow = int(self.Rows_lineEdit_2.text())-1
-            outputRow = int(self.Columns_lineEdit_2.text())-1
+            inputRow = int(self.Rows_lineEdit_2.text()) - 1
+            outputRow = int(self.Columns_lineEdit_2.text()) - 1
             self.readTableRow()
             self.writeTableRow()
+
     def readTableRow(self):
         global xFormula
         global yFormula
@@ -1992,10 +2059,10 @@ class Ui_MainWindow(object):
         xPlus = np.double(self.lineEdit_scale_x_plus.text())
         try:
             global rowData
-            rowData = np.zeros((tableDimensions[0]-1))
+            rowData = np.zeros((tableDimensions[0] - 1))
             j = 0
-            while j < tableDimensions[0]-1:
-                a_item = self.tableWidget.item(j+1, inputRow)
+            while j < tableDimensions[0] - 1:
+                a_item = self.tableWidget.item(j + 1, inputRow)
                 try:
                     a_name = np.single(a_item.text())
                 except:
@@ -2034,16 +2101,17 @@ class Ui_MainWindow(object):
 
     def writeTableRow(self):
         try:
-            j=0
-            while j < tableDimensions[0]-1:
+            j = 0
+            while j < tableDimensions[0] - 1:
                 A = []
-                #print(str(rowData[j]))
-                A = str(np.round(rowData[j],6))
+                # print(str(rowData[j]))
+                A = str(np.round(rowData[j], 6))
                 cellinfo = QTableWidgetItem(A)
-                self.tableWidget.setItem(j+1, outputRow, cellinfo)
+                self.tableWidget.setItem(j + 1, outputRow, cellinfo)
                 j += 1
         except Exception as e:
             self.errMessage("writeTableRow:", str(e))
+
     def btn_LoadData(self):
         pick_file_to_append()
         if files:
@@ -2054,10 +2122,10 @@ class Ui_MainWindow(object):
             global data
             try:
                 if os.path.splitext(files)[1] == ".xlsx":
-                    data = pd.read_excel(files,header=None)
+                    data = pd.read_excel(files, header=None)
                     data = data.to_numpy()
                 elif os.path.splitext(files)[1] == ".csv":
-                    data = pd.read_csv(files,header=None)
+                    data = pd.read_csv(files, header=None)
                     data = data.to_numpy()
                 elif os.path.splitext(files)[1] == ".txt":
                     data = np.loadtxt(files)
@@ -2066,7 +2134,8 @@ class Ui_MainWindow(object):
                 self.printTOTable()
             except:
                 pass
-    def printTOTable(self): #Prints data file to table
+
+    def printTOTable(self):  # Prints data file to table
         try:
             import numpy as np
             ##print("Loaded Data:", data.shape[0], "R, ", data.shape[1], "C")
@@ -2405,11 +2474,11 @@ class Ui_MainWindow(object):
         except Exception as e:
             self.errMessage("Printing to Table:", str(e))
 
-
     def btn_combobox_index(self, value):
         global plot_AxisIndex
-        plot_AxisIndex=value
-        #print("btn_combobox_index:", plot_AxisIndex)
+        plot_AxisIndex = value
+        # print("btn_combobox_index:", plot_AxisIndex)
+
     def btn_combobox_changed(self, value):
         global combobox_Val
         btn_combobox_Val = value
@@ -2427,11 +2496,12 @@ class Ui_MainWindow(object):
             global uyIndex
             uyIndex = plot_AxisIndex
         tableLabels[int(plot_AxisIndex)] = int(value)
+
     def btn_ClearTable(self):
 
         ##print("Clear Table")
-    #    self.Rows_lineEdit.text()
-    #    self.Columns_lineEdit.text()
+        #    self.Rows_lineEdit.text()
+        #    self.Columns_lineEdit.text()
         import numpy as np
         self.tableWidget.setRowCount(int(self.Rows_lineEdit.text()))
         self.tableWidget.setColumnCount(int(self.Columns_lineEdit.text()))
@@ -2441,15 +2511,15 @@ class Ui_MainWindow(object):
 
         ##print("tableDimensions set to:", tableDimensions[0],"R, ", tableDimensions[1],"C")
         if self.checkBox_2.isChecked() == True:
-            i=0
-            A=str("")
+            i = 0
+            A = str("")
             while i < int(self.Columns_lineEdit.text()):
                 j = 1
-                while j < int(self.Rows_lineEdit.text())+1:
+                while j < int(self.Rows_lineEdit.text()) + 1:
                     self.tableWidget.setItem(j, i, QtWidgets.QTableWidgetItem(""))
                     j += 1
                 i += 1
-        col=0
+        col = 0
         while col < tableDimensions[1]:
             combo = QtWidgets.QComboBox()
             combo.addItems(["Ignore", "X-axis", "Xerr", "Y-axis", "Yerr"])
@@ -2759,23 +2829,23 @@ class Ui_MainWindow(object):
         if 100 < int(self.Columns_lineEdit.text()):
             self.tableWidget.cellWidget(0, 100).currentIndexChanged.connect(lambda: self.btn_combobox_index(100))
             self.tableWidget.cellWidget(0, 100).currentIndexChanged.connect(self.btn_combobox_changed)
+
     def btn_SaveTable(self):
         ##print("Save Table")
 
         self.readTable()
         SaveFile()
 
-
     def readTable(self):
         try:
             global OutPut_Table
             tableDimensions = [int(self.tableWidget.rowCount()), int(self.tableWidget.columnCount())]
-            OutPut_Table = np.zeros((tableDimensions[0]-1, tableDimensions[1]))
+            OutPut_Table = np.zeros((tableDimensions[0] - 1, tableDimensions[1]))
             i = 0
             while i < tableDimensions[1]:
                 j = 0
-                while j < tableDimensions[0]-1:
-                    a_item = self.tableWidget.item(j+1, i)
+                while j < tableDimensions[0] - 1:
+                    a_item = self.tableWidget.item(j + 1, i)
                     try:
                         a_name = np.single(a_item.text())
                     except:
@@ -2783,7 +2853,7 @@ class Ui_MainWindow(object):
                     OutPut_Table[j, i] = a_name
                     j += 1
                 i += 1
-            #print(OutPut_Table)
+            # print(OutPut_Table)
         except Exception as e:
             self.errMessage("Reading Table:", str(e))
 
@@ -2800,18 +2870,19 @@ class Ui_MainWindow(object):
                 self.pltConfigWindow()
                 Plot_Window().show()
             else:
-                self.errMessage("The inappropriate combination is selected from the dropdown buttons on the table.", "Possible Solution: Click on 'New Table' button with 'Delete Old Entries' button unchecked and select the proper labels combination.")
+                self.errMessage("The inappropriate combination is selected from the dropdown buttons on the table.",
+                                "Possible Solution: Click on 'New Table' button with 'Delete Old Entries' button unchecked and select the proper labels combination.")
 
         except Exception as e:
             self.errMessage("Generating Plot:", str(e))
 
-
     def about_gui_command(self):
         about_gui()
+
     def open_home_page(self):
         webbrowser.open('https://www.physlab.org/', new=2)
 
-    def errMessage(self,Text,InformativeText):
+    def errMessage(self, Text, InformativeText):
         msgBox = QMessageBox()
         msgBox.setWindowIcon(QtGui.QIcon('ico.ico'))
         msgBox.setWindowTitle("PhysPlot - Plot Window")
@@ -2824,13 +2895,12 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.setWindowIcon(QtGui.QIcon('ico.ico'))
     MainWindow.show()
-
-
 
     sys.exit(app.exec_())
