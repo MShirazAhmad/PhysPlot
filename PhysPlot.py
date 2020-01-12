@@ -2,8 +2,8 @@
     File name: PhysPlot.py
     Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
     Date created: 8/20/2019
-    Date last modified: 1/10/2020
-    Script Version: 1.1.3 (Bleeding Edge)
+    Date last modified: 1/13/2020
+    Script Version: 1.1.3 (Stable)
     Python Version: 3.7.3
 '''
 import webbrowser
@@ -1226,7 +1226,7 @@ class about_gui(QWidget):
         self.initUI()
 
     def initUI(self):
-        message = "<p><strong>PhysPlot<br /></strong>Version: 1.1.0 - Bleeding Edge (8/23/2019)</p><p><strong>Created by:</strong> <a href='mailto:shiraz.phy@gmail.com'>Muhammad Shiraz Ahmad</a> and <a href='mailto:sabieh@gmail.com'>Muhammad Sabieh Anwar</a></p><p><strong>Important Links: </strong><a href='https://www.physlab.org/'>PhysLab.org</a>, <a href='https://www.qosain.pk/'>Qosain.pk</a></p><p><strong>License:</strong> <a href='https://www.gnu.org/licenses/gpl-3.0.en.html'>GNU General Public License v3.0</a></p><p>Copyright &copy; 2019, all rights reserved.</p>"
+        message = "<p><strong>PhysPlot<br /></strong>Version: 1.1.3 (Stable) (1/13/2020)</p><p><strong>Created by:</strong> <a href='mailto:shiraz.phy@gmail.com'>Muhammad Shiraz Ahmad</a> and <a href='mailto:sabieh@gmail.com'>Muhammad Sabieh Anwar</a></p><p><strong>Important Links: </strong><a href='https://www.physlab.org/'>PhysLab.org</a>, <a href='https://www.qosain.pk/'>Qosain.pk</a></p><p><strong>License:</strong> <a href='https://www.gnu.org/licenses/gpl-3.0.en.html'>GNU General Public License v3.0</a></p><p>Copyright &copy; 2019, all rights reserved.</p>"
         buttonReply = QMessageBox.question(self, 'About', message,
                                            QMessageBox.Ok, QMessageBox.Ok)
         self.show()
