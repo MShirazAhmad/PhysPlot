@@ -1,6 +1,6 @@
 '''
     File name: PhysPlot.py
-    Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
+    Authors: Muhammad Shiraz Ahmad, and Sabieh Anwar
     Date created: 8/20/2019
     Date last modified: 1/13/2020
     Script Version: 1.1.3 (Stable)
