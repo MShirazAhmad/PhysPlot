@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
     File name: PhysPlot.py
     Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
