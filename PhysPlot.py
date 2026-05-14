@@ -1,11 +1,17 @@
-'''
-    File name: PhysPlot.py
-    Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
-    Date created: 8/20/2019
-    Date last modified: 1/13/2020
-    Script Version: 1.1.3 (Stable)
-    Python Version: 3.7.3
-'''
+"""PhysPlot main application module.
+
+This module implements the complete PhysPlot desktop GUI application:
+table-based data entry/import, column transformations, plotting with
+matplotlib, and optional curve fitting.
+
+Original metadata:
+- File name: PhysPlot.py
+- Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
+- Date created: 8/20/2019
+- Date last modified: 1/13/2020
+- Script Version: 1.1.3 (Stable)
+- Python Version: 3.7.3
+"""
 import webbrowser
 
 import matplotlib.pyplot as plt
@@ -19,6 +25,8 @@ from scipy.optimize import curve_fit
 
 
 class Ui_ConfigWindow(object):
+    """Plot configuration window for styling and curve-fit display options."""
+
     def setupUiConfigWindow(self, ConfigWindow):
         ConfigWindow.setObjectName("ConfigWindow")
         ConfigWindow.resize(440, 555)
@@ -848,6 +856,7 @@ class Ui_ConfigWindow(object):
         """
 
     def readFitType(self):
+        """Update curve-fit enable flags from the configuration checkboxes."""
         if self.checkBox__crvft_1.isChecked() == True:
             plt_LableData[0, 0] = True
         else:
@@ -1158,6 +1167,7 @@ class Ui_ConfigWindow(object):
         plt_LableData[10, 3] = True
 
     def definePlotParameters(self):
+        """Persist current plot settings and open the plot window when valid."""
         global Grid_Style
         global Grid_Width
         global Grid_Color
@@ -1214,6 +1224,7 @@ class Ui_ConfigWindow(object):
 
 
 class about_gui(QWidget):
+    """Modal about dialog showing app version, authors, links, and license."""
 
     def __init__(self):
         super().__init__()
@@ -1233,6 +1244,8 @@ class about_gui(QWidget):
 
 
 class pick_file_to_append(QWidget):
+    """File picker dialog used to select an input dataset for import."""
+
     def __init__(self):
         super().__init__()
         self.title = "Please Pick multiple Physlogger' exported files"
@@ -1259,6 +1272,7 @@ class pick_file_to_append(QWidget):
 
 
 class SaveFile(QWidget):
+    """Save dialog wrapper that exports the current output table to text."""
 
     def __init__(self):
         super().__init__()
@@ -1289,6 +1303,8 @@ class SaveFile(QWidget):
 
 
 class Plot_Window(QDialog):
+    """Plot dialog that renders data, errors, legend, and optional fits."""
+
     def __init__(self, parent=None):
         super(Plot_Window, self).__init__(parent)
         self.setWindowIcon(QtGui.QIcon('ico.ico'))
@@ -1573,6 +1589,8 @@ class Plot_Window(QDialog):
 
 
 class Ui_MainWindow(object):
+    """Primary PhysPlot window for table editing, transforms, and plot launch."""
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(601, 643)
@@ -2036,6 +2054,7 @@ class Ui_MainWindow(object):
             self.shiftVal()
 
     def readRow(self):
+        """Read transform input/output column choices and apply transformation."""
         if (int(self.Rows_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (
                 int(self.Columns_lineEdit_2.text()) <= int(self.tableWidget.columnCount())) and (
                 int(self.Rows_lineEdit_2.text()) > 0) and (int(self.Columns_lineEdit_2.text()) > 0):
@@ -2113,6 +2132,7 @@ class Ui_MainWindow(object):
             self.errMessage("writeTableRow:", str(e))
 
     def btn_LoadData(self):
+        """Load dataset files (.xlsx, .csv, .txt) and print values to the table."""
         pick_file_to_append()
         if files:
             import numpy as np
@@ -2498,6 +2518,7 @@ class Ui_MainWindow(object):
         tableLabels[int(plot_AxisIndex)] = int(value)
 
     def btn_ClearTable(self):
+        """Reset table dimensions/content and recreate axis-role combobox headers."""
 
         ##print("Clear Table")
         #    self.Rows_lineEdit.text()
@@ -2831,6 +2852,7 @@ class Ui_MainWindow(object):
             self.tableWidget.cellWidget(0, 100).currentIndexChanged.connect(self.btn_combobox_changed)
 
     def btn_SaveTable(self):
+        """Read the current table and open the export save-file dialog."""
         ##print("Save Table")
 
         self.readTable()
@@ -2864,6 +2886,7 @@ class Ui_MainWindow(object):
         self.Ui_ConfigWindow.show()
 
     def btn_GeneratePlot(self):
+        """Validate axis selections and open configuration/plot windows."""
         self.readTable()
         try:
             if list(tableLabels == 1).count(True) == 1 and list(tableLabels == 3).count(True) == 1:
