@@ -12,6 +12,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'myst_parser',
 ]
+autodoc_mock_imports = ['PyQt5', 'matplotlib', 'numpy', 'scipy', 'pandas']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build']
