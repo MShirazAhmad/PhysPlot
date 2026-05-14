@@ -2716,8 +2716,8 @@ class Ui_MainWindow(object):
             self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(lambda: self.btn_combobox_index(55))
             self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(self.btn_combobox_changed)
         if 56 < int(self.Columns_lineEdit.text()):
-                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
-                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(self.btn_combobox_changed)
+            self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
+            self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(self.btn_combobox_changed)
         if 57 < int(self.Columns_lineEdit.text()):
             self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(lambda: self.btn_combobox_index(57))
             self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(self.btn_combobox_changed)
