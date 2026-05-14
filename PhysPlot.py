@@ -1353,7 +1353,7 @@ class Plot_Window(QDialog):
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
-                             Linewidth=float(Line_Width),
+                             linewidth=float(Line_Width),
                              color=Color[Line_Color],
                              elinewidth=1,
                              capsize=5,
@@ -1368,7 +1368,7 @@ class Plot_Window(QDialog):
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
-                             Linewidth=float(Line_Width),
+                             linewidth=float(Line_Width),
                              color=Color[Line_Color],
                              elinewidth=1,
                              capsize=5,
@@ -1383,7 +1383,7 @@ class Plot_Window(QDialog):
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
-                             Linewidth=float(Line_Width),
+                             linewidth=float(Line_Width),
                              color=Color[Line_Color],
                              elinewidth=1,
                              capsize=5,
@@ -1398,7 +1398,7 @@ class Plot_Window(QDialog):
                              markeredgecolor=Color[Marker_Color],
                              markersize=float(Marker_Size),
                              linestyle=Linestyle[Line_Style],
-                             Linewidth=float(Line_Width),
+                             linewidth=float(Line_Width),
                              color=Color[Line_Color],
                              elinewidth=1,
                              capsize=5,
@@ -1702,7 +1702,7 @@ class Ui_MainWindow(object):
         self.Columns_lineEdit.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.Columns_lineEdit.setObjectName("Columns_lineEdit")
 
-        validator = QtGui.QDoubleValidator()
+        validator = QtGui.QIntValidator(1, 999999)
 
         self.Rows_lineEdit.setText("10")
         self.Columns_lineEdit.setText("4")
@@ -1971,8 +1971,8 @@ class Ui_MainWindow(object):
         self.comboBox_scale_x.setItemText(8, _translate("MainWindow", "sin(x)"))
         self.comboBox_scale_x.setItemText(9, _translate("MainWindow", "tan(x)"))
         self.comboBox_scale_x.setItemText(10, _translate("MainWindow", "arccos(x)"))
-        self.comboBox_scale_x.setItemText(11, _translate("MainWindow", "arsin(x)"))
-        self.comboBox_scale_x.setItemText(12, _translate("MainWindow", "artan(x)"))
+        self.comboBox_scale_x.setItemText(11, _translate("MainWindow", "arcsin(x)"))
+        self.comboBox_scale_x.setItemText(12, _translate("MainWindow", "arctan(x)"))
         self.label_3.setText(_translate("MainWindow", "x"))
         self.lineEdit_scale_x_x.setText(_translate("MainWindow", "1"))
         self.label_4.setText(_translate("MainWindow", "+"))
@@ -2152,8 +2152,8 @@ class Ui_MainWindow(object):
                 else:
                     data = np.loadtxt(files)
                 self.printTOTable()
-            except:
-                pass
+            except Exception as e:
+                self.errMessage("Loading Data:", str(e))
 
     def printTOTable(self):  # Prints data file to table
         try:
@@ -2343,8 +2343,8 @@ class Ui_MainWindow(object):
                 self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(lambda: self.btn_combobox_index(55))
                 self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(self.btn_combobox_changed)
             if 56 < data.shape[1]:
-                self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
-                self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(self.btn_combobox_changed)
+                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
+                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(self.btn_combobox_changed)
             if 57 < data.shape[1]:
                 self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(lambda: self.btn_combobox_index(57))
                 self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(self.btn_combobox_changed)
@@ -2716,8 +2716,8 @@ class Ui_MainWindow(object):
             self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(lambda: self.btn_combobox_index(55))
             self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(self.btn_combobox_changed)
         if 56 < int(self.Columns_lineEdit.text()):
-            self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
-            self.tableWidget.cellWidget(0, 55).currentIndexChanged.connect(self.btn_combobox_changed)
+                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(lambda: self.btn_combobox_index(56))
+                self.tableWidget.cellWidget(0, 56).currentIndexChanged.connect(self.btn_combobox_changed)
         if 57 < int(self.Columns_lineEdit.text()):
             self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(lambda: self.btn_combobox_index(57))
             self.tableWidget.cellWidget(0, 57).currentIndexChanged.connect(self.btn_combobox_changed)
