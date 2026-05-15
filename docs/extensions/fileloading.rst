@@ -8,6 +8,17 @@ File-loader plugins convert external data files into a two-dimensional table
 that PhysPlot can display. A loader receives a file path and returns a
 rectangular data array.
 
+Where Loaders Appear in the UI
+------------------------------
+
+Discovered loaders are shown in two places:
+
+- **Settings > File Loader** (menu selection)
+- **Data Loader** dropdown above the **Import Data** button (quick selection)
+
+The selected loader is used when importing files. PhysPlot discovers loader
+files at startup.
+
 Layman Example
 --------------
 
@@ -81,7 +92,31 @@ Minimal CSV-Like Template
            if len(parts) < 2:
                continue
            rows.append((float(parts[0]), float(parts[1])))
-       return np.asarray(rows, dtype=float)
+        return np.asarray(rows, dtype=float)
+
+Step-by-Step: Build a New Loader
+--------------------------------
+
+1. Create a new file in ``fileloader/`` (for example
+   ``fileloader/my_device_loader.py``).
+2. Define a human-readable ``title`` string.
+3. Implement ``load_data(file_path)`` to parse your format and return a 2D
+   array-like result.
+4. Optionally define ``DEFAULT_COLUMN_ROLES`` to pre-assign column roles after
+   import.
+5. Restart PhysPlot so the loader is discovered and added to the menu and
+   dropdown.
+6. Select your loader from **Settings > File Loader** or the **Data Loader**
+   dropdown, then import a file.
+
+Loader Categories
+-----------------
+
+- **General tabular loader**: parse delimited numeric files.
+- **Instrument-specific loader**: skip custom headers/metadata and keep
+  meaningful columns.
+- **Role-aware loader**: also sets ``DEFAULT_COLUMN_ROLES`` for automatic
+  X/Y mapping.
 
 OES HRF Pattern
 ---------------
