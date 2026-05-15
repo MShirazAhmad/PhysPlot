@@ -7,20 +7,40 @@ Prerequisites
 - Python 3.7 or newer
 - pip
 
-Usage modes
------------
+Clone the repository
+--------------------
 
-PhysPlot is available in two common modes:
+.. code-block:: bash
 
-1. Packaged desktop builds when provided by the official PhysPlot project.
-2. Python script execution using ``PhysPlot.py``.
+   git clone https://github.com/MShirazAhmad/PhysPlot.git
+   cd PhysPlot
+
+Create and activate a virtual environment
+-----------------------------------------
+
+.. code-block:: bash
+
+   python -m venv .venv
+
+On macOS/Linux:
+
+.. code-block:: bash
+
+   source .venv/bin/activate
+
+On Windows (PowerShell):
+
+.. code-block:: powershell
+
+   .venv\Scripts\Activate.ps1
 
 Install Python dependencies
 ---------------------------
 
 .. code-block:: bash
 
-   pip install PyQt5 matplotlib numpy scipy pandas
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
 
 Run PhysPlot
 ------------
@@ -30,6 +50,12 @@ From the project directory:
 .. code-block:: bash
 
    python PhysPlot.py
+
+Alternative module entry point:
+
+.. code-block:: bash
+
+   python -m physplot
 
 Keep the ``physplot/inc`` image assets with the source tree so the GUI can load
 the official app icon and logo.

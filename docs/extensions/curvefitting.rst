@@ -23,6 +23,12 @@ If your plotted data looks like a line, choose a linear fit. If your plotted
 data follows exponential decay, choose an exponential model. A curve-fitting
 plugin is simply a small file that tells PhysPlot what equation to use.
 
+Where Curve Fits Appear in the UI
+---------------------------------
+
+Discovered curve-fitting plugins are listed in the curve-fit configuration
+window. PhysPlot discovers these files at startup.
+
 Required File Location
 ----------------------
 
@@ -87,7 +93,19 @@ Callable Template
        Returns:
            numpy.ndarray: Model Y values for the input X array.
        """
-       return amplitude * np.exp(-((x - center) / width) ** 2)
+        return amplitude * np.exp(-((x - center) / width) ** 2)
+
+Step-by-Step: Build a New Curve-Fit Plugin
+------------------------------------------
+
+1. Create a new file in ``curvefitting/`` (for example
+   ``curvefitting/12_gaussian.py``).
+2. Add ``DISPLAY_NAME``, ``DEFAULT_LABEL``, ``KIND``, and ``LABEL_MODES``.
+3. For ``KIND = "poly"``, add ``DEGREE``.
+4. For ``KIND = "callable"``, implement ``function(x, ...)`` and optionally
+   add ``INITIAL_GUESS``.
+5. Restart PhysPlot so the new fit appears in the curve-fit list.
+6. Select the fit in the configuration window and apply it to plotted data.
 
 Required Fields
 ---------------
