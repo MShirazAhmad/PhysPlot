@@ -1,6 +1,8 @@
 Plot Customization
 ==================
 
+For a full step-by-step flow, see :ref:`GUI Walkthrough — Generating and Formatting a Plot <gui-generating-and-formatting-plot>`.
+
 Configuration window options
 ----------------------------
 
@@ -28,6 +30,6 @@ Color options
 
 Blue, Green, Red, Cyan, Magenta, Yellow, Black, White.
 
-.. image:: ../_static/PP8.png
+.. image:: ../_static/gui_walkthrough/04_plot_generated_and_formatting_window.png
    :alt: Plot customization options
    :width: 700px

@@ -1,6 +1,8 @@
 Data Import
 ===========
 
+For a full step-by-step flow, see :ref:`GUI Walkthrough — Importing Data <gui-importing-data>` and :ref:`GUI Walkthrough — Choosing Axis Roles <gui-choosing-axis-roles>`.
+
 Supported formats
 -----------------
 
@@ -38,6 +40,6 @@ Use the dropdown at row 0 for each column and choose one of:
 - Y-axis
 - Yerr
 
-.. image:: ../_static/PP4.png
+.. image:: ../_static/gui_walkthrough/02_import_file_selection_dialog.png
    :alt: Data import and axis assignment
    :width: 700px

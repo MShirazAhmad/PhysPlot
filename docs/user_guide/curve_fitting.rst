@@ -1,6 +1,8 @@
 Curve Fitting
 =============
 
+For a full step-by-step flow, see :ref:`GUI Walkthrough — Curve Fitting and Fit Labels <gui-curve-fitting-and-fit-labels>`.
+
 Available fits
 --------------
 
@@ -29,6 +31,6 @@ For each fit, you can:
   - Equation
   - Custom Label
 
-.. image:: ../_static/PP7.png
+.. image:: ../_static/gui_walkthrough/05_curve_fitting_label_mode.png
    :alt: Curve fitting controls
    :width: 700px
