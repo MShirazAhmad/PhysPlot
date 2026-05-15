@@ -12,8 +12,8 @@ Usage modes
 
 PhysPlot is available in two common modes:
 
-1. Windows installer from `PhysLab <https://www.physlab.org/physplot/>`_
-2. Python script execution using ``PhysPlot.py``
+1. Packaged desktop builds when provided by the official PhysPlot project.
+2. Python script execution using ``PhysPlot.py``.
 
 Install Python dependencies
 ---------------------------
@@ -31,4 +31,5 @@ From the project directory:
 
    python PhysPlot.py
 
-Keep ``ico.ico`` and ``PhysPlotLogo.png`` in the same directory as ``PhysPlot.py``.
+Keep the ``physplot/inc`` image assets with the source tree so the GUI can load
+the official app icon and logo.
