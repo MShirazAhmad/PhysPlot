@@ -16,6 +16,16 @@ PhysPlot reads the input column as a one-dimensional numeric array, calls the
 plugin's ``transform(values)`` function, then writes the returned values into
 the output column.
 
+Where Functions Appear in the UI
+--------------------------------
+
+Discovered function plugins are available in:
+
+- The top-bar **Functions** menu
+- The transform dropdown in the data-manipulation controls
+
+PhysPlot discovers function files at startup.
+
 Layman Example
 --------------
 
@@ -82,7 +92,28 @@ Minimal Template
        maximum = np.nanmax(values)
        if maximum == minimum:
            return np.zeros_like(values)
-       return (values - minimum) / (maximum - minimum)
+        return (values - minimum) / (maximum - minimum)
+
+Step-by-Step: Build a New Function
+----------------------------------
+
+1. Create a new file in ``functions/`` (for example
+   ``functions/15_normalize.py``).
+2. Define ``DISPLAY_NAME`` for the GUI entry.
+3. Define ``DEFAULT_LABEL`` for generated labels.
+4. Implement ``transform(values)`` and return one value per input row.
+5. Restart PhysPlot so the function appears in the menu and dropdown.
+
+Function Categories
+-------------------
+
+Common categories used by PhysPlot plugins include:
+
+- **Identity/basic**: pass-through operations.
+- **Power/reciprocal**: ``x^2``, ``x^3``, ``1/x``.
+- **Log/exp**: ``log10``, ``ln``, ``e^x``.
+- **Trigonometric**: ``sin``, ``cos``, ``tan``, inverse trig.
+- **Domain-specific**: custom transforms such as baseline correction.
 
 Practical Rules
 ---------------
