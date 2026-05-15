@@ -6,7 +6,19 @@ Supported formats
 
 - ``.txt``
 - ``.csv``
+- ``.tsv``
 - ``.xlsx``
+
+Loader selection
+----------------
+
+PhysPlot uses plugin-based file loaders. You can choose the active loader from:
+
+- **Settings > File Loader**
+- The **Data Loader** dropdown above **Import Data**
+
+Loader plugins are auto-discovered at startup from the ``fileloader/`` folder.
+The built-in default loader keeps standard CSV/XLSX/TXT/TSV import support.
 
 Import steps
 ------------
