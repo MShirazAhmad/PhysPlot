@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.DS_Store
+.history/
+docs/_build/
+.pytest_cache/

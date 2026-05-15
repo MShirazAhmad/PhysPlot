@@ -1,6 +1,4 @@
-"""PhysPlot launcher.
-
-The application implementation lives in the ``physplot`` package.
+"""Run PhysPlot with ``python -m physplot``.
 
 Input data structure:
     Uses command-line arguments already present in ``sys.argv``; no custom
@@ -11,9 +9,10 @@ Return type:
     finishes.
 
 Optional main/runtime behavior:
-    Running this file directly calls ``physplot.run_app()``.
+    When executed as a module, calls ``run_app()`` to launch the GUI.
 """
-from physplot import run_app
+
+from .runner import run_app
 
 
 if __name__ == "__main__":
