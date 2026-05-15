@@ -17,23 +17,3 @@ Documentation, screenshots, tutorials, website text, walkthroughs, and education
 The PhysPlot name, logo, app icon, GUI branding, and official visual identity are reserved by the project originator. Unofficial forks or modified builds must not be presented as official PhysPlot releases.
 
 Only pull requests merged by the maintainer are official PhysPlot revisions. For details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [TRADEMARK.md](TRADEMARK.md).
-
-# Pictorial procedure for data analysis
-
-![Image description](pictorial_procedure/PP2.png)
-
-![Image description](pictorial_procedure/PP3.png)
-
-![Image description](pictorial_procedure/PP4.png)
-
-![Image description](pictorial_procedure/PP5.png)
-
-![Image description](pictorial_procedure/PP6.png)
-
-![Image description](pictorial_procedure/PP7.png)
-
-![Image description](pictorial_procedure/PP8.png)
-
-![Image description](pictorial_procedure/PP9.png)
-
-![Image description](pictorial_procedure/PP10.png)
