@@ -8,11 +8,6 @@ PhysPlot: Advanced Plotting Made Simple
 
 PhysPlot is a scientific plotting software with a graphical user interface, designed to produce publication-ready 2D plots. It supports vector and bitmap outputs and allows importing, transforming, plotting, fitting, and exporting datasets.
 
-Branding
---------
-
-PhysPlot documentation uses the official wide brand asset ``_static/PhysPlotWide.png`` on the home page and follows the project trademark policy for name and logo usage.
-
 Plugin System
 -------------
 
