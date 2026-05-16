@@ -1,6 +1,8 @@
 Plot Generation
 ===============
 
+For a full step-by-step flow, see :ref:`GUI Walkthrough — Generating and Formatting a Plot <gui-generating-and-formatting-plot>`.
+
 Requirements
 ------------
 
@@ -23,6 +25,6 @@ The plot window includes a matplotlib navigation toolbar (pan, zoom, save) and d
 - Title and axis labels
 - Legend entry
 
-.. image:: ../_static/PP6.png
+.. image:: ../_static/gui_walkthrough/04_plot_generated_and_formatting_window.png
    :alt: Plot generation and output window
    :width: 700px
