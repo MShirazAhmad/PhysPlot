@@ -2,6 +2,10 @@
   <img src="physplot/inc/PhysPlotWide.png" alt="PhysPlot logo" width="420">
 </p>
 
+PhysPlot began in 2019 with an idea suggested by my mentor, Dr. Muhammad Sabieh Anwar: to develop a lightweight but capable plotting tool for researchers who need to generate publication-ready graphs quickly, without depending on system-heavy software such as MATLAB or Origin.
+
+I started building PhysPlot while I was learning Python. What began as a small learning project gradually evolved into a research-focused plotting application.
+
 # PhysPlot: Advanced Plotting Made Simple
 
 PhysPlot is a scientific plotting software with a graphical user interface, designed to produce publication-ready 2D plots. It supports vector and bitmap output, including PDF, Postscript, SVG and EPS. It allows data to be imported from text, CSV and Excel files and It can export data in text format. Datasets can also be entered within the program, and new datasets can be created via the manipulation of existing datasets using mathematical expressions.
