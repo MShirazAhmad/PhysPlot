@@ -165,7 +165,8 @@ class RecorderModePanel(QtWidgets.QWidget):
         layout.setContentsMargins(8, 6, 8, 8)
         layout.setSpacing(8)
         left = QtWidgets.QVBoxLayout()
-        left.addWidget(BulkPanel(actions), 1)
+        self.bulk = BulkPanel(actions)
+        left.addWidget(self.bulk, 1)
         layout.addLayout(left, 3)
         self.sequence = SequenceTablePanel(
             actions,

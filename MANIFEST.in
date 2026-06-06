@@ -1,7 +1,9 @@
 include README.md
+include AGENTS.md
 include LICENSE
 include CONTRIBUTING.md
 include TRADEMARK.md
+recursive-include docs *
 recursive-include physplot/inc *.png
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

@@ -59,3 +59,4 @@ Project links
    extensions/index
    api/index
    reference/classes
+   CODEX_PROJECT_GUIDE

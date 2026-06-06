@@ -8,7 +8,35 @@ I started building PhysPlot while I was learning Python. What began as a small l
 
 # PhysPlot: Advanced Plotting Made Simple
 
-PhysPlot is a scientific plotting software with a graphical user interface, designed to produce publication-ready 2D plots. It supports vector and bitmap output, including PDF, Postscript, SVG and EPS. It allows data to be imported from text, CSV and Excel files and It can export data in text format. Datasets can also be entered within the program, and new datasets can be created via the manipulation of existing datasets using mathematical expressions.
+PhysPlot is a scientific plotting and workflow automation package with a
+desktop GUI for publication-ready 2D plots. It supports CSV, TXT, Excel, and
+DataFrame inputs; spreadsheet-style editing; column role assignment; modular
+plotters; reusable Python protocol sequences; and headless bulk runs.
+
+The guiding idea is simple:
+
+```text
+load data -> assign column roles -> transform -> plot -> save protocol -> run in bulk
+```
+
+The GUI is table-first, while the backend remains importable and scriptable for
+notebooks, command-line runs, and automated batches.
+
+## Features
+
+- PyQt6 desktop GUI with Simple and Advanced modes
+- Spreadsheet-style table with editable cells, column roles, copy/paste, rename,
+  row/column deletion, and scrollable Excel-like behavior
+- Dynamic loader discovery from built-in loaders and local `fileloader/` modules
+- Dynamic function discovery from backend transformations and local `functions/`
+  modules
+- Modular plotter registry, including basic, histogram, error-bar, overlay,
+  subplot-grid, nanoindentation, and Oliver-Pharr plotter modules
+- Build Protocol table/code editor for reproducible Python workflows
+- Run Sequence bulk runner that uses plot modules and configuration already
+  stored in the protocol sequence
+- Headless CLI support for single-file and folder workflows
+- Pip-ready package published as `python-physplot`
 
 ## Installation
 
@@ -44,6 +72,38 @@ pp.load("data.csv")
 pp.set_roles(x="Time", y="Voltage")
 fig = pp.plot_with_module("basic", "scatter")
 ```
+
+## GUI Workflow
+
+Launch:
+
+```bash
+physplot-gui
+```
+
+Simple Mode is organized into three panels:
+
+1. **Data Importer**: select a loader and import/export data.
+2. **Apply Mathematical Transformation**: create derived columns from table
+   columns.
+3. **Plotter Module**: select a registered plotter and plot type.
+
+Advanced Mode has two tabs:
+
+- **Build Protocol**: review the operation sequence as a table, edit it as
+  Python code, import/export `Sequence.py`, and apply the current sequence.
+- **Run Sequence**: apply the current or imported sequence to an input folder.
+  Plot mode and formatting are defined by `PlotModuleStep` entries inside the
+  sequence, not by separate bulk-run controls.
+
+## Documentation
+
+- [Codex and Maintainer Project Guide](docs/CODEX_PROJECT_GUIDE.md)
+- [Contributing](CONTRIBUTING.md)
+- [Trademark and Branding](TRADEMARK.md)
+
+The project guide includes the working structure, design philosophy, backend
+contracts, testing checklist, and annotated sample protocol drafts.
 
 ## Quick Start (from source)
 
@@ -96,6 +156,13 @@ Build local PyPI artifacts:
 ```bash
 python -m build
 python -m twine check dist/*
+```
+
+The expected package files are:
+
+```text
+dist/python_physplot-<version>-py3-none-any.whl
+dist/python_physplot-<version>.tar.gz
 ```
 
 ## License, Tutorials, and Contributions

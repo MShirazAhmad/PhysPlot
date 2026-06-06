@@ -20,14 +20,14 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'PhysPlot'
 author = 'Shiraz Ahmad'
-release = '2.0.0'
+release = '1.0.0'
 
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'myst_parser',
 ]
-autodoc_mock_imports = ['PyQt5', 'matplotlib', 'numpy', 'scipy', 'pandas']
+autodoc_mock_imports = ['PyQt6', 'matplotlib', 'numpy', 'scipy', 'pandas']
 autodoc_typehints = 'signature'
 autodoc_preserve_defaults = True
 add_module_names = False
