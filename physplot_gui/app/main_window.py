@@ -753,14 +753,17 @@ class MainWindow(QtWidgets.QMainWindow):
             self._error("Apply sequence failed", RuntimeError("Build or import a protocol sequence first."))
             return
         try:
-            self.sync_table_to_backend()
-            steps = list(self.state.pp.workflow)
-            self.state.pp.run_workflow(steps, allow_column_number_fallback=True)
-            self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
-            self.status.set_message("Sequence complete")
-            self._refresh_all()
+            self._run_current_sequence("Sequence complete")
         except Exception as exc:
             self._error("Apply sequence failed", exc)
+
+    def _run_current_sequence(self, status_message: str) -> None:
+        self.sync_table_to_backend()
+        steps = list(self.state.pp.workflow)
+        self.state.pp.run_workflow(steps, allow_column_number_fallback=True)
+        self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
+        self.status.set_message(status_message)
+        self._refresh_all()
 
     def apply_sequence_code(self, source: str) -> None:
         steps = load_workflow_source(source, name="physplot_sequence_editor")
@@ -797,7 +800,15 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.state.pp.workflow.pop(workflow_index)
             if removed:
                 self._reindex_sequence_rows_after_delete(set(removed))
-            self._refresh_all()
+            if self.state.pp.workflow:
+                try:
+                    self._run_current_sequence("Sequence updated")
+                except Exception as exc:
+                    self._error("Apply revised sequence failed", exc)
+                    self._refresh_all()
+            else:
+                self.status.set_message("Sequence cleared")
+                self._refresh_all()
 
     def browse_input_folder(self, field: QtWidgets.QLineEdit) -> None:
         self._browse_folder(field, "Input Folder")
