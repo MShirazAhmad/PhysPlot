@@ -7,7 +7,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 pytest.importorskip("PyQt6")
 
 from physplot.qt_compat import QtWidgets
-from physplot.steps import PlotModuleStep, SetRoleStep
+from physplot.steps import LoadDataStep, PlotModuleStep, SetRoleStep, TransformColumnStep
 from physplot_gui.app.main_window import MainWindow
 
 
@@ -41,6 +41,33 @@ WORKFLOW_STEPS = [
     assert len(window.state.pp.workflow) == 1
     assert "plotter_id='basic'" not in panel.code_view.toPlainText()
     assert "SetRoleStep" in panel.code_view.toPlainText()
+
+    window.close()
+    app.quit()
+
+
+def test_deleting_protocol_step_replays_revised_sequence_on_table(tmp_path):
+    data_path = tmp_path / "data.csv"
+    data_path.write_text("Time,Voltage\n1,2\n2,4\n", encoding="utf-8")
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    window.state.pp.workflow = [
+        LoadDataStep(path=str(data_path), loader="csv", dataset_name="data"),
+        SetRoleStep(roles={"x": "Time", "y": "Voltage"}),
+        TransformColumnStep("Voltage", "multiply", "Voltage_mV", params={"factor": 1000}),
+    ]
+    window.state.timeline = window._sequence_rows_from_steps(window.state.pp.workflow)
+
+    window.apply_current_sequence()
+    assert "Voltage_mV" in window.central_table.column_names()
+
+    window.delete_timeline_step(1)
+
+    assert [type(step) for step in window.state.pp.workflow] == [LoadDataStep, SetRoleStep]
+    assert "Voltage_mV" not in window.central_table.column_names()
+    assert window.central_table.to_dataframe()["Voltage"].tolist() == [2, 4]
 
     window.close()
     app.quit()
