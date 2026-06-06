@@ -1,6 +1,8 @@
-$$\text{\color{red}\Huge This latest branch might have tremendous bugs.}$$
+$$\text{\color{red}\Huge Warning: Experimental Branch}$$
+$$\text{\color{red}\Huge Significant Bugs Or Breaking Changes May Be Present}$$
 
-$$\text{\color{green}Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
+$$\text{\color{green}\Large Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
+
 <p align="center">
   <img src="physplot/inc/PhysPlotWide.png" alt="PhysPlot logo" width="420">
 </p>
