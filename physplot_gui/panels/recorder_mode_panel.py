@@ -57,23 +57,27 @@ class SequenceTablePanel(QtWidgets.QFrame):
         self.stack.addWidget(self.timeline)
         self.stack.addWidget(self.code_view)
         layout.addWidget(self.stack, 1)
+        self.apply_code_button = None
         if show_buttons:
             buttons = QtWidgets.QHBoxLayout()
             for text, callback in (
                 ("Import Sequence.py", actions.open_workflow),
                 ("Export Sequence.py", actions.save_workflow),
                 ("Apply This Sequence", actions.apply_current_sequence),
-                ("Apply Code Changes", self._apply_code_changes),
+                ("Apply Code to Table", self._apply_code_changes),
                 ("Copy as Script", actions.copy_workflow_script),
                 ("Clear Sequence", actions.clear_recording),
             ):
                 button = QtWidgets.QPushButton(text)
                 if text == "Apply This Sequence":
                     button.setProperty("primary", True)
+                if text == "Apply Code to Table":
+                    self.apply_code_button = button
                 button.clicked.connect(callback)
                 buttons.addWidget(button)
             buttons.addStretch(1)
             layout.addLayout(buttons)
+        self._update_code_button_visibility()
 
     def set_tracking(self, active: bool = True) -> None:
         self.tracking_badge.setText("Tracking: ON")
@@ -113,6 +117,7 @@ class SequenceTablePanel(QtWidgets.QFrame):
                 self.code_button.setChecked(True)
                 return
         self.stack.setCurrentIndex(index)
+        self._update_code_button_visibility()
 
     @staticmethod
     def _fallback_code_line(row: dict) -> str:
@@ -145,8 +150,12 @@ class SequenceTablePanel(QtWidgets.QFrame):
             self._code_dirty = False
             return True
         except Exception as exc:
-            QtWidgets.QMessageBox.warning(self, "Apply code changes failed", str(exc))
+            QtWidgets.QMessageBox.warning(self, "Apply code to table failed", str(exc))
             return False
+
+    def _update_code_button_visibility(self) -> None:
+        if self.apply_code_button is not None:
+            self.apply_code_button.setVisible(self.editable_code and self.stack.currentIndex() == 1)
 
 
 class RecorderModePanel(QtWidgets.QWidget):
