@@ -1,3 +1,6 @@
+$$\text{\color{red}The Current Branch is the latest and might have tremendous bugs.}$$
+
+$$\text{\color{green}Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
 <p align="center">
   <img src="physplot/inc/PhysPlotWide.png" alt="PhysPlot logo" width="420">
 </p>
