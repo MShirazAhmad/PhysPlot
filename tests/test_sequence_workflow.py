@@ -12,7 +12,7 @@ from physplot.steps import (
     SetRoleStep,
     TransformColumnStep,
 )
-from physplot.workflow import load_workflow
+from physplot.workflow import load_workflow, load_workflow_source
 
 
 def test_sequence_export_load_and_headless_run(tmp_path):
@@ -47,6 +47,22 @@ def test_sequence_export_load_and_headless_run(tmp_path):
     pp_from_run = module.run(output_dir=notebook_output)
     assert "Voltage_mV" in pp_from_run.dataset.dataframe
     assert (notebook_output / "data.csv").exists()
+
+
+def test_sequence_can_load_from_editable_source_text():
+    source = """
+from physplot.steps import LoadDataStep, PlotModuleStep, SetRoleStep
+
+WORKFLOW_STEPS = [
+    LoadDataStep(path='data.csv', loader='csv', dataset_name='data'),
+    SetRoleStep(roles={'x': 'Time', 'y': 'Voltage'}),
+    PlotModuleStep(plotter_id='basic', plot_type='scatter', config={}),
+]
+"""
+    steps = load_workflow_source(source)
+
+    assert [step.__class__.__name__ for step in steps] == ["LoadDataStep", "SetRoleStep", "PlotModuleStep"]
+    assert steps[1].roles == {"x": "Time", "y": "Voltage"}
 
 
 def test_sequence_replays_visible_blank_column_rename_and_edit(tmp_path):

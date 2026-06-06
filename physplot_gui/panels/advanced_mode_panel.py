@@ -26,7 +26,9 @@ class AdvancedModePanel(QtWidgets.QWidget):
         self.sequence_builder = SequenceTablePanel(
             actions,
             title="Protocol Sequence from Simple Mode",
-            show_buttons=False,
+            show_buttons=True,
+            editable_code=True,
+            show_delete=True,
         )
         layout.addWidget(self.sequence_builder, 1)
         return widget

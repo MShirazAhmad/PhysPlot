@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 
 from .api import PhysPlot
+from .steps import LoadDataStep
 from .workflow import load_workflow
 
 MODULE_ID = "physplot.bulk"
@@ -26,6 +27,7 @@ def run_folder(
     allow_column_number_fallback=False,
 ):
     steps = load_workflow(workflow) if not isinstance(workflow, list) else workflow
+    steps = [step for step in steps if not isinstance(step, LoadDataStep)]
     input_folder = Path(input_folder)
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
