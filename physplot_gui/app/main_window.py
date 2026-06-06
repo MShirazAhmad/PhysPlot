@@ -362,6 +362,29 @@ class MainWindow(QtWidgets.QMainWindow):
             self.plot_window.refresh_plot()
             self.plot_window.raise_()
             self.plot_window.activateWindow()
+        self._tile_legacy_plot_windows()
+
+    def _tile_legacy_plot_windows(self) -> None:
+        config_window = getattr(self, "plot_config_window", None)
+        plot_window = getattr(self, "plot_window", None)
+        if config_window is None or plot_window is None:
+            return
+        screen = self.screen() or QtWidgets.QApplication.primaryScreen()
+        if screen is None:
+            return
+        available = screen.availableGeometry()
+        gap = 12
+        margin = 24
+        top = max(available.top() + margin, self.y() + 40)
+        height = min(max(620, config_window.height(), plot_window.height()), max(420, available.height() - top - margin))
+        config_width = min(max(430, config_window.width()), max(380, int(available.width() * 0.32)))
+        plot_width = min(max(860, plot_window.width()), max(620, available.width() - config_width - gap - margin * 2))
+        total_width = config_width + gap + plot_width
+        left = available.left() + max(margin, (available.width() - total_width) // 2)
+        config_window.setGeometry(left, top, config_width, height)
+        plot_window.setGeometry(left + config_width + gap, top, plot_width, height)
+        config_window.raise_()
+        plot_window.raise_()
 
     def _prepare_legacy_plot_state(self, legacy_app) -> None:
         df = self.central_table.to_dataframe()
@@ -535,13 +558,18 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         self.sync_table_to_backend()
         try:
-            if plotter_id in self._custom_plotters:
+            if plotter_id == "basic":
+                self.state.pp.plot_with_module(plotter_id, plot_type)
+                workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
+                self._open_legacy_plot_windows()
+            elif plotter_id in self._custom_plotters:
                 figure = self._run_custom_plotter(plotter_id, plot_type)
                 workflow_index = None
+                self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             else:
                 figure = self.state.pp.plot_with_module(plotter_id, plot_type)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
-            self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
+                self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             self._append_sequence(
                 "Generate Plot",
                 f"Create {plotter_id} {plot_type}",
