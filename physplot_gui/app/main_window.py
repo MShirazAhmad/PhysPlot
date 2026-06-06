@@ -11,6 +11,7 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
 from physplot.plotting_modules import PlotterRegistry
+from physplot.workflow import load_workflow_source
 from physplot.steps import (
     CalculateColumnStep,
     DeleteColumnsStep,
@@ -48,11 +49,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if LOGO_ICON.exists():
             self.setWindowIcon(QtGui.QIcon(str(LOGO_ICON)))
         self._build_ui()
-        self._build_mode_shortcuts()
         self._bootstrap_blank_table()
         self._refresh_all()
 
     def _build_ui(self) -> None:
+        self._build_menu_bar()
         root = QtWidgets.QWidget()
         self.setCentralWidget(root)
         layout = QtWidgets.QVBoxLayout(root)
@@ -73,6 +74,37 @@ class MainWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.mode_manager.stack, 0)
         self.status = PhysPlotStatusBar()
         layout.addWidget(self.status)
+
+    def _build_menu_bar(self) -> None:
+        menu_bar = self.menuBar()
+
+        file_menu = menu_bar.addMenu("File")
+        self._add_menu_action(file_menu, "Import Data...", lambda: self.import_data("auto"), "Ctrl+O")
+        self._add_menu_action(file_menu, "Import Folder...", self.import_folder)
+        self._add_menu_action(file_menu, "Export Data...", self.export_data, "Ctrl+E")
+
+        protocol_menu = menu_bar.addMenu("Protocol")
+        self._add_menu_action(protocol_menu, "Import Sequence.py...", self.open_workflow)
+        self._add_menu_action(protocol_menu, "Export Sequence.py...", self.save_workflow, "Ctrl+S")
+        self._add_menu_action(protocol_menu, "Apply This Sequence", self.apply_current_sequence, "Ctrl+R")
+        self._add_menu_action(protocol_menu, "Copy Sequence Code", self.copy_workflow_script)
+        self._add_menu_action(protocol_menu, "Clear Sequence", self.clear_recording)
+
+        view_menu = menu_bar.addMenu("View")
+        self._add_menu_action(view_menu, "Simple Mode", lambda: self.mode_manager.set_mode("Simple"), "Ctrl+1")
+        self._add_menu_action(view_menu, "Advanced Mode", lambda: self.mode_manager.set_mode("Advanced"), "Ctrl+2")
+
+        plot_menu = menu_bar.addMenu("Plot")
+        self._add_menu_action(plot_menu, "Generate Plot", self.generate_plot, "Ctrl+G")
+        self._add_menu_action(plot_menu, "Update Integrated Preview", self.generate_integrated_plot)
+
+    def _add_menu_action(self, menu, text: str, callback, shortcut: str | None = None):
+        action = QtWidgets.QAction(text, self)
+        if shortcut:
+            action.setShortcut(shortcut)
+        action.triggered.connect(lambda checked=False: callback())
+        menu.addAction(action)
+        return action
 
     def _header(self):
         header = QtWidgets.QHBoxLayout()
@@ -100,13 +132,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mode_switcher.mode_changed.connect(self.mode_manager.set_mode)
         header.addWidget(self.mode_switcher)
         return header
-
-    def _build_mode_shortcuts(self) -> None:
-        for index, mode in enumerate(("Simple", "Advanced"), start=1):
-            action = QtWidgets.QAction(mode, self)
-            action.setShortcut(f"Ctrl+{index}")
-            action.triggered.connect(lambda checked=False, value=mode: self.mode_manager.set_mode(value))
-            self.addAction(action)
 
     def _bootstrap_blank_table(self) -> None:
         df = pd.DataFrame("", index=range(17), columns=[f"Column {i}" for i in range(1, 20)])
@@ -702,7 +727,6 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self.state.pp.save_workflow(path)
             self.state.workflow_file = Path(path)
-            self._append_sequence("Save Sequence", "Save Sequence.py", Path(path).name)
             self.status.set_message("Sequence saved")
             self._refresh_all()
         except Exception as exc:
@@ -722,22 +746,28 @@ class MainWindow(QtWidgets.QMainWindow):
             self._refresh_all()
 
     def run_workflow(self) -> None:
-        if self.state.workflow_file is None:
-            self.open_workflow()
-        if self.state.workflow_file is None:
+        self.apply_current_sequence()
+
+    def apply_current_sequence(self) -> None:
+        if not self.state.pp.workflow:
+            self._error("Apply sequence failed", RuntimeError("Build or import a protocol sequence first."))
             return
         try:
             self.sync_table_to_backend()
-            steps = self.state.pp.load_workflow(self.state.workflow_file)
-            self.state.pp.workflow = list(steps)
-            self.state.timeline = self._sequence_rows_from_steps(steps)
+            steps = list(self.state.pp.workflow)
             self.state.pp.run_workflow(steps, allow_column_number_fallback=True)
             self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
-            self._append_sequence("Run Sequence", "Execute Sequence.py", self.state.workflow_file.name)
             self.status.set_message("Sequence complete")
             self._refresh_all()
         except Exception as exc:
-            self._error("Run workflow failed", exc)
+            self._error("Apply sequence failed", exc)
+
+    def apply_sequence_code(self, source: str) -> None:
+        steps = load_workflow_source(source, name="physplot_sequence_editor")
+        self.state.pp.workflow = list(steps)
+        self.state.timeline = self._sequence_rows_from_steps(steps)
+        self.status.set_message("Sequence code applied")
+        self._refresh_all()
 
     def workflow_manager(self) -> None:
         QtWidgets.QMessageBox.information(self, "Sequence Manager", "Sequence actions are available in the Advanced panel.")
@@ -782,8 +812,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def run_bulk_workflow(self, payload: dict) -> None:
         try:
+            workflow_file = payload.get("workflow_file")
+            workflow = workflow_file
+            if not workflow:
+                if not self.state.pp.workflow:
+                    raise RuntimeError("Build or import a protocol sequence before running bulk automation.")
+                workflow = [step for step in self.state.pp.workflow if not isinstance(step, LoadDataStep)]
             outputs = self.state.pp.run_bulk(
-                payload["workflow_file"],
+                workflow,
                 payload["input_folder"],
                 payload["output_folder"],
                 allow_column_number_fallback=True,

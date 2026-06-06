@@ -9,6 +9,7 @@ from pathlib import Path
 from . import __version__
 from .api import PhysPlot
 from .bulk import run_folder
+from .steps import LoadDataStep
 from .workflow import load_workflow
 
 MODULE_ID = "physplot.__main__"
@@ -44,7 +45,8 @@ def main(argv=None) -> int:
     if args.command == "run-workflow":
         pp = PhysPlot()
         pp.load(args.input)
-        pp.run_workflow(load_workflow(args.workflow), allow_column_number_fallback=args.allow_column_number_fallback)
+        steps = [step for step in load_workflow(args.workflow) if not isinstance(step, LoadDataStep)]
+        pp.run_workflow(steps, allow_column_number_fallback=args.allow_column_number_fallback)
         output = Path(args.output)
         pp.export(output)
         print(f"Workflow output written to {output}")

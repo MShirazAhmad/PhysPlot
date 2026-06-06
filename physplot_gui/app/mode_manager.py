@@ -28,7 +28,7 @@ class ModeManager(QtCore.QObject):
             self.stack.setMaximumHeight(152)
         else:
             self.stack.setMinimumHeight(300)
-            self.stack.setMaximumHeight(360)
+            self.stack.setMaximumHeight(430)
         self.stack.setCurrentWidget(panel)
         self.mode_changed.emit(mode)
 
