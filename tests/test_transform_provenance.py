@@ -18,3 +18,22 @@ def test_transform_provenance_by_name_and_number():
     assert meta["transformation"] == {"function": "multiply", "params": {"factor": 1000}}
     assert meta["source_column_numbers"] == [2]
     assert meta["column_number"] == 4
+
+
+def test_transform_coerces_numeric_spreadsheet_strings_with_blanks():
+    pp = PhysPlot()
+    pp.load(
+        pd.DataFrame(
+            {
+                "Time": ["1", "2", "", ""],
+                "Voltage": ["2", "4", "", ""],
+                "Note": ["A", "B", "", ""],
+            }
+        ),
+        loader="dataframe",
+    )
+
+    result = pp.transform("Time", "multiply", output="Time_scaled", factor=1.5)
+
+    assert result.dropna().tolist() == [1.5, 3.0]
+    assert pd.isna(result.iloc[2])
