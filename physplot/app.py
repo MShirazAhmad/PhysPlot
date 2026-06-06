@@ -17,11 +17,11 @@ Return type:
     active plot.
 
 Optional main/runtime behavior:
-    This module can be imported by ``physplot.runner`` or run directly. When
-    run directly it delegates to ``physplot.runner.run_app()``.
+    This legacy module is imported by the modern GUI when Basic Plotter needs
+    the historical plot-formatting and curve-fitting windows.
 
 Original metadata:
-- File name: PhysPlot.py
+- Original file name: PhysPlot.py
 - Authors: Muhammad Shiraz Ahmad and Sabieh Anwar
 - Date created: 8/20/2019
 - Date last modified: 5/15/2026
@@ -31,7 +31,6 @@ Original metadata:
 import webbrowser
 import ast
 import importlib.util
-import sys
 from pathlib import Path
 
 MODULE_ID = "physplot.app"
@@ -3133,12 +3132,3 @@ class Ui_MainWindow(object):
         msgBox.setInformativeText(InformativeText)
         msgBox.setWindowTitle("Warning")
         msgBox.exec_()
-
-
-if __name__ == "__main__":
-    project_root = Path(__file__).resolve().parent.parent
-    if str(project_root) not in sys.path:
-        sys.path.insert(0, str(project_root))
-    from physplot.runner import run_app
-
-    run_app()

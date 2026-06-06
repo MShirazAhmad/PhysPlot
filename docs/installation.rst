@@ -4,8 +4,21 @@ Installation
 Prerequisites
 -------------
 
-- Python 3.7 or newer
+- Python 3.10 or newer
 - pip
+
+Install from PyPI
+-----------------
+
+.. code-block:: bash
+
+   python -m pip install python-physplot
+
+Launch the GUI:
+
+.. code-block:: bash
+
+   physplot-gui
 
 Clone the repository
 --------------------
@@ -40,7 +53,7 @@ Install Python dependencies
 .. code-block:: bash
 
    python -m pip install --upgrade pip
-   python -m pip install -r requirements.txt
+   python -m pip install -e ".[dev]"
 
 Run PhysPlot
 ------------
@@ -49,13 +62,13 @@ From the project directory:
 
 .. code-block:: bash
 
-   python PhysPlot.py
+   physplot-gui
 
-Alternative module entry point:
+Backend command-line entry point:
 
 .. code-block:: bash
 
-   python -m physplot
+   physplot --version
 
 Keep the ``physplot/inc`` image assets with the source tree so the GUI can load
 the official app icon and logo.

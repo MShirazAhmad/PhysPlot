@@ -1,5 +1,4 @@
-import subprocess
-import sys
+import importlib.util
 
 import pandas as pd
 
@@ -28,18 +27,26 @@ def test_sequence_export_load_and_headless_run(tmp_path):
     workflow_path = tmp_path / "sequence.py"
     pp.save_workflow(workflow_path)
     assert pp.workflow_script() == workflow_path.read_text(encoding="utf-8")
+    assert "__main__" not in pp.workflow_script()
+    assert "argparse" not in pp.workflow_script()
 
     steps = load_workflow(workflow_path)
     assert len(steps) == 3
 
-    subprocess.run(
-        [sys.executable, str(workflow_path), "--output", str(output_dir)],
-        check=True,
-        cwd=tmp_path,
-    )
+    runner = PhysPlot()
+    runner.run_workflow(steps, allow_column_number_fallback=True)
+    runner.export(output_dir)
 
     exported = pd.read_csv(output_dir / "data.csv")
     assert "Voltage_mV" in exported.columns
+
+    spec = importlib.util.spec_from_file_location("generated_sequence", workflow_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    notebook_output = tmp_path / "notebook_out"
+    pp_from_run = module.run(output_dir=notebook_output)
+    assert "Voltage_mV" in pp_from_run.dataset.dataframe
+    assert (notebook_output / "data.csv").exists()
 
 
 def test_sequence_replays_visible_blank_column_rename_and_edit(tmp_path):
