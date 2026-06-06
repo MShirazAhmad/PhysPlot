@@ -1,5 +1,5 @@
 $$\text{\color{red}\Huge Warning: Experimental Branch}$$
-$$\text{\color{red}\Huge Significant Bugs Or Breaking Changes May Be Present}$$
+$$\text{\color{red}\Large Significant Bugs Or Breaking Changes May Be Present}$$
 
 $$\text{\color{green}\Large Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
 
