@@ -70,7 +70,10 @@ class PhysPlot:
         source_number = self.dataset.get_column_number(source_column)
         output = output or f"{source_column}_{function_name}"
         transform = get_transform(function_name)
-        values = transform(self.dataset.dataframe[source_column], **params)
+        source_values = pd.to_numeric(self.dataset.dataframe[source_column], errors="coerce")
+        if not source_values.notna().any():
+            raise ValueError(f"Column '{source_column}' does not contain numeric values for transformation.")
+        values = transform(source_values, **params)
         metadata = {
             "title": output,
             "source_label": output,

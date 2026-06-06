@@ -115,7 +115,8 @@ class CentralTable(QtWidgets.QWidget):
             df = self._trim_empty_extent(df)
         for column in df.columns:
             numeric = pd.to_numeric(df[column], errors="coerce")
-            if numeric.notna().any() and df[column].replace("", pd.NA).notna().all():
+            nonempty = df[column].replace("", pd.NA).notna()
+            if numeric.notna().any() and numeric[nonempty].notna().all():
                 df[column] = numeric
         return df
 
