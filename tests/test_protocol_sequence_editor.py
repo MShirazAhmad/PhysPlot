@@ -71,3 +71,20 @@ def test_deleting_protocol_step_replays_revised_sequence_on_table(tmp_path):
 
     window.close()
     app.quit()
+
+
+def test_bulk_panel_payload_is_sequence_driven():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    bulk_panel = window.mode_manager.panels["Advanced"].recorder.bulk
+
+    payload = bulk_panel.payload()
+
+    assert "plot_mode" not in payload
+    assert "dpi" not in payload
+    assert not hasattr(bulk_panel, "plot_mode")
+    assert not hasattr(bulk_panel, "dpi")
+
+    window.close()
+    app.quit()
