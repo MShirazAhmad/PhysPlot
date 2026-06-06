@@ -1,0 +1,5 @@
+Depth (nm),Load (mN),Hardness (GPa),Modulus (GPa),Stiffness (N/m)
+0,0,0,0,0
+50,1.2,20,350,1000
+100,3.8,24,370,1500
+150,7.1,25,380,1800

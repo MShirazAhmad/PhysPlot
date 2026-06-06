@@ -1,0 +1,16 @@
+include README.md
+include LICENSE
+include CONTRIBUTING.md
+include TRADEMARK.md
+recursive-include physplot/inc *.png
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude .venv *
+recursive-exclude .gui-venv *
+recursive-exclude .pytest_cache *
+recursive-exclude outputs *
+recursive-exclude test_data *
+recursive-exclude workflows *
+exclude PhysPlot_backend_revision.zip
+exclude pipeline.json
+exclude workflow.py

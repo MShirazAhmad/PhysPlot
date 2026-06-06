@@ -12,6 +12,13 @@ Optional main/runtime behavior:
     Imported by the application at startup; not intended to be run directly.
 """
 
+MODULE_ID = "physplot.utils"
+MODULE_VERSION = "1.0.0"
+MODULE_REVISION = "2026-05-30-r1"
+MODULE_API_VERSION = "1"
+MODULE_COMPATIBILITY = "v1"
+MODULE_STATUS = "stable"
+
 
 def table_item_float(table, row, column):
     """table_item_float(table, row, column) -> float

@@ -25,6 +25,7 @@ import numpy as np
 
 
 title = "OES HRF Loader"
+COLUMN_NAMES = ["Wavelength", "Intensity"]
 DEFAULT_COLUMN_ROLES = ["X-axis", "Y-axis"]
 DATA_ROW_PATTERN = re.compile(
     r"^\s*([-+]?\d+(?:\.\d+)?)\s*,?\s+"
