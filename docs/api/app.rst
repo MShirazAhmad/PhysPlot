@@ -9,14 +9,6 @@ Main Application Module
    :undoc-members:
    :show-inheritance:
 
-Runner Module
--------------
-
-.. automodule:: physplot.runner
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Package Entry Points
 --------------------
 
