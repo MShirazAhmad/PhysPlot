@@ -17,6 +17,13 @@ Optional main/runtime behavior:
 import json
 from pathlib import Path
 
+MODULE_ID = "physplot.constants"
+MODULE_VERSION = "1.0.0"
+MODULE_REVISION = "2026-05-30-r1"
+MODULE_API_VERSION = "1"
+MODULE_COMPATIBILITY = "v1"
+MODULE_STATUS = "stable"
+
 _CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "ui_config.json"
 with _CONFIG_PATH.open(encoding="utf-8") as config_file:
     UI_CONFIG = json.load(config_file)

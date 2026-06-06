@@ -1,0 +1,5 @@
+Time,Voltage,Error,Group
+1,2,0.1,A
+2,4,0.2,A
+3,6,0.2,B
+4,8,0.3,B

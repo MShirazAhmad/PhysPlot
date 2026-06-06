@@ -5,3 +5,12 @@ __pycache__/
 .history/
 docs/_build/
 .pytest_cache/
+.venv/
+.gui-venv/
+build/
+dist/
+*.egg-info/
+outputs/
+PhysPlot_backend_revision.zip
+pipeline.json
+workflow.py

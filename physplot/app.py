@@ -34,12 +34,23 @@ import importlib.util
 import sys
 from pathlib import Path
 
+MODULE_ID = "physplot.app"
+MODULE_VERSION = "1.0.0"
+MODULE_REVISION = "2026-05-30-r1"
+MODULE_API_VERSION = "1"
+MODULE_COMPATIBILITY = "v1"
+MODULE_STATUS = "stable"
+
 import numpy as np
-from PyQt5 import QtCore, QtWidgets, QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QMessageBox, QFileDialog, QTableWidgetItem
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from physplot.qt_compat import Qt, QtCore, QtGui, QtWidgets
+QDialog = QtWidgets.QDialog
+QVBoxLayout = QtWidgets.QVBoxLayout
+QWidget = QtWidgets.QWidget
+QMessageBox = QtWidgets.QMessageBox
+QFileDialog = QtWidgets.QFileDialog
+QTableWidgetItem = QtWidgets.QTableWidgetItem
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 from scipy.optimize import curve_fit
 
@@ -1763,7 +1774,7 @@ class SaveFile(QWidget):
             None: Result described by the method name and GUI side effects.
         """
         super().__init__()
-        self.title = 'PyQt5 file dialogs - pythonspot.com'
+        self.title = 'Qt file dialogs'
         self.left = 10
         self.top = 10
         self.width = 640
@@ -1937,6 +1948,16 @@ class Plot_Window(QDialog):
             ax.legend(loc='upper left', fontsize='small')
         self.figure.tight_layout()
         self.canvas.draw()
+
+    def errMessage(self, Text, InformativeText):
+        """Show an error dialog from the standalone plot window."""
+        msgBox = QMessageBox(self)
+        msgBox.setWindowIcon(QtGui.QIcon(str(APP_ICON_PATH)))
+        msgBox.setIcon(QMessageBox.Critical)
+        msgBox.setText(Text)
+        msgBox.setInformativeText(InformativeText)
+        msgBox.setWindowTitle("Warning")
+        msgBox.exec_()
 
 
 class Ui_MainWindow(object):

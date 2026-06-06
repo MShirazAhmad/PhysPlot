@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-physplot"
+version = "1.0.0"
+description = "Scientific plotting, workflow recording, and publication-ready plot generation for researchers."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "LicenseRef-PolyForm-Noncommercial-1.0.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "M. Shiraz Ahmad" },
+]
+keywords = [
+    "plotting",
+    "scientific-visualization",
+    "matplotlib",
+    "data-analysis",
+    "workflow",
+    "gui",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+dependencies = [
+    "matplotlib>=3.8",
+    "numpy>=1.24",
+    "openpyxl>=3.1",
+    "pandas>=2.0",
+    "PyQt6>=6.6",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.2",
+    "pytest>=8",
+    "twine>=5",
+]
+
+[project.scripts]
+physplot = "physplot.__main__:main"
+physplot-gui = "physplot_gui.app.runner:run_app"
+python-physplot = "physplot.__main__:main"
+python-physplot-gui = "physplot_gui.app.runner:run_app"
+
+[project.urls]
+Homepage = "https://github.com/MShirazAhmad/PhysPlot"
+Repository = "https://github.com/MShirazAhmad/PhysPlot"
+Issues = "https://github.com/MShirazAhmad/PhysPlot/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["physplot*", "physplot_gui*"]
+exclude = ["tests*", "docs*", "outputs*", "workflows*", "test_data*"]
+
+[tool.setuptools.package-data]
+physplot = ["inc/*.png"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

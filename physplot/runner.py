@@ -20,6 +20,13 @@ import sys
 import traceback
 from pathlib import Path
 
+MODULE_ID = "physplot.runner"
+MODULE_VERSION = "1.0.0"
+MODULE_REVISION = "2026-05-30-r1"
+MODULE_API_VERSION = "1"
+MODULE_COMPATIBILITY = "v1"
+MODULE_STATUS = "stable"
+
 _APP = None
 _MAIN_WINDOW = None
 _UI = None
@@ -95,7 +102,7 @@ def run_app():
         int: Qt event-loop exit code.
     """
     global _APP, _MAIN_WINDOW, _UI
-    from PyQt5 import QtCore, QtGui, QtWidgets
+    from physplot.qt_compat import QtCore, QtGui, QtWidgets
 
     sys.excepthook = _exception_hook
     project_root = Path(__file__).resolve().parent.parent
@@ -110,11 +117,10 @@ def run_app():
     app.aboutToQuit.connect(lambda: _log("QApplication aboutToQuit emitted"))
     app.lastWindowClosed.connect(lambda: _log("QApplication lastWindowClosed emitted"))
 
-    from .app import Ui_MainWindow
+    from physplot_gui.app.main_window import MainWindow
 
-    main_window = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(main_window)
+    main_window = MainWindow()
+    ui = main_window
     _MAIN_WINDOW = main_window
     _UI = ui
     main_window.setAttribute(QtCore.Qt.WA_ShowWithoutActivating, False)

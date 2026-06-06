@@ -10,6 +10,41 @@ I started building PhysPlot while I was learning Python. What began as a small l
 
 PhysPlot is a scientific plotting software with a graphical user interface, designed to produce publication-ready 2D plots. It supports vector and bitmap output, including PDF, Postscript, SVG and EPS. It allows data to be imported from text, CSV and Excel files and It can export data in text format. Datasets can also be entered within the program, and new datasets can be created via the manipulation of existing datasets using mathematical expressions.
 
+## Installation
+
+Install the published package:
+
+```bash
+python -m pip install python-physplot
+```
+
+Launch the GUI:
+
+```bash
+physplot-gui
+```
+
+The distribution name is `python-physplot`; the import package remains `physplot`.
+
+Run the backend command-line interface:
+
+```bash
+physplot --version
+physplot run-workflow workflow.py --input data.csv --output outputs/run
+physplot run-bulk workflow.py --input-folder data/ --output-folder outputs/batch
+```
+
+You can also use PhysPlot from Python:
+
+```python
+from physplot import PhysPlot
+
+pp = PhysPlot()
+pp.load("data.csv")
+pp.set_roles(x="Time", y="Voltage")
+fig = pp.plot_with_module("basic", "scatter")
+```
+
 ## Quick Start (from source)
 
 Clone the repository:
@@ -41,19 +76,26 @@ Install dependencies:
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -e ".[dev]"
 ```
 
 Run PhysPlot:
 
 ```bash
-python PhysPlot.py
+physplot-gui
 ```
 
 Alternative module entry point:
 
 ```bash
-python -m physplot
+python -m physplot --version
+```
+
+Build local PyPI artifacts:
+
+```bash
+python -m build
+python -m twine check dist/*
 ```
 
 ## License, Tutorials, and Contributions
