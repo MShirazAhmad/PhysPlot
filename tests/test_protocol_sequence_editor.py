@@ -30,6 +30,10 @@ WORKFLOW_STEPS = [
     assert len(window.state.timeline) == 2
 
     panel = window.mode_manager.panels["Advanced"].sequence_builder
+    assert panel.apply_code_button.text() == "Apply Code to Table"
+    assert panel.apply_code_button.isHidden()
+    panel._set_view_mode(1)
+    assert not panel.apply_code_button.isHidden()
     assert "PlotModuleStep" in panel.code_view.toPlainText()
 
     window.delete_timeline_step(1)
