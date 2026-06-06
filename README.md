@@ -1,4 +1,4 @@
-$$\text{\color{red}The Current Branch is the latest and might have tremendous bugs.}$$
+$$\text{\color{red}\Huge The Current Branch is the latest and might have tremendous bugs.}$$
 
 $$\text{\color{green}Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
 <p align="center">
