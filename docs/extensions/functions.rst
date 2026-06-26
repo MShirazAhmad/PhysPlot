@@ -10,7 +10,7 @@ In the main window, the user selects:
 - an input column,
 - an output column,
 - a function from the Functions dropdown,
-- an optional multiplier and offset.
+- an optional offset.
 
 PhysPlot reads the input column as a one-dimensional numeric array, calls the
 plugin's ``transform(values)`` function, then writes the returned values into

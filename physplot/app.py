@@ -1606,7 +1606,7 @@ class Ui_ConfigWindow(object):
     def definePlotParameters(self):
         """definePlotParameters(self) -> None
 
-        Persist current plot settings and refresh or open the plot window.
+        Persist current legacy plot settings and refresh or open the legacy plot window.
 
         Parameters:
             self (Ui_ConfigWindow): Active configuration window instance.
@@ -1949,7 +1949,7 @@ class Plot_Window(QDialog):
         self.canvas.draw()
 
     def errMessage(self, Text, InformativeText):
-        """Show an error dialog from the standalone plot window."""
+        """Show an error dialog from the standalone legacy plot window."""
         msgBox = QMessageBox(self)
         msgBox.setWindowIcon(QtGui.QIcon(str(APP_ICON_PATH)))
         msgBox.setIcon(QMessageBox.Critical)
@@ -3066,7 +3066,7 @@ class Ui_MainWindow(object):
     def btn_GeneratePlot(self):
         """btn_GeneratePlot(self) -> None
 
-        Validate axis selections and open configuration and plot windows.
+        Validate axis selections and open legacy configuration and plot windows.
 
         Parameters:
             self (Ui_MainWindow): Active main window UI instance.

@@ -1,4 +1,4 @@
-"""FigureForge plugin for fitting arbitrary functions to plotted data."""
+"""Figure Editor plugin for fitting arbitrary functions to plotted data."""
 
 from __future__ import annotations
 

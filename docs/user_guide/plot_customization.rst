@@ -3,15 +3,20 @@ Plot Customization
 
 For a full step-by-step flow, see :ref:`GUI Walkthrough — Generating and Formatting a Plot <gui-generating-and-formatting-plot>`.
 
-Configuration window options
-----------------------------
+Figure Editor options
+---------------------
 
-PhysPlot's plot configuration window lets you control:
+For Basic Plotter output, PhysPlot opens the Figure Editor. The Figure Editor property inspector lets you control:
 
-- Grid: style, width, color
-- Marker: style, size, color
-- Line: style, width, color
-- Plot labels: title, x-label, y-label, legend label
+- Figure size, DPI, face color, and layout.
+- Axes labels, title, bounds, scale, spines, grid, and tick label styling.
+- Marker, line, scatter, legend, annotation, and text artist properties.
+- Custom fit overlays through **Figure Editor > Fitting > Add Fit Function**.
+
+Reusable templates
+------------------
+
+After styling a figure, choose **Figure Editor > PhysPlot > Save as Template**. The template is saved under ``styling/`` and appears in Simple Mode after clicking **Reload** next to **Template**. Select a template before **Generate Plot** to apply the saved appearance to the next plot.
 
 Marker style options
 --------------------

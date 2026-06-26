@@ -1,4 +1,4 @@
-"""Reusable plot styling modules for PhysPlot and FigureForge."""
+"""Reusable figure templates shared by PhysPlot and the Figure Editor."""
 
 from __future__ import annotations
 

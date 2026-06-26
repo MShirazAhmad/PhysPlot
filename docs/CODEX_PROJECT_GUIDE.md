@@ -81,7 +81,8 @@ Simple Mode has exactly three panels below the table:
 3. Plotter Module
 
 It is intended for everyday use: load data, assign roles, transform columns,
-plot, export.
+choose an optional template, generate a plot, edit it in the Figure Editor, and
+export.
 
 ### Build Protocol
 
@@ -147,7 +148,7 @@ Set column role   -> pp.set_roles(...)
 Transform column  -> pp.transform(...)
 Calculate formula -> pp.calculate(...)
 Fit model         -> pp.fit(...)
-Generate Plot     -> pp.plot_with_module(...) or legacy formatter for Basic Plotter
+Generate Plot     -> pp.plot_with_module(...) and Figure Editor for Basic Plotter
 Export            -> pp.export(...)
 Bulk Run          -> pp.run_bulk(...)
 ```
@@ -349,4 +350,3 @@ Expected result:
 3. Confirm `dist/python_physplot-*.whl` and `.tar.gz` were freshly built.
 4. Push the release branch.
 5. Tag only after the maintainer approves the exact release commit.
-

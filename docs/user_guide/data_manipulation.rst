@@ -14,7 +14,7 @@ Inputs
 - **Input Col.**: source column
 - **Output Col.**: destination column
 - **Function**: selected transformation
-- Scalar and offset controls: ``x`` multiplier and ``+`` offset
+- **Offset**: optional value added after the selected function is applied
 
 Supported functions
 -------------------

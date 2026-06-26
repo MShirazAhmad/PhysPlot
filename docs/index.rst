@@ -6,12 +6,23 @@ PhysPlot: Advanced Plotting Made Simple
    :align: center
    :width: 620px
 
-PhysPlot is a scientific plotting software with a graphical user interface, designed to produce publication-ready 2D plots. It supports vector and bitmap outputs and allows importing, transforming, plotting, fitting, and exporting datasets.
+PhysPlot is a scientific plotting application with a spreadsheet-first graphical interface. It supports importing, transforming, plotting, fitting, templating figure appearance, and exporting datasets.
+
+Main Features
+-------------
+
+- Spreadsheet-first data entry and import with explicit column-role dropdowns.
+- Replayable protocol sequences for transformations, plotting, and batch runs.
+- Simple Mode panels for importing data, transforming columns, and generating plots.
+- Figure Editor-based editing for Basic Plotter output.
+- Reusable figure templates saved from **Figure Editor > PhysPlot > Save as Template** and selected from Simple Mode's **Template** dropdown.
+- Custom fit functions through **Figure Editor > Fitting > Add Fit Function**.
+- Backend plotting modules for headless use, notebooks, and bulk workflows.
 
 Plugin System
 -------------
 
-PhysPlot supports plugin-based extension points for importing, transforming, and fitting data without editing core GUI files.
+PhysPlot supports plugin-based extension points for importing, transforming, fitting, and editing figures without editing core GUI files.
 
 File Loader plugins
 ~~~~~~~~~~~~~~~~~~~

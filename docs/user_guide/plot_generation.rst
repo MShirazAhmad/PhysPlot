@@ -11,19 +11,23 @@ To generate a plot, assign exactly one **X-axis** column and one **Y-axis** colu
 Generate plot flow
 ------------------
 
-1. Click **Generate Plot** in the main window.
-2. PhysPlot opens a configuration window.
-3. PhysPlot opens the plot window.
+1. Choose a plotter and plot type in Simple Mode.
+2. Optionally choose a saved **Template**.
+3. Click **Generate Plot**.
+4. For Basic Plotter output, PhysPlot opens the Figure Editor.
 
-Plot window
------------
+Figure Editor
+-------------
 
-The plot window includes a matplotlib navigation toolbar (pan, zoom, save) and draws:
+The Figure Editor opens with the generated Matplotlib figure and lets you inspect and edit the figure tree. It draws:
 
 - Main data series
 - Optional error bars (if Xerr/Yerr columns are assigned)
 - Title and axis labels
-- Legend entry
+- Legend entries and titles
+- Optional fit overlays added through **Figure Editor > Fitting > Add Fit Function**
+
+Use **Figure Editor > PhysPlot > Save as Template** to save the current appearance. Back in Simple Mode, click **Reload** next to **Template** and select the saved template before generating another plot.
 
 .. image:: ../_static/gui_walkthrough/04_plot_generated_and_formatting_window.png
    :alt: Plot generation and output window
