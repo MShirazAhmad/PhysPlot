@@ -90,8 +90,15 @@ Simple Mode is organized into three panels:
 
 1. **Data Importer**: select a loader and import/export data.
 2. **Apply Mathematical Transformation**: create derived columns from table
-   columns.
-3. **Plotter Module**: select a registered plotter and plot type.
+   columns with a selected function and optional offset.
+3. **Plotter Module**: select a registered plotter, plot type, and reusable
+   figure template before generating the plot.
+
+For Basic Plotter workflows, **Generate Plot** opens the Figure Editor. Use
+**Figure Editor > PhysPlot > Save as Template** in that window to save the
+final styling for reuse in Simple Mode's **Template** selector. The Figure
+Editor also provides **Fitting > Add Fit Function** for custom expression-based
+fits on the selected axes or series.
 
 Advanced Mode has two tabs:
 

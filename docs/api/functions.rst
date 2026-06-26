@@ -82,7 +82,7 @@ Implementation Notes
 --------------------
 
 Each function file should import only what it needs. For most transformations,
-``numpy`` is enough. Avoid editing table widgets or plot windows inside a
+``numpy`` is enough. Avoid editing table widgets or figure-editor windows inside a
 function plugin; PhysPlot handles reading the selected column, writing the
 output column, and refreshing the plot.
 

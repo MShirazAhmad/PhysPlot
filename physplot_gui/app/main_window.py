@@ -459,7 +459,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _open_figureforge_editor(self, figure) -> None:
         if importlib.util.find_spec("FigureForge") is None:
-            raise RuntimeError("FigureForge is not installed. Install it with `python -m pip install FigureForge`.")
+            raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
 
         self._install_figureforge_plugins()
         self._prepare_figureforge_figure(figure)
@@ -529,8 +529,8 @@ class MainWindow(QtWidgets.QMainWindow):
             stderr = ""
         self._reap_figureforge_processes()
         if process.returncode:
-            detail = stderr.strip() or f"FigureForge exited with code {process.returncode}."
-            self._error("FigureForge failed", RuntimeError(detail))
+            detail = stderr.strip() or f"Figure Editor exited with code {process.returncode}."
+            self._error("Figure Editor failed", RuntimeError(detail))
         try:
             temp_path.unlink()
         except OSError:
@@ -552,9 +552,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def _install_figureforge_plugins() -> None:
         spec = importlib.util.find_spec("FigureForge")
         if spec is None or not spec.submodule_search_locations:
-            raise RuntimeError("FigureForge is not installed. Install it with `python -m pip install FigureForge`.")
+            raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
         if not FIGUREFORGE_PLUGIN_DIR.exists():
-            raise RuntimeError(f"PhysPlot FigureForge plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
+            raise RuntimeError(f"PhysPlot Figure Editor plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
         plugin_dir = Path(next(iter(spec.submodule_search_locations))) / "plugins"
         plugin_dir.mkdir(parents=True, exist_ok=True)
         for plugin_source in FIGUREFORGE_PLUGIN_DIR.glob("*.py"):

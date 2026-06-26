@@ -1,4 +1,4 @@
-"""FigureForge plugin for saving reusable PhysPlot style modules."""
+"""Figure Editor plugin for saving reusable PhysPlot templates."""
 
 from __future__ import annotations
 
