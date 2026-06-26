@@ -12,8 +12,8 @@ class ModeManager(QtCore.QObject):
     def __init__(self, actions, parent=None):
         super().__init__(parent)
         self.stack = QtWidgets.QStackedWidget()
-        self.stack.setMinimumHeight(138)
-        self.stack.setMaximumHeight(152)
+        self.stack.setMinimumHeight(168)
+        self.stack.setMaximumHeight(184)
         self.panels = {
             "Simple": SimpleModePanel(actions),
             "Advanced": AdvancedModePanel(actions),
@@ -24,8 +24,8 @@ class ModeManager(QtCore.QObject):
     def set_mode(self, mode: str) -> None:
         panel = self.panels[mode]
         if mode == "Simple":
-            self.stack.setMinimumHeight(138)
-            self.stack.setMaximumHeight(152)
+            self.stack.setMinimumHeight(168)
+            self.stack.setMaximumHeight(184)
         else:
             self.stack.setMinimumHeight(300)
             self.stack.setMaximumHeight(430)
