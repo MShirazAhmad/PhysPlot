@@ -2,9 +2,19 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
+import os
+import pickle
+import shutil
+import subprocess
+import sys
+import tempfile
+import textwrap
 from pathlib import Path
 
+from appdirs import user_config_dir
+from importlib.metadata import version as package_version
 import numpy as np
 import pandas as pd
 from physplot.qt_compat import QtCore, QtGui, QtWidgets
@@ -27,6 +37,7 @@ from physplot.steps import (
 from physplot_gui.app.gui_state import GuiState
 from physplot_gui.app.mode_manager import ModeManager
 from physplot_gui.app.plugin_discovery import discover_fileloaders, discover_functions, discover_loader_plotters
+from physplot_gui.plot_styles import apply_style_module, list_style_modules, style_directory
 from physplot_gui.style.theme import APP_STYLESHEET
 from physplot_gui.widgets.central_table import CentralTable
 from physplot_gui.widgets.mode_switcher import ModeSwitcher
@@ -35,6 +46,7 @@ from physplot_gui.widgets.status_bar import PhysPlotStatusBar
 
 LOGO_WIDE = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlotWide1.png"
 LOGO_ICON = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot.png"
+FIGUREFORGE_PLUGIN_DIR = Path(__file__).resolve().parents[1] / "figureforge_plugins"
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -205,6 +217,18 @@ class MainWindow(QtWidgets.QMainWindow):
         dataset = self.state.pp.dataset
         return PlotterRegistry.default().list_plot_types(plotter_id, dataset) if plotter_id else []
 
+    def style_module_entries(self) -> list[dict]:
+        return [{"name": "None", "path": None}, *list_style_modules()]
+
+    def refresh_style_modules(self) -> None:
+        self.mode_manager.refresh_plots()
+
+    def _selected_style_module(self):
+        panel = self.mode_manager.panels.get("Simple")
+        if hasattr(panel, "current_style_module"):
+            return panel.current_style_module()
+        return None
+
     def _mode_changed(self, mode: str) -> None:
         self.state.mode = mode
         self.mode_switcher.set_mode(mode)
@@ -348,8 +372,16 @@ class MainWindow(QtWidgets.QMainWindow):
     def generate_plot(self) -> None:
         self.sync_table_to_backend()
         try:
-            self._open_legacy_plot_windows()
-            self._record("Generate Plot", f"Create {self._current_plot_mode()} plot", "X vs Y")
+            figure = self.state.pp.plot_with_module("basic", "scatter")
+            workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
+            apply_style_module(figure, self._selected_style_module())
+            self._open_figureforge_editor(figure)
+            self._append_sequence(
+                "Generate Plot",
+                f"Create {self._current_plot_mode()} plot",
+                "X vs Y",
+                workflow_index=workflow_index,
+            )
             self.status.set_message("Plot generated")
             self._refresh_all()
         except Exception as exc:
@@ -425,6 +457,158 @@ class MainWindow(QtWidgets.QMainWindow):
                 "Select exactly one X column and one Y column from the column dropdowns before generating a plot."
             )
 
+    def _open_figureforge_editor(self, figure) -> None:
+        if importlib.util.find_spec("FigureForge") is None:
+            raise RuntimeError("FigureForge is not installed. Install it with `python -m pip install FigureForge`.")
+
+        self._install_figureforge_plugins()
+        self._prepare_figureforge_figure(figure)
+        self._reap_figureforge_processes()
+        temp_file = tempfile.NamedTemporaryFile(
+            prefix="physplot_figureforge_",
+            suffix=".pkl",
+            delete=False,
+        )
+        temp_path = Path(temp_file.name)
+        try:
+            with temp_file:
+                pickle.dump(figure, temp_file)
+            launcher = textwrap.dedent(
+                """
+                import os
+                import pickle
+                import sys
+
+                temp_path = sys.argv[1]
+                try:
+                    with open(temp_path, "rb") as handle:
+                        figure = pickle.load(handle)
+                    from PySide6.QtWidgets import QApplication
+                    from FigureForge.main import create_splash
+                    from FigureForge.gui import MainWindow
+
+                    app = QApplication.instance() or QApplication(sys.argv)
+                    splash = create_splash()
+                    window = MainWindow(splash, figure)
+                    window.plugin_menu.setTitle("Figure Editor")
+                    window.show()
+                    splash.finish(window)
+                    app.exec()
+                finally:
+                    try:
+                        os.remove(temp_path)
+                    except OSError:
+                        pass
+                """
+            )
+            process = subprocess.Popen(
+                [sys.executable, "-c", launcher, str(temp_path)],
+                cwd=str(Path.cwd()),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
+                env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory())},
+            )
+        except Exception:
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
+            raise
+
+        self._figureforge_processes = getattr(self, "_figureforge_processes", [])
+        self._figureforge_processes.append((process, temp_path))
+        QtCore.QTimer.singleShot(1200, lambda: self._check_figureforge_process(process, temp_path))
+
+    def _check_figureforge_process(self, process, temp_path: Path) -> None:
+        if process.poll() is None:
+            return
+        try:
+            _, stderr = process.communicate(timeout=0.1)
+        except Exception:
+            stderr = ""
+        self._reap_figureforge_processes()
+        if process.returncode:
+            detail = stderr.strip() or f"FigureForge exited with code {process.returncode}."
+            self._error("FigureForge failed", RuntimeError(detail))
+        try:
+            temp_path.unlink()
+        except OSError:
+            pass
+
+    def _reap_figureforge_processes(self) -> None:
+        active = []
+        for process, temp_path in getattr(self, "_figureforge_processes", []):
+            if process.poll() is None:
+                active.append((process, temp_path))
+                continue
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
+        self._figureforge_processes = active
+
+    @staticmethod
+    def _install_figureforge_plugins() -> None:
+        spec = importlib.util.find_spec("FigureForge")
+        if spec is None or not spec.submodule_search_locations:
+            raise RuntimeError("FigureForge is not installed. Install it with `python -m pip install FigureForge`.")
+        if not FIGUREFORGE_PLUGIN_DIR.exists():
+            raise RuntimeError(f"PhysPlot FigureForge plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
+        plugin_dir = Path(next(iter(spec.submodule_search_locations))) / "plugins"
+        plugin_dir.mkdir(parents=True, exist_ok=True)
+        for plugin_source in FIGUREFORGE_PLUGIN_DIR.glob("*.py"):
+            shutil.copy2(plugin_source, plugin_dir / plugin_source.name)
+        MainWindow._point_figureforge_at_plugin_dir(plugin_dir)
+
+    @staticmethod
+    def _point_figureforge_at_plugin_dir(plugin_dir: Path) -> None:
+        config_dir = Path(user_config_dir(package_version("FigureForge"), "FigureForge"))
+        config_dir.mkdir(parents=True, exist_ok=True)
+        preferences_path = config_dir / "preferences.json"
+        if preferences_path.exists():
+            try:
+                preferences = json.loads(preferences_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                preferences = {}
+        else:
+            preferences = {}
+        preferences.update(
+            {
+                "plugin_directory": str(plugin_dir),
+                "plugin_requirements": str(plugin_dir / "requirements.txt"),
+                "theme": preferences.get("theme", "light"),
+                "debug": preferences.get("debug", False),
+                "show_welcome": preferences.get("show_welcome", False),
+                "recent_files": preferences.get("recent_files", []),
+                "check_for_updates": preferences.get("check_for_updates", False),
+                "last_export_path": preferences.get("last_export_path", ""),
+            }
+        )
+        preferences_path.write_text(json.dumps(preferences, indent=4), encoding="utf-8")
+
+    @staticmethod
+    def _prepare_figureforge_figure(figure) -> None:
+        for axes in figure.get_axes():
+            if not any(child.__class__.__name__ == "Line2D" for child in axes.get_children()):
+                axes.plot([], [], label="_physplot_template_line", visible=False)
+            if not any(child.__class__.__name__ == "PathCollection" for child in axes.get_children()):
+                axes.scatter([], [], label="_physplot_template_scatter", visible=False)
+            if axes.get_legend() is None:
+                legend = axes.legend([], [])
+                legend.set_visible(False)
+            if not any(child.__class__.__name__ == "Annotation" for child in axes.get_children()):
+                axes.annotate(
+                    "",
+                    xy=(0.5, 0.5),
+                    xytext=(0.5, 0.5),
+                    xycoords="axes fraction",
+                    textcoords="axes fraction",
+                    annotation_clip=False,
+                    label="_physplot_template_annotation",
+                    visible=False,
+                )
+
     def set_column_role(self, column: str, role: str) -> None:
         try:
             self.state.set_role(column, role)
@@ -484,6 +668,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def apply_simple_transform(self, input_column: str, output: str, function_name: str | dict, multiplier: float, offset: float):
         if not input_column:
             return
+        if not self._column_has_values(input_column):
+            self.status.set_message("Enter or import data before applying a transformation")
+            return
         output = output or input_column
         if isinstance(function_name, dict) and function_name.get("module") is not None:
             self._apply_function_plugin(input_column, output, function_name, multiplier, offset)
@@ -521,6 +708,12 @@ class MainWindow(QtWidgets.QMainWindow):
             function_to_run = function_name
         output = output or f"{input_column}_{function_name}"
         self.apply_simple_transform(input_column, output, function_to_run, multiplier, offset)
+
+    def _column_has_values(self, column_name: str) -> bool:
+        df = self.central_table.to_dataframe(trim_empty=False)
+        if column_name not in df.columns:
+            return False
+        return df[column_name].astype(str).str.strip().ne("").any()
 
     def _apply_function_plugin(self, input_column: str, output_column: str, entry: dict, multiplier: float, offset: float) -> None:
         self.sync_table_to_backend()
@@ -578,22 +771,25 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as exc:
             self._error("Transformation failed", exc)
 
-    def generate_module_plot(self, plotter_id: str, plot_type: str) -> None:
+    def generate_module_plot(self, plotter_id: str, plot_type: str, style_module=None) -> None:
         if not plotter_id:
             return
         self.sync_table_to_backend()
         try:
             if plotter_id == "basic":
-                self.state.pp.plot_with_module(plotter_id, plot_type)
+                figure = self.state.pp.plot_with_module(plotter_id, plot_type)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
-                self._open_legacy_plot_windows()
+                apply_style_module(figure, style_module)
+                self._open_figureforge_editor(figure)
             elif plotter_id in self._custom_plotters:
                 figure = self._run_custom_plotter(plotter_id, plot_type)
                 workflow_index = None
+                apply_style_module(figure, style_module)
                 self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             else:
                 figure = self.state.pp.plot_with_module(plotter_id, plot_type)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
+                apply_style_module(figure, style_module)
                 self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             self._append_sequence(
                 "Generate Plot",

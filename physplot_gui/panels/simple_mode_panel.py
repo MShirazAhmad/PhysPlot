@@ -81,8 +81,6 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.function = AutoWidthComboBox()
         for entry in self.actions.simple_function_entries():
             self.function.addItem(entry["display_name"], entry)
-        self.multiplier = QtWidgets.QLineEdit("1")
-        self.multiplier.setMaximumWidth(84)
         self.offset = QtWidgets.QLineEdit("0")
         self.offset.setMaximumWidth(84)
         self.output_column = AutoWidthComboBox()
@@ -101,8 +99,6 @@ class SimpleModePanel(QtWidgets.QWidget):
         formula.addWidget(QtWidgets.QLabel("("))
         formula.addWidget(QtWidgets.QLabel("Input"))
         formula.addWidget(self.input_column, 2)
-        formula.addWidget(QtWidgets.QLabel("x"))
-        formula.addWidget(self.multiplier)
         formula.addWidget(QtWidgets.QLabel("+"))
         formula.addWidget(self.offset)
         formula.addWidget(QtWidgets.QLabel(")"))
@@ -132,6 +128,9 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.plotter = AutoWidthComboBox()
         self.plotter.currentIndexChanged.connect(self._plotter_changed)
         self.plot_type = AutoWidthComboBox()
+        self.style_module = AutoWidthComboBox()
+        reload_styles_button = QtWidgets.QPushButton("Reload")
+        reload_styles_button.clicked.connect(self.refresh_styles)
         generate_button = QtWidgets.QPushButton("Generate Plot")
         generate_button.setProperty("primary", True)
         generate_button.clicked.connect(self._generate_plot)
@@ -142,9 +141,16 @@ class SimpleModePanel(QtWidgets.QWidget):
         layout.addWidget(self.plotter, 1, 1)
         layout.addWidget(QtWidgets.QLabel("Plot Type / Protocol:"), 2, 0)
         layout.addWidget(self.plot_type, 2, 1)
-        layout.addWidget(generate_button, 3, 0)
-        layout.addWidget(export_button, 3, 1)
+        layout.addWidget(QtWidgets.QLabel("Template:"), 3, 0)
+        style_layout = QtWidgets.QHBoxLayout()
+        style_layout.setSpacing(6)
+        style_layout.addWidget(self.style_module, 1)
+        style_layout.addWidget(reload_styles_button)
+        layout.addLayout(style_layout, 3, 1)
+        layout.addWidget(generate_button, 4, 0)
+        layout.addWidget(export_button, 4, 1)
         layout.setColumnStretch(1, 1)
+        self.refresh_styles()
         return frame
 
     def refresh_columns(self, columns: list[str]) -> None:
@@ -196,6 +202,25 @@ class SimpleModePanel(QtWidgets.QWidget):
                 self.plotter.setCurrentIndex(index)
         self.plotter.blockSignals(False)
         self._plotter_changed()
+        self.refresh_styles()
+
+    def refresh_styles(self) -> None:
+        current = self.style_module.currentData() if hasattr(self, "style_module") else None
+        current = str(current) if current else None
+        self.style_module.blockSignals(True)
+        self.style_module.clear()
+        for entry in self.actions.style_module_entries():
+            path = str(entry["path"]) if entry["path"] else None
+            self.style_module.addItem(entry["name"], path)
+        if current:
+            index = self.style_module.findData(current)
+            if index >= 0:
+                self.style_module.setCurrentIndex(index)
+        self.style_module.blockSignals(False)
+
+    def current_style_module(self):
+        path = self.style_module.currentData()
+        return str(path) if path else None
 
     def _plotter_changed(self) -> None:
         plotter_id = self.plotter.currentData()
@@ -208,13 +233,13 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.actions.apply_backend_transform(
             self.input_column.currentData() or self.input_column.currentText(),
             self.function.currentData() or self.function.currentText(),
-            self._float_value(self.multiplier.text(), 1.0),
+            1.0,
             self._float_value(self.offset.text(), 0.0),
             self._combo_value(self.output_column),
         )
 
     def _generate_plot(self) -> None:
-        self.actions.generate_module_plot(self.plotter.currentData(), self.plot_type.currentText())
+        self.actions.generate_module_plot(self.plotter.currentData(), self.plot_type.currentText(), self.current_style_module())
 
     def _loader_entry(self) -> dict | str:
         return self.loader.currentData() or "auto"
