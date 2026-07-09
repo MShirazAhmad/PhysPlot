@@ -41,6 +41,7 @@ MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
 
 import numpy as np
+from physplot.user_paths import plugin_search_dirs
 from physplot.qt_compat import Qt, QtCore, QtGui, QtWidgets
 QDialog = QtWidgets.QDialog
 QVBoxLayout = QtWidgets.QVBoxLayout
@@ -56,9 +57,6 @@ from scipy.optimize import curve_fit
 plt_LableData = np.zeros((0, 4))
 CURVE_FIT_ROWS = []
 ACTIVE_CURVE_FIT_DEFINITIONS = []
-FILELOADER_DIR = Path(__file__).resolve().parent.parent / "fileloader"
-FUNCTIONS_DIR = Path(__file__).resolve().parent.parent / "functions"
-CURVEFITTING_DIR = Path(__file__).resolve().parent.parent / "curvefitting"
 APP_LOGO_PATH = Path(__file__).resolve().parent / "inc" / "PhysPlotWide1.png"
 APP_ICON_PATH = Path(__file__).resolve().parent / "inc" / "PhysPlot.png"
 
@@ -167,12 +165,7 @@ def _discover_loader_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    if not FILELOADER_DIR.exists():
-        return []
-    return sorted(
-        [path for path in FILELOADER_DIR.glob("*.py") if path.name != "__init__.py"],
-        key=lambda path: (path.stem != "default_loader", path.stem),
-    )
+    return _discover_plugin_files(plugin_search_dirs("fileloader"), default_first=True)
 
 
 def _load_loader_module(loader_path):
@@ -210,12 +203,7 @@ def _discover_function_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    if not FUNCTIONS_DIR.exists():
-        return []
-    return sorted(
-        [path for path in FUNCTIONS_DIR.glob("*.py") if path.name != "__init__.py"],
-        key=lambda path: path.stem,
-    )
+    return _discover_plugin_files(plugin_search_dirs("functions"))
 
 
 def _load_function_module(function_path):
@@ -251,12 +239,21 @@ def _discover_curve_fit_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    if not CURVEFITTING_DIR.exists():
-        return []
-    return sorted(
-        [path for path in CURVEFITTING_DIR.glob("*.py") if path.name != "__init__.py"],
-        key=lambda path: path.stem,
-    )
+    return _discover_plugin_files(plugin_search_dirs("curvefitting"))
+
+
+def _discover_plugin_files(folders, default_first=False):
+    paths_by_name = {}
+    for folder in folders:
+        if not folder.exists():
+            continue
+        for path in sorted(folder.glob("*.py")):
+            if path.name.startswith(".") or path.name == "__init__.py":
+                continue
+            paths_by_name.setdefault(path.name, path)
+    if default_first:
+        return sorted(paths_by_name.values(), key=lambda path: (path.stem != "default_loader", path.stem))
+    return sorted(paths_by_name.values(), key=lambda path: path.stem)
 
 
 def _load_curve_fit_module(curve_fit_path):

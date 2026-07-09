@@ -46,7 +46,7 @@ PhysPlot/
     steps/
       *.py                      Replayable workflow step classes
     inc/
-      *.png                     Logo and icon assets
+      *.png, *.jpeg             Logo and icon assets
   physplot_gui/
     __main__.py                 python -m physplot_gui entry point
     app/
@@ -71,6 +71,29 @@ PhysPlot/
 ```
 
 ## Main User Flows
+
+### Application Header and Menus
+
+The modern GUI is launched by `physplot-gui`, `python-physplot-gui`, or
+`python -m physplot_gui`. `physplot_gui/app/runner.py` sets the application
+name/display name to `PhysPlot` before constructing `MainWindow`.
+
+The top header is intentionally branded but compact:
+
+- `physplot/inc/lsf.jpeg` and `physplot/inc/physlab.png` sit on the far left.
+- `physplot/inc/PhysPlotWide1.png` remains centered.
+- The Simple/Advanced mode switcher remains on the right.
+
+The native menu bar is built in `MainWindow._build_menu_bar()`:
+
+- **File**: import/export data.
+- **Protocol**: import/export/apply/copy/clear sequence actions.
+- **View**: Simple and Advanced mode shortcuts.
+- **Plot**: generate plots and update the integrated preview.
+- **Help**: documentation, repository, issue tracker, and About dialog.
+
+On macOS, Qt may place these menus in the system menu bar while the app process
+still appears as `Python` when launched directly with `python -m physplot_gui`.
 
 ### Simple Mode
 
@@ -151,6 +174,26 @@ Fit model         -> pp.fit(...)
 Generate Plot     -> pp.plot_with_module(...) and Figure Editor for Basic Plotter
 Export            -> pp.export(...)
 Bulk Run          -> pp.run_bulk(...)
+```
+
+Current built-in loaders:
+
+```text
+auto, csv, txt, excel, nanoindentation, dataframe
+```
+
+Current built-in plotter modules and plot types:
+
+```text
+basic: scatter, line, scatter_line
+histogram: histogram, density_histogram
+scatter: scatter
+line: line
+errorbar: x_y_errorbar, y_errorbar
+overlay: overlay_by_group, overlay_by_dataset
+subplot_grid: subplots_by_group, subplots_by_dataset
+nanoindentation: load_depth, hardness_depth, modulus_depth, stiffness_depth, contact_depth
+oliver_pharr: load_depth_with_unloading_fit, unloading_fit, contact_stiffness_fit, area_function, hardness_summary, modulus_summary
 ```
 
 ## Workflow Step Pattern
@@ -332,6 +375,7 @@ Before marking work production-ready:
 ```bash
 python -m pytest
 QT_QPA_PLATFORM=offscreen python -m pytest tests/test_protocol_sequence_editor.py
+QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
 rm -rf build dist python_physplot.egg-info
 python -m build
 python -m twine check dist/*
@@ -341,6 +385,8 @@ Expected result:
 
 - All backend tests pass.
 - GUI smoke tests pass or skip only when PyQt6 is unavailable.
+- Direct GUI launch succeeds in a Python version supported by the Qt/FigureForge
+  dependency stack; Python 3.12 is the current safe local choice on macOS.
 - `twine check` passes for both wheel and source distribution.
 
 ## Release Checklist

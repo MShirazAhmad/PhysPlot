@@ -6,17 +6,25 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Exporting Processed 
 Export behavior
 ---------------
 
-Click **Export Data** to save the current table output.
+Click **Export Data** from Simple Mode or use **File > Export Data...** to save
+the current table output.
 
-- Output format: text file (tab-delimited)
-- Numeric formatting: rounded and written to 3 decimal places
+Backend exports can also include metadata, column summaries, generated workflow
+source, fit results, and ``plot.png`` when a figure exists.
 
 Workflow
 --------
 
-1. Click **Export Data**.
+1. Click **Export Data** or choose **File > Export Data...**.
 2. Choose destination path and filename.
 3. Confirm save.
+
+For reproducible runs, export the protocol with **Protocol > Export
+Sequence.py...** and run it later with:
+
+.. code-block:: bash
+
+   physplot run-workflow sequence.py --input data.csv --output outputs/run
 
 .. image:: ../_static/gui_walkthrough/08_export_data_workflow.png
    :alt: Data export workflow

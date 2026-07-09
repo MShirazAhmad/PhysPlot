@@ -15,6 +15,8 @@ def run_app() -> int:
     global _WINDOW
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv)
     app.setApplicationName("PhysPlot")
+    app.setApplicationDisplayName("PhysPlot")
+    app.setOrganizationName("PhysLab")
     _WINDOW = MainWindow()
     _WINDOW.show()
     return app.exec_()

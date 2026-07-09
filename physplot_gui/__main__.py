@@ -1,6 +1,6 @@
 """Entry point for the modern PhysPlot GUI."""
 
-from .app.runner import run_app
+from physplot_gui.app.runner import run_app
 
 
 if __name__ == "__main__":

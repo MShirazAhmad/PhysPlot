@@ -7,18 +7,23 @@ Manual table entry
 ------------------
 
 You can type values directly into the table cells (rows below the header row).
+Use the dropdown above each column to mark it as **X**, **Y**, **X Error**,
+**Y Error**, **Group**, **Label**, or **Ignore**.
 
 Managing dimensions
 -------------------
 
-- Use the row ``+`` / ``-`` buttons to add or remove rows.
-- Use the column ``+`` / ``-`` buttons to add or remove columns.
-- Use **New Table** to reinitialize table structure based on row/column inputs.
+- Use table editing and context-menu actions to copy, paste, clear, rename
+  columns, delete rows, and delete columns.
+- Row and column deletions become replayable workflow steps when they affect
+  the current protocol.
 
 Delete old entries
 ------------------
 
-When **Delete Old Entries** is checked, old cell contents are cleared while rebuilding the table.
+Use **File > Import Data...** or Simple Mode's **Data Importer** panel to load
+new data into the table. Manual edits to cells are recorded as workflow steps
+so the sequence can be replayed.
 
 .. image:: ../_static/gui_walkthrough/01_main_window_overview.png
    :alt: Data entry and table controls

@@ -16,7 +16,27 @@ For Basic Plotter output, PhysPlot opens the Figure Editor. The Figure Editor pr
 Reusable templates
 ------------------
 
-After styling a figure, choose **Figure Editor > PhysPlot > Save as Template**. The template is saved under ``styling/`` and appears in Simple Mode after clicking **Reload** next to **Template**. Select a template before **Generate Plot** to apply the saved appearance to the next plot.
+After styling a figure, choose **Figure Editor > PhysPlot > Save as Template**.
+The template is saved as a JSON file under:
+
+.. code-block:: text
+
+   styling/*.json
+
+PhysPlot reads templates from ``styling/`` by default. To use another template
+folder, set ``PHYSPLOT_STYLE_DIR`` before launching the app:
+
+.. code-block:: bash
+
+   export PHYSPLOT_STYLE_DIR=/path/to/templates
+
+Templates are not Python plugins and do not require restarting PhysPlot. Click
+**Reload** next to **Template** in Simple Mode, then select the saved template
+before **Generate Plot**.
+
+Templates store figure and axes appearance, not the data itself. The generated
+workflow stores plot choices and LSQ fit settings in ``PlotModuleStep``; the
+template selector applies visual styling when the plot is generated.
 
 Marker style options
 --------------------

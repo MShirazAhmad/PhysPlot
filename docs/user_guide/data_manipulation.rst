@@ -6,7 +6,10 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Custom Mathematical 
 Transformation panel
 --------------------
 
-Use **Apply Mathematical Transformation to Column** to compute values from one column and write to another.
+Use Simple Mode's **Apply Mathematical Transformation** panel to compute values
+from one column and write them to another. Transformations are recorded as
+workflow steps and can be replayed through **Build Protocol** or headless CLI
+workflows.
 
 Inputs
 ------
@@ -28,6 +31,9 @@ Supported functions
 - ``e^x``
 - ``cos(x)``, ``sin(x)``, ``tan(x)``
 - ``arccos(x)``, ``arsin(x)``, ``artan(x)``
+
+Additional functions can be added as ``.py`` files under ``functions/`` and
+are discovered when PhysPlot starts.
 
 .. image:: ../_static/gui_walkthrough/07_custom_function_transform_system.png
    :alt: Mathematical transformation controls

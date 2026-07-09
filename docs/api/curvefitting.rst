@@ -1,9 +1,11 @@
 Curve-Fitting Plugin API
 ========================
 
-Curve-fitting plugins live in the top-level ``curvefitting`` folder. PhysPlot
-reads these files to populate the curve-fitting configuration screen and to
-choose the correct fitting routine.
+Legacy curve-fitting plugins live in the top-level ``curvefitting`` folder.
+PhysPlot reads these files to populate the legacy curve-fitting configuration
+screen and to choose the correct fitting routine. Modern Basic Plotter output
+also supports expression-based fitting through **Figure Editor > Fitting > Add
+Fit Function**, which does not require a file-based plugin.
 
 Required Module Variables
 -------------------------

@@ -21,8 +21,8 @@ Where Functions Appear in the UI
 
 Discovered function plugins are available in:
 
-- The top-bar **Functions** menu
-- The transform dropdown in the data-manipulation controls
+- Simple Mode's **Apply Mathematical Transformation** panel.
+- The transform dropdown used when building replayable workflow steps.
 
 PhysPlot discovers function files at startup.
 
@@ -92,7 +92,7 @@ Minimal Template
        maximum = np.nanmax(values)
        if maximum == minimum:
            return np.zeros_like(values)
-        return (values - minimum) / (maximum - minimum)
+       return (values - minimum) / (maximum - minimum)
 
 Step-by-Step: Build a New Function
 ----------------------------------
@@ -102,7 +102,7 @@ Step-by-Step: Build a New Function
 2. Define ``DISPLAY_NAME`` for the GUI entry.
 3. Define ``DEFAULT_LABEL`` for generated labels.
 4. Implement ``transform(values)`` and return one value per input row.
-5. Restart PhysPlot so the function appears in the menu and dropdown.
+5. Restart PhysPlot so the function appears in the transformation dropdown.
 
 Function Categories
 -------------------

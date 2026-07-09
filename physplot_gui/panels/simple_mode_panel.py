@@ -129,6 +129,21 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.plotter.currentIndexChanged.connect(self._plotter_changed)
         self.plot_type = AutoWidthComboBox()
         self.style_module = AutoWidthComboBox()
+        self.fit_enabled = QtWidgets.QCheckBox("LSQ fit")
+        self.fit_expression = QtWidgets.QLineEdit("a*x + b")
+        self.fit_expression.setPlaceholderText("f(x)")
+        self.fit_parameters = QtWidgets.QLineEdit("a,b")
+        self.fit_parameters.setPlaceholderText("parameters")
+        self.fit_initial = QtWidgets.QLineEdit("1,0")
+        self.fit_initial.setPlaceholderText("initial guesses")
+        self.fit_label = QtWidgets.QLineEdit("")
+        self.fit_label.setPlaceholderText("label")
+        self.fit_line_style = AutoWidthComboBox()
+        self.fit_line_style.addItems(["--", "-", "-.", ":"])
+        self.fit_line_width = QtWidgets.QLineEdit("2")
+        self.fit_line_width.setMaximumWidth(52)
+        self.fit_show_legend = QtWidgets.QCheckBox("Legend")
+        self.fit_show_legend.setChecked(True)
         reload_styles_button = QtWidgets.QPushButton("Reload")
         reload_styles_button.clicked.connect(self.refresh_styles)
         generate_button = QtWidgets.QPushButton("Generate Plot")
@@ -147,8 +162,28 @@ class SimpleModePanel(QtWidgets.QWidget):
         style_layout.addWidget(self.style_module, 1)
         style_layout.addWidget(reload_styles_button)
         layout.addLayout(style_layout, 3, 1)
-        layout.addWidget(generate_button, 4, 0)
-        layout.addWidget(export_button, 4, 1)
+        fit_layout = QtWidgets.QHBoxLayout()
+        fit_layout.setSpacing(6)
+        fit_layout.addWidget(self.fit_enabled)
+        fit_layout.addWidget(self.fit_expression, 1)
+        layout.addWidget(QtWidgets.QLabel("Fit Function:"), 4, 0)
+        layout.addLayout(fit_layout, 4, 1)
+        fit_params_layout = QtWidgets.QHBoxLayout()
+        fit_params_layout.setSpacing(6)
+        fit_params_layout.addWidget(self.fit_parameters, 1)
+        fit_params_layout.addWidget(self.fit_initial, 1)
+        layout.addWidget(QtWidgets.QLabel("Params / Initial:"), 5, 0)
+        layout.addLayout(fit_params_layout, 5, 1)
+        fit_style_layout = QtWidgets.QHBoxLayout()
+        fit_style_layout.setSpacing(6)
+        fit_style_layout.addWidget(self.fit_label, 1)
+        fit_style_layout.addWidget(self.fit_line_style)
+        fit_style_layout.addWidget(self.fit_line_width)
+        fit_style_layout.addWidget(self.fit_show_legend)
+        layout.addWidget(QtWidgets.QLabel("Fit Style:"), 6, 0)
+        layout.addLayout(fit_style_layout, 6, 1)
+        layout.addWidget(generate_button, 7, 0)
+        layout.addWidget(export_button, 7, 1)
         layout.setColumnStretch(1, 1)
         self.refresh_styles()
         return frame
@@ -239,7 +274,26 @@ class SimpleModePanel(QtWidgets.QWidget):
         )
 
     def _generate_plot(self) -> None:
-        self.actions.generate_module_plot(self.plotter.currentData(), self.plot_type.currentText(), self.current_style_module())
+        self.actions.generate_module_plot(
+            self.plotter.currentData(),
+            self.plot_type.currentText(),
+            self.current_style_module(),
+            fit_config=self._fit_config(),
+        )
+
+    def _fit_config(self) -> dict | None:
+        if not self.fit_enabled.isChecked():
+            return None
+        return {
+            "enabled": True,
+            "expression": self.fit_expression.text().strip() or "a*x + b",
+            "parameters": self.fit_parameters.text().strip() or "a,b",
+            "initial": self.fit_initial.text().strip() or "1,0",
+            "label": self.fit_label.text().strip(),
+            "line_style": self.fit_line_style.currentText() or "--",
+            "line_width": self._float_value(self.fit_line_width.text(), 2.0),
+            "show_legend": self.fit_show_legend.isChecked(),
+        }
 
     def _loader_entry(self) -> dict | str:
         return self.loader.currentData() or "auto"

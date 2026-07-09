@@ -17,6 +17,10 @@ PhysPlot is a table-first scientific plotting application:
 The GUI is only an orchestration layer. Scientific logic belongs in the backend
 package under `physplot/`.
 
+The current GUI header is branded: LSF and PhysLab logos are on the far left,
+the PhysPlot wide logo stays centered, and the Simple/Advanced switcher stays
+on the right. Help/About links live in the native menu bar.
+
 ## Repository Structure
 
 ```text
@@ -45,6 +49,15 @@ When the local GUI-only environment exists, use it for direct PyQt smoke checks:
 QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
 ```
 
+On macOS, prefer a Python 3.12 virtual environment for local GUI work if the
+system Python is newer than the Qt/FigureForge dependency stack supports:
+
+```bash
+/opt/homebrew/bin/python3.12 -m venv .gui-venv
+.gui-venv/bin/python -m pip install -e ".[dev]"
+.gui-venv/bin/python -m physplot_gui
+```
+
 ## Design Rules
 
 - Preserve the table-first layout.
@@ -53,6 +66,9 @@ QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
 - Build Protocol is the editable sequence source of truth.
 - Run Sequence applies an existing sequence to folders; plot type/configuration
   comes from `PlotModuleStep` entries in the sequence.
+- The native menu bar should contain File, Protocol, View, Plot, and Help.
+- Help should link to the Read the Docs site, GitHub repository, issue tracker,
+  and About dialog.
 - If protocol rows are deleted, the remaining sequence should be replayable
   and reflected in the table.
 - Generated workflow files must be normal Python that can run in notebooks or
@@ -64,4 +80,3 @@ QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
 - Import package: `physplot`
 - GUI entry points: `physplot-gui`, `python-physplot-gui`
 - CLI entry points: `physplot`, `python-physplot`
-

@@ -2,6 +2,11 @@
 
 The PhysPlot name, logo, app icon, GUI branding, and official visual identity are reserved by the project originator.
 
+The current official GUI header uses LSF and PhysLab marks at the far left with
+the PhysPlot logo centered. These bundled marks and their placement are part of
+the official application presentation and should not be reused to imply
+endorsement, sponsorship, or official release status for an unofficial build.
+
 ## Reserved Branding
 
 The following are not freely reusable for unofficial apps, modified builds, or independent branded releases:
@@ -10,6 +15,7 @@ The following are not freely reusable for unofficial apps, modified builds, or i
 - PhysPlot logos
 - PhysPlot app icons
 - PhysPlot GUI branding
+- Bundled LSF and PhysLab header marks
 - Official screenshots or visual identity used to imply official release status
 
 ## Unofficial Forks

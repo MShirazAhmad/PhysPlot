@@ -12,6 +12,7 @@ from .core.formula import evaluate_formula
 from .core.transformations import get_transform
 from .loaders import get_loader
 from .plotting_modules import PlotterRegistry
+from .plotting_modules.fit_overlay import apply_lsq_fit_overlay
 from .steps.calculate_column import CalculateColumnStep
 from .steps.delete_columns import DeleteColumnsStep
 from .steps.delete_rows import DeleteRowsStep
@@ -197,6 +198,15 @@ class PhysPlot:
         self._require_dataset()
         plotter = PlotterRegistry.default().get(plotter_id)
         figure = plotter.plot(self.dataset, plot_type=plot_type, config=config)
+        fit_result = apply_lsq_fit_overlay(figure, self.dataset, config.get("lsq_fit"))
+        if fit_result is not None:
+            self.fit_result = {
+                "method": "lsq",
+                "expression": config["lsq_fit"].get("expression"),
+                "parameters": fit_result["parameters"],
+            }
+        elif isinstance(self.fit_result, dict) and self.fit_result.get("method") == "lsq":
+            self.fit_result = None
         self.last_figure = figure
         if record:
             self.workflow.append(PlotModuleStep(plotter_id=plotter_id, plot_type=plot_type, config=dict(config)))
