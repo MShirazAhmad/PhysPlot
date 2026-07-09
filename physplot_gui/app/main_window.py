@@ -21,6 +21,7 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
 from physplot.plotting_modules import PlotterRegistry
+from physplot.user_paths import ensure_user_physplot_dirs
 from physplot.workflow import load_workflow_source
 from physplot.steps import (
     CalculateColumnStep,
@@ -46,6 +47,8 @@ from physplot_gui.widgets.status_bar import PhysPlotStatusBar
 
 LOGO_WIDE = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlotWide1.png"
 LOGO_ICON = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot.png"
+LSF_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "lsf.jpeg"
+PHYSLAB_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "physlab.png"
 FIGUREFORGE_PLUGIN_DIR = Path(__file__).resolve().parents[1] / "figureforge_plugins"
 
 
@@ -55,6 +58,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.state = GuiState()
         self._active_loader_entry = None
         self._custom_plotters: dict[str, dict] = {}
+        ensure_user_physplot_dirs()
         self.setWindowTitle("PhysPlot")
         self.resize(1500, 900)
         self.setStyleSheet(APP_STYLESHEET)
@@ -90,45 +94,63 @@ class MainWindow(QtWidgets.QMainWindow):
     def _build_menu_bar(self) -> None:
         menu_bar = self.menuBar()
 
-        file_menu = menu_bar.addMenu("File")
+        self.file_menu = file_menu = menu_bar.addMenu("File")
         self._add_menu_action(file_menu, "Import Data...", lambda: self.import_data("auto"), "Ctrl+O")
         self._add_menu_action(file_menu, "Import Folder...", self.import_folder)
         self._add_menu_action(file_menu, "Export Data...", self.export_data, "Ctrl+E")
 
-        protocol_menu = menu_bar.addMenu("Protocol")
+        self.protocol_menu = protocol_menu = menu_bar.addMenu("Protocol")
         self._add_menu_action(protocol_menu, "Import Sequence.py...", self.open_workflow)
         self._add_menu_action(protocol_menu, "Export Sequence.py...", self.save_workflow, "Ctrl+S")
         self._add_menu_action(protocol_menu, "Apply This Sequence", self.apply_current_sequence, "Ctrl+R")
         self._add_menu_action(protocol_menu, "Copy Sequence Code", self.copy_workflow_script)
         self._add_menu_action(protocol_menu, "Clear Sequence", self.clear_recording)
 
-        view_menu = menu_bar.addMenu("View")
+        self.view_menu = view_menu = menu_bar.addMenu("View")
         self._add_menu_action(view_menu, "Simple Mode", lambda: self.mode_manager.set_mode("Simple"), "Ctrl+1")
         self._add_menu_action(view_menu, "Advanced Mode", lambda: self.mode_manager.set_mode("Advanced"), "Ctrl+2")
 
-        plot_menu = menu_bar.addMenu("Plot")
+        self.plot_menu = plot_menu = menu_bar.addMenu("Plot")
         self._add_menu_action(plot_menu, "Generate Plot", self.generate_plot, "Ctrl+G")
         self._add_menu_action(plot_menu, "Update Integrated Preview", self.generate_integrated_plot)
 
-    def _add_menu_action(self, menu, text: str, callback, shortcut: str | None = None):
+        self.help_menu = help_menu = menu_bar.addMenu("Help")
+        self._add_menu_action(help_menu, "Documentation", lambda: self._open_url("https://physplot.readthedocs.io/en/latest/"))
+        self._add_menu_action(help_menu, "GitHub Repository", lambda: self._open_url("https://github.com/MShirazAhmad/PhysPlot"))
+        self._add_menu_action(help_menu, "Report Issues or Bugs", lambda: self._open_url("https://github.com/MShirazAhmad/PhysPlot/issues"))
+        help_menu.addSeparator()
+        self._add_menu_action(help_menu, "About PhysPlot", self.show_about_dialog, menu_role=QtGui.QAction.AboutRole)
+
+    def _add_menu_action(self, menu, text: str, callback, shortcut: str | None = None, menu_role=None):
         action = QtWidgets.QAction(text, self)
         if shortcut:
             action.setShortcut(shortcut)
+        if menu_role is not None:
+            action.setMenuRole(menu_role)
         action.triggered.connect(lambda checked=False: callback())
         menu.addAction(action)
         return action
 
     def _header(self):
-        header = QtWidgets.QHBoxLayout()
+        header = QtWidgets.QGridLayout()
         header.setContentsMargins(4, 0, 4, 0)
-        header.setSpacing(0)
-        header.addStretch(1)
+        header.setHorizontalSpacing(12)
+
+        left_logos = QtWidgets.QHBoxLayout()
+        left_logos.setContentsMargins(0, 0, 0, 0)
+        left_logos.setSpacing(10)
+        for path, height in ((LSF_LOGO, 72), (PHYSLAB_LOGO, 46)):
+            label = self._logo_label(path, height)
+            if label is not None:
+                left_logos.addWidget(label)
+        left_logos.addStretch(1)
+
         title_wrap = QtWidgets.QHBoxLayout()
+        title_wrap.setContentsMargins(0, 0, 0, 0)
         if LOGO_WIDE.exists():
-            logo = QtWidgets.QLabel()
-            pixmap = QtGui.QPixmap(str(LOGO_WIDE))
-            logo.setPixmap(pixmap.scaledToHeight(72, QtCore.Qt.SmoothTransformation))
-            title_wrap.addWidget(logo)
+            logo = self._logo_label(LOGO_WIDE, 72)
+            if logo is not None:
+                title_wrap.addWidget(logo)
         else:
             labels = QtWidgets.QVBoxLayout()
             title = QtWidgets.QLabel("PhysPlot")
@@ -138,12 +160,68 @@ class MainWindow(QtWidgets.QMainWindow):
             labels.addWidget(title, alignment=QtCore.Qt.AlignCenter)
             labels.addWidget(subtitle, alignment=QtCore.Qt.AlignCenter)
             title_wrap.addLayout(labels)
-        header.addLayout(title_wrap)
-        header.addStretch(1)
+
         self.mode_switcher = ModeSwitcher()
         self.mode_switcher.mode_changed.connect(self.mode_manager.set_mode)
-        header.addWidget(self.mode_switcher)
+
+        header.addLayout(left_logos, 0, 0, alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        header.addLayout(title_wrap, 0, 1, alignment=QtCore.Qt.AlignCenter)
+        header.addWidget(self.mode_switcher, 0, 2, alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        header.setColumnStretch(0, 1)
+        header.setColumnStretch(1, 0)
+        header.setColumnStretch(2, 1)
         return header
+
+    @staticmethod
+    def _logo_label(path: Path, height: int):
+        if not path.exists():
+            return None
+        logo = QtWidgets.QLabel()
+        logo.setAlignment(QtCore.Qt.AlignCenter)
+        pixmap = QtGui.QPixmap(str(path))
+        logo.setPixmap(pixmap.scaledToHeight(height, QtCore.Qt.SmoothTransformation))
+        return logo
+
+    def show_about_dialog(self) -> None:
+        about = QtWidgets.QDialog(self)
+        about.setWindowTitle("About PhysPlot")
+        about.setModal(True)
+        layout = QtWidgets.QVBoxLayout(about)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(10)
+
+        logo = self._logo_label(LOGO_ICON, 64)
+        if logo is not None:
+            layout.addWidget(logo, alignment=QtCore.Qt.AlignCenter)
+
+        title = QtWidgets.QLabel("PhysPlot")
+        title.setAlignment(QtCore.Qt.AlignCenter)
+        title.setStyleSheet("font-size:22px;font-weight:800;color:#0f172a;")
+        layout.addWidget(title)
+
+        summary = QtWidgets.QLabel("Table-first scientific plotting and replayable workflow builder.")
+        summary.setAlignment(QtCore.Qt.AlignCenter)
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
+
+        links = QtWidgets.QLabel(
+            "<p><a href='https://physplot.readthedocs.io/en/latest/'>Documentation</a></p>"
+            "<p><a href='https://github.com/MShirazAhmad/PhysPlot'>GitHub Repository</a></p>"
+            "<p><a href='https://github.com/MShirazAhmad/PhysPlot/issues'>Report issues or bugs</a></p>"
+        )
+        links.setAlignment(QtCore.Qt.AlignCenter)
+        links.setTextFormat(QtCore.Qt.RichText)
+        links.setOpenExternalLinks(True)
+        layout.addWidget(links)
+
+        close_button = QtWidgets.QPushButton("Close")
+        close_button.clicked.connect(about.accept)
+        layout.addWidget(close_button, alignment=QtCore.Qt.AlignCenter)
+        about.exec_()
+
+    @staticmethod
+    def _open_url(url: str) -> None:
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
 
     def _bootstrap_blank_table(self) -> None:
         df = pd.DataFrame("", index=range(17), columns=[f"Column {i}" for i in range(1, 20)])
@@ -771,23 +849,26 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as exc:
             self._error("Transformation failed", exc)
 
-    def generate_module_plot(self, plotter_id: str, plot_type: str, style_module=None) -> None:
+    def generate_module_plot(self, plotter_id: str, plot_type: str, style_module=None, fit_config=None) -> None:
         if not plotter_id:
             return
         self.sync_table_to_backend()
         try:
+            plot_config = {"lsq_fit": fit_config} if fit_config else {}
             if plotter_id == "basic":
-                figure = self.state.pp.plot_with_module(plotter_id, plot_type)
+                figure = self.state.pp.plot_with_module(plotter_id, plot_type, **plot_config)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
                 apply_style_module(figure, style_module)
                 self._open_figureforge_editor(figure)
             elif plotter_id in self._custom_plotters:
+                if fit_config:
+                    raise ValueError("LSQ fit from Simple Mode is available for backend plotter modules.")
                 figure = self._run_custom_plotter(plotter_id, plot_type)
                 workflow_index = None
                 apply_style_module(figure, style_module)
                 self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             else:
-                figure = self.state.pp.plot_with_module(plotter_id, plot_type)
+                figure = self.state.pp.plot_with_module(plotter_id, plot_type, **plot_config)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
                 apply_style_module(figure, style_module)
                 self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
@@ -1151,7 +1232,11 @@ class MainWindow(QtWidgets.QMainWindow):
             elif isinstance(step, CalculateColumnStep):
                 row = {"action": "Calculate", "details": step.formula_original, "target": step.output}
             elif isinstance(step, PlotModuleStep):
-                row = {"action": "Generate Plot", "details": step.plotter_id, "target": step.plot_type or ""}
+                details = step.plotter_id
+                lsq_fit = step.config.get("lsq_fit") if isinstance(step.config, dict) else None
+                if lsq_fit:
+                    details = f"{details} + LSQ {lsq_fit.get('expression', '')}".strip()
+                row = {"action": "Generate Plot", "details": details, "target": step.plot_type or ""}
             elif isinstance(step, RenameColumnStep):
                 row = {
                     "action": "Rename Column",

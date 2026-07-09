@@ -4,9 +4,10 @@ Curve-Fitting Plugins
 What Curve-Fitting Plugins Do
 -----------------------------
 
-Curve-fitting plugins define mathematical models that can be fitted to the
-active plot's X and Y data. In the configuration window, the user chooses a
-label mode and then selects a fit type from the visible curve-fit list.
+Curve-fitting plugins define legacy mathematical models that can be fitted to
+the active plot's X and Y data. Modern Basic Plotter output opens in the Figure
+Editor, where users can also choose **Figure Editor > Fitting > Add Fit
+Function** and enter an expression such as ``a*x + b`` directly.
 
 PhysPlot supports two plugin kinds:
 
@@ -26,8 +27,9 @@ plugin is simply a small file that tells PhysPlot what equation to use.
 Where Curve Fits Appear in the UI
 ---------------------------------
 
-Discovered curve-fitting plugins are listed in the curve-fit configuration
-window. PhysPlot discovers these files at startup.
+Discovered legacy curve-fitting plugins are listed in the curve-fit
+configuration window. Expression-based Figure Editor fits do not require files
+under ``curvefitting/``. PhysPlot discovers file-based fit plugins at startup.
 
 Required File Location
 ----------------------
@@ -93,7 +95,7 @@ Callable Template
        Returns:
            numpy.ndarray: Model Y values for the input X array.
        """
-        return amplitude * np.exp(-((x - center) / width) ** 2)
+       return amplitude * np.exp(-((x - center) / width) ** 2)
 
 Step-by-Step: Build a New Curve-Fit Plugin
 ------------------------------------------

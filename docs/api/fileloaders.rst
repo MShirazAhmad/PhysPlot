@@ -1,8 +1,9 @@
 File Loader API
 ===============
 
-File loaders live in the top-level ``fileloader`` package. Each loader exposes
-``title`` and ``load_data(file_path)``.
+User file loaders live in the top-level ``fileloader`` folder. Each loader
+exposes ``title`` or ``DISPLAY_NAME`` and ``load_data(file_path)``. Built-in
+backend loaders live under ``physplot.loaders``.
 
 Package Contract
 ----------------
@@ -11,16 +12,16 @@ Package Contract
    :members:
    :undoc-members:
 
-Default Loader
---------------
+Built-In Backend Loaders
+------------------------
 
-.. automodule:: fileloader.default_loader
+.. automodule:: physplot.loaders
    :members:
    :undoc-members:
 
-OES HRF Loader
---------------
+Loader Base Classes
+-------------------
 
-.. automodule:: fileloader.oes_hrf_loader
+.. automodule:: physplot.loaders.base
    :members:
    :undoc-members:

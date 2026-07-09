@@ -10,24 +10,32 @@ Supported formats
 - ``.csv``
 - ``.tsv``
 - ``.xlsx``
+- nanoindentation files through the built-in nanoindentation loader
+- DataFrames through the backend API
 
 Loader selection
 ----------------
 
-PhysPlot uses plugin-based file loaders. You can choose the active loader from:
-
-- **Settings > File Loader**
-- The **Data Loader** dropdown above **Import Data**
+PhysPlot uses built-in and plugin-based file loaders. Choose the active loader
+from Simple Mode's **Data Importer** panel before clicking **Import Data**.
 
 Loader plugins are auto-discovered at startup from the ``fileloader/`` folder.
-The built-in default loader keeps standard CSV/XLSX/TXT/TSV import support.
+Built-in loaders are:
+
+- Auto Loader
+- CSV Loader
+- TXT Loader
+- Excel Loader
+- Nanoindentation Loader
+- DataFrame Loader
 
 Import steps
 ------------
 
-1. Click **Import Data**.
-2. Select a supported file.
-3. PhysPlot loads values into the table and creates top-row dropdowns.
+1. Select a loader, or keep **Auto Loader** for common tabular files.
+2. Click **Import Data**.
+3. Select a supported file.
+4. PhysPlot loads values into the table and updates the column-role dropdowns.
 
 Column assignment
 -----------------
@@ -35,10 +43,12 @@ Column assignment
 Use the dropdown at row 0 for each column and choose one of:
 
 - Ignore
-- X-axis
-- Xerr
-- Y-axis
-- Yerr
+- X
+- Y
+- X Error
+- Y Error
+- Group
+- Label
 
 .. image:: ../_static/gui_walkthrough/02_import_file_selection_dialog.png
    :alt: Data import and axis assignment

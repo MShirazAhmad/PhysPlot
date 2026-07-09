@@ -1,123 +1,95 @@
-$$\text{\color{red}\Huge Warning: Experimental Branch}$$
-$$\text{\color{red}\Large Significant Bugs Or Breaking Changes May Be Present}$$
-
-$$\text{\color{green}\Large Latest Stable Branch:}$$ https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
+# PhysPlot
 
 <p align="center">
   <img src="physplot/inc/PhysPlotWide.png" alt="PhysPlot logo" width="420">
 </p>
 
-PhysPlot began in 2019 with an idea suggested by my mentor, Dr. Muhammad Sabieh Anwar: to develop a lightweight but capable plotting tool for researchers who need to generate publication-ready graphs quickly, without depending on system-heavy software such as MATLAB or Origin.
+> **⚠️ Experimental Development Branch**
+>
+> This branch is under active development and may contain incomplete features, breaking changes, or significant bugs.
+>
+> **Latest Stable Release**
+>
+> https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
 
-I started building PhysPlot while I was learning Python. What began as a small learning project gradually evolved into a research-focused plotting application.
+---
 
-# PhysPlot: Advanced Plotting Made Simple
+## Overview
 
-PhysPlot is a scientific plotting and workflow automation package with a
-desktop GUI for publication-ready 2D plots. It supports CSV, TXT, Excel, and
-DataFrame inputs; spreadsheet-style editing; column role assignment; modular
-plotters; reusable Python protocol sequences; and headless bulk runs.
+PhysPlot is a scientific plotting and workflow automation application for researchers, engineers, and students who require fast, reproducible, publication-quality figures without relying on large commercial software packages.
 
-The guiding idea is simple:
+Originally conceived in 2019 following a suggestion from **Dr. Muhammad Sabieh Anwar**, PhysPlot has evolved into a modular scientific plotting platform supporting graphical workflows, reusable plotting protocols, and automated batch processing.
+
+The workflow is intentionally simple:
 
 ```text
-load data -> assign column roles -> transform -> plot -> save protocol -> run in bulk
+Load Data
+      ↓
+Assign Column Roles
+      ↓
+Apply Transformations
+      ↓
+Generate Publication-Quality Plot
+      ↓
+Save Workflow
+      ↓
+Reuse or Run in Bulk
 ```
 
-The GUI is table-first, while the backend remains importable and scriptable for
-notebooks, command-line runs, and automated batches.
+---
 
-## Features
+# Features
 
-- PyQt6 desktop GUI with Simple and Advanced modes
-- Spreadsheet-style table with editable cells, column roles, copy/paste, rename,
-  row/column deletion, and scrollable Excel-like behavior
-- Dynamic loader discovery from built-in loaders and local `fileloader/` modules
-- Dynamic function discovery from backend transformations and local `functions/`
-  modules
-- Modular plotter registry, including basic, histogram, error-bar, overlay,
-  subplot-grid, nanoindentation, and Oliver-Pharr plotter modules
-- Build Protocol table/code editor for reproducible Python workflows
-- Run Sequence bulk runner that uses plot modules and configuration already
-  stored in the protocol sequence
-- Headless CLI support for single-file and folder workflows
-- Pip-ready package published as `python-physplot`
+- Scientific plotting desktop application built with PyQt
+- Publication-quality figure generation
+- Spreadsheet-style data editor
+- CSV, TXT, Excel, Nanoindentation, and DataFrame support
+- Dynamic data loaders
+- Dynamic mathematical transformation modules
+- Modular plotting architecture
+- Figure templates
+- Reusable workflow protocols
+- Automated batch processing
+- Headless command-line execution
+- Python API
+- FigureForge-powered figure editor
+- Plugin-friendly architecture
 
-## Installation
+---
 
-Install the published package:
+# Installation
+
+## Option 1 — Precompiled Application (Recommended)
+
+Precompiled releases are available for both **macOS** and **Windows**.
+
+Download the latest release from:
+
+https://github.com/MShirazAhmad/PhysPlot/releases
+
+---
+
+## Option 2 — Install from PyPI
 
 ```bash
 python -m pip install python-physplot
 ```
 
-Launch the GUI:
+Launch the graphical application:
 
 ```bash
 physplot-gui
 ```
 
-The distribution name is `python-physplot`; the import package remains `physplot`.
-
-Run the backend command-line interface:
+Launch the command-line interface:
 
 ```bash
 physplot --version
-physplot run-workflow workflow.py --input data.csv --output outputs/run
-physplot run-bulk workflow.py --input-folder data/ --output-folder outputs/batch
 ```
 
-You can also use PhysPlot from Python:
+---
 
-```python
-from physplot import PhysPlot
-
-pp = PhysPlot()
-pp.load("data.csv")
-pp.set_roles(x="Time", y="Voltage")
-fig = pp.plot_with_module("basic", "scatter")
-```
-
-## GUI Workflow
-
-Launch:
-
-```bash
-physplot-gui
-```
-
-Simple Mode is organized into three panels:
-
-1. **Data Importer**: select a loader and import/export data.
-2. **Apply Mathematical Transformation**: create derived columns from table
-   columns with a selected function and optional offset.
-3. **Plotter Module**: select a registered plotter, plot type, and reusable
-   figure template before generating the plot.
-
-For Basic Plotter workflows, **Generate Plot** opens the Figure Editor. Use
-**Figure Editor > PhysPlot > Save as Template** in that window to save the
-final styling for reuse in Simple Mode's **Template** selector. The Figure
-Editor also provides **Fitting > Add Fit Function** for custom expression-based
-fits on the selected axes or series.
-
-Advanced Mode has two tabs:
-
-- **Build Protocol**: review the operation sequence as a table, edit it as
-  Python code, import/export `Sequence.py`, and apply the current sequence.
-- **Run Sequence**: apply the current or imported sequence to an input folder.
-  Plot mode and formatting are defined by `PlotModuleStep` entries inside the
-  sequence, not by separate bulk-run controls.
-
-## Documentation
-
-- [Codex and Maintainer Project Guide](docs/CODEX_PROJECT_GUIDE.md)
-- [Contributing](CONTRIBUTING.md)
-- [Trademark and Branding](TRADEMARK.md)
-
-The project guide includes the working structure, design philosophy, backend
-contracts, testing checklist, and annotated sample protocol drafts.
-
-## Quick Start (from source)
+## Option 3 — Run from Source
 
 Clone the repository:
 
@@ -126,65 +98,185 @@ git clone https://github.com/MShirazAhmad/PhysPlot.git
 cd PhysPlot
 ```
 
-Create and activate a virtual environment:
+Create a virtual environment:
 
 ```bash
-python -m venv .venv
-```
-
-On macOS/Linux:
-
-```bash
+/opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv
 source .venv/bin/activate
 ```
 
-On Windows (PowerShell):
+Verify Python:
 
-```powershell
-.venv\Scripts\Activate.ps1
+```bash
+python --version
 ```
 
-Install dependencies:
+Expected output:
+
+```text
+Python 3.12.x
+```
+
+Upgrade pip and install the project requirements:
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+python -m pip install -r requirements.txt
 ```
 
-Run PhysPlot:
+Launch PhysPlot:
 
 ```bash
 physplot-gui
 ```
 
-Alternative module entry point:
+Alternatively:
 
 ```bash
-python -m physplot --version
+python -m physplot_gui
 ```
 
-Build local PyPI artifacts:
+---
+
+# Tested Environment
+
+PhysPlot has been tested with:
+
+| Component | Version |
+|------------|---------|
+| Python | 3.12.x (Homebrew) |
+| Operating System | macOS (Apple Silicon) |
+
+The tested package versions are maintained in **requirements.txt**.
+
+Installing dependencies directly from **requirements.txt** is recommended to ensure compatibility and reproducible behavior.
+
+---
+
+# Documentation
+
+Complete project documentation is available online.
+
+- Documentation
+  https://physplot.readthedocs.io/
+
+- GitHub Repository
+  https://github.com/MShirazAhmad/PhysPlot
+
+- Issue Tracker
+  https://github.com/MShirazAhmad/PhysPlot/issues
+
+Additional project documentation:
+
+- Maintainer Project Guide
+- Contributing Guide
+- Trademark and Branding
+
+---
+
+# GUI Workflow
+
+The graphical interface follows a table-first workflow.
+
+### Simple Mode
+
+1. Import Data
+2. Apply Mathematical Transformations
+3. Select Plot Module
+4. Apply Figure Template
+5. Generate Plot
+6. Edit Figure
+7. Export Figure
+
+### Advanced Mode
+
+#### Build Protocol
+
+Create, edit, save, and reuse Python workflow protocols.
+
+#### Run Sequence
+
+Execute saved workflows on entire folders for automated batch processing.
+
+---
+
+# Python API
+
+PhysPlot can also be used directly from Python.
+
+```python
+from physplot import PhysPlot
+
+pp = PhysPlot()
+
+pp.load("data.csv")
+pp.set_roles(
+    x="Time",
+    y="Voltage"
+)
+
+fig = pp.plot_with_module(
+    "basic",
+    "scatter"
+)
+```
+
+---
+
+# Command-Line Examples
+
+Show version:
 
 ```bash
-python -m build
-python -m twine check dist/*
+physplot --version
 ```
 
-The expected package files are:
+Run a workflow:
 
-```text
-dist/python_physplot-<version>-py3-none-any.whl
-dist/python_physplot-<version>.tar.gz
+```bash
+physplot run-workflow workflow.py \
+    --input data.csv \
+    --output outputs/run
 ```
 
-## License, Tutorials, and Contributions
+Run batch processing:
 
-PhysPlot source code is licensed under the PolyForm Noncommercial License 1.0.0. You may fork PhysPlot, study the code, make noncommercial improvements, and submit revisions back through pull requests.
+```bash
+physplot run-bulk workflow.py \
+    --input-folder data \
+    --output-folder outputs/batch
+```
 
-Commercial use is not allowed without prior written permission from the project originator.
+---
 
-Documentation, screenshots, tutorials, website text, walkthroughs, and educational media are licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) unless otherwise stated. Noncommercial tutorials and educational guides are welcome.
+# Supported Data Sources
 
-The PhysPlot name, logo, app icon, GUI branding, and official visual identity are reserved by the project originator. Unofficial forks or modified builds must not be presented as official PhysPlot releases.
+- CSV
+- TXT
+- Microsoft Excel
+- Nanoindentation datasets
+- Pandas DataFrames
 
-Only pull requests merged by the maintainer are official PhysPlot revisions. For details, see [CONTRIBUTING.md](CONTRIBUTING.md) and [TRADEMARK.md](TRADEMARK.md).
+---
+
+# License
+
+PhysPlot source code is licensed under the **PolyForm Noncommercial License 1.0.0**.
+
+You may:
+
+- Study the source code
+- Fork the repository
+- Modify the software for noncommercial purposes
+- Submit improvements through pull requests
+
+Commercial use requires prior written permission from the project originator.
+
+Documentation, tutorials, screenshots, and educational material are licensed under the **Creative Commons Attribution–NonCommercial 4.0 International (CC BY-NC 4.0)** unless otherwise noted.
+
+The **PhysPlot** name, logo, application icon, GUI branding, and visual identity remain reserved by the project originator. Modified versions must not be represented as official PhysPlot releases.
+
+For contribution policies and branding guidelines, see:
+
+- `CONTRIBUTING.md`
+- `TRADEMARK.md`

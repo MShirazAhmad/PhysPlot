@@ -1,6 +1,41 @@
-matplotlib>=3.8
-numpy>=1.24
-openpyxl>=3.1
-pandas>=2.0
-PyQt6>=6.6
-scipy>=1.10
+# ============================================================
+# IndentAnalyzer Requirements
+# ============================================================
+#
+# Tested Environment
+# ------------------
+# Python : 3.12.x (Homebrew)
+# Platform: macOS (Apple Silicon)
+#
+# Recommended virtual environment:
+#
+#   /opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv
+#   source .venv/bin/activate
+#
+# Install dependencies:
+#
+#   python -m pip install --upgrade pip
+#   python -m pip install -r requirements.txt
+#
+# These version ranges are selected to remain compatible with
+# FigureForge 0.3.x while allowing compatible package updates.
+#
+# ============================================================
+
+# Plotting and figure generation
+FigureForge>=0.3.3,<0.4
+matplotlib>=3.9,<4.0
+
+# GUI
+PyQt5>=5.15.11,<5.16
+
+# Numerical computing
+numpy>=1.26,<2.0
+scipy>=1.10,<2.0
+
+# Data handling
+pandas>=2.0,<3.0
+
+# Excel file support
+xlrd>=2.0,<3.0
+openpyxl>=3.1,<4.0

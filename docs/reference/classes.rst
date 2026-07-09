@@ -1,45 +1,48 @@
 Class Reference
 ===============
 
-PhysPlot is primarily a GUI application, not a Python library API. The classes below describe its main runtime components.
+PhysPlot is both a table-first GUI application and an importable backend
+package. The classes below describe the current runtime components most useful
+to users and contributors.
 
 Core classes
 ------------
 
-- ``Ui_MainWindow``
+- ``physplot.PhysPlot``
 
-  Main application window. Manages table operations, data import/export, transformations,
-  axis role assignment, and plot launch.
+  Public backend facade for loading data, assigning roles, transforming
+  columns, plotting with modules, exporting outputs, and running workflows.
 
-- ``Ui_ConfigWindow``
+- ``physplot_gui.app.main_window.MainWindow``
 
-  Plot configuration window. Stores style parameters and curve-fit label/enable settings
-  used by the plotting dialog.
+  Modern PyQt6 main window. Orchestrates the central table, Simple/Advanced
+  panels, protocol menus, Help/About links, and backend API calls.
 
-- ``Plot_Window``
+- ``physplot_gui.widgets.central_table.CentralTable``
 
-  Plot dialog containing the matplotlib canvas and toolbar. Renders data/error bars,
-  labels, legend, and enabled fit curves.
+  Spreadsheet widget with column-role dropdowns, cell editing, copy/paste,
+  rename, row deletion, and column deletion behavior.
 
-Support dialogs
----------------
+- ``physplot.steps.WorkflowStep``
 
-- ``about_gui``
+  Base class for replayable workflow steps such as loading data, setting roles,
+  transforming columns, calculating formulas, deleting rows/columns, renaming
+  columns, editing cells, and generating plot modules.
 
-  Shows version/author/license and external links.
+- ``physplot.plotting_modules.PlotterRegistry``
 
-- ``pick_file_to_append``
-
-  Opens dataset file-selection dialog and stores selected path.
-
-- ``SaveFile``
-
-  Opens save dialog and writes processed table output to disk.
+  Registry for built-in plotter modules and their available plot types.
 
 Autodoc view
 ------------
 
-.. automodule:: PhysPlot
+.. automodule:: physplot
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :no-index:
+
+.. automodule:: physplot_gui.app.main_window
    :members:
    :undoc-members:
    :show-inheritance:

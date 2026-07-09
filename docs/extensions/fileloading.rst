@@ -13,8 +13,9 @@ Where Loaders Appear in the UI
 
 Discovered loaders are shown in two places:
 
-- **Settings > File Loader** (menu selection)
-- **Data Loader** dropdown above the **Import Data** button (quick selection)
+- Simple Mode's **Data Importer** loader dropdown.
+- The backend loader registry for scripted and headless workflows when a
+  loader is implemented as a backend loader.
 
 The selected loader is used when importing files. PhysPlot discovers loader
 files at startup.
@@ -47,7 +48,10 @@ Required Structure
 Every loader should define:
 
 ``title``
-   Text shown in the Data Loader dropdown.
+   Text shown in the **Data Importer** loader dropdown.
+
+``DISPLAY_NAME``
+   Also accepted by the modern GUI for user/plugin-style loaders.
 
 ``load_data(file_path)``
    Function that receives a file path and returns a two-dimensional table-like
@@ -56,7 +60,7 @@ Every loader should define:
 Optional:
 
 ``DEFAULT_COLUMN_ROLES``
-   A list of default role labels such as ``["X-axis", "Y-axis"]``. PhysPlot
+   A list of default role labels such as ``["X", "Y"]``. PhysPlot
    applies these roles automatically after import.
 
 Minimal CSV-Like Template
@@ -70,7 +74,8 @@ Minimal CSV-Like Template
    import numpy as np
 
    title = "My Instrument Loader"
-   DEFAULT_COLUMN_ROLES = ["X-axis", "Y-axis"]
+   DISPLAY_NAME = "My Instrument Loader"
+   DEFAULT_COLUMN_ROLES = ["X", "Y"]
 
 
    def load_data(file_path):
@@ -92,7 +97,7 @@ Minimal CSV-Like Template
            if len(parts) < 2:
                continue
            rows.append((float(parts[0]), float(parts[1])))
-        return np.asarray(rows, dtype=float)
+       return np.asarray(rows, dtype=float)
 
 Step-by-Step: Build a New Loader
 --------------------------------
@@ -104,10 +109,9 @@ Step-by-Step: Build a New Loader
    array-like result.
 4. Optionally define ``DEFAULT_COLUMN_ROLES`` to pre-assign column roles after
    import.
-5. Restart PhysPlot so the loader is discovered and added to the menu and
-   dropdown.
-6. Select your loader from **Settings > File Loader** or the **Data Loader**
-   dropdown, then import a file.
+5. Restart PhysPlot so the loader is discovered and added to Simple Mode's
+   **Data Importer** dropdown.
+6. Select your loader from **Data Importer**, then import a file.
 
 Loader Categories
 -----------------
@@ -143,5 +147,5 @@ Existing Examples
 
 See:
 
-- ``fileloader/default_loader.py``
-- ``fileloader/oes_hrf_loader.py``
+- ``fileloader/`` for user/plugin-style loaders
+- ``physplot/loaders/`` for built-in backend loaders

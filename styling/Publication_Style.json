@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "name": "Publication Style",
+  "figure": {
+    "facecolor": "#ffffffff",
+    "edgecolor": "#ffffffff",
+    "dpi": 200.0,
+    "size_inches": [
+      3.82,
+      3.315
+    ],
+    "suptitle": ""
+  },
+  "axes": [
+    {
+      "facecolor": "#ffffffff",
+      "title": {
+        "color": "#000000ff",
+        "fontsize": 12.0,
+        "fontfamily": [
+          "sans-serif"
+        ],
+        "fontstyle": "normal",
+        "fontweight": "normal",
+        "ha": "center",
+        "va": "baseline"
+      },
+      "x_label": {
+        "color": "#000000ff",
+        "fontsize": 10.0,
+        "fontfamily": [
+          "sans-serif"
+        ],
+        "fontstyle": "normal",
+        "fontweight": "normal",
+        "ha": "center",
+        "va": "top"
+      },
+      "y_label": {
+        "color": "#000000ff",
+        "fontsize": 10.0,
+        "fontfamily": [
+          "sans-serif"
+        ],
+        "fontstyle": "normal",
+        "fontweight": "normal",
+        "ha": "center",
+        "va": "bottom"
+      },
+      "x_scale": "linear",
+      "y_scale": "linear",
+      "grid": {
+        "visible": false,
+        "color": "#b0b0b0ff",
+        "linestyle": "-",
+        "linewidth": 0.8,
+        "alpha": 1.0
+      },
+      "spines": {
+        "left": {
+          "visible": true,
+          "color": "#000000ff",
+          "linewidth": 0.8,
+          "linestyle": "solid"
+        },
+        "right": {
+          "visible": true,
+          "color": "#000000ff",
+          "linewidth": 0.8,
+          "linestyle": "solid"
+        },
+        "bottom": {
+          "visible": true,
+          "color": "#000000ff",
+          "linewidth": 0.8,
+          "linestyle": "solid"
+        },
+        "top": {
+          "visible": true,
+          "color": "#000000ff",
+          "linewidth": 0.8,
+          "linestyle": "solid"
+        }
+      },
+      "ticks": {
+        "x": {
+          "labelsize": 10.0,
+          "labelcolor": "#000000ff"
+        },
+        "y": {
+          "labelsize": 10.0,
+          "labelcolor": "#000000ff"
+        }
+      },
+      "lines": [
+        {
+          "color": "#ff7f0eff",
+          "linestyle": "-",
+          "linewidth": 2.0,
+          "marker": "None",
+          "markersize": 6.0,
+          "markeredgecolor": "#ff7f0eff",
+          "markerfacecolor": "#ff7f0eff",
+          "alpha": null
+        }
+      ],
+      "collections": [
+        {
+          "facecolor": "#1f77b4ff",
+          "edgecolor": "#1f77b4ff",
+          "linewidth": 1.0,
+          "alpha": null
+        }
+      ],
+      "legend": {
+        "visible": true,
+        "frame_on": true,
+        "fontsize": 10.0,
+        "loc": 0
+      }
+    }
+  ]
+}

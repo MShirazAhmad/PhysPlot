@@ -4,12 +4,10 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import sys
 from pathlib import Path
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-FUNCTIONS_DIR = PROJECT_ROOT / "functions"
-FILELOADER_DIR = PROJECT_ROOT / "fileloader"
+from physplot.user_paths import plugin_search_dirs
 
 
 def discover_functions() -> list[dict]:
@@ -19,8 +17,10 @@ def discover_functions() -> list[dict]:
     Optional ``DISPLAY_NAME`` controls the label shown in the GUI.
     """
     entries = []
-    for path in _plugin_files(FUNCTIONS_DIR):
+    for path in _plugin_files(plugin_search_dirs("functions")):
         module = _load_module(path, f"physplot_user_function_{path.stem}")
+        if module is None:
+            continue
         if not hasattr(module, "transform"):
             continue
         display_name = getattr(module, "DISPLAY_NAME", path.stem.replace("_", " ").title())
@@ -35,8 +35,10 @@ def discover_fileloaders() -> list[dict]:
     ``COLUMN_NAMES`` and ``DEFAULT_COLUMN_ROLES`` are picked up later by the GUI.
     """
     entries = []
-    for path in _plugin_files(FILELOADER_DIR):
+    for path in _plugin_files(plugin_search_dirs("fileloader")):
         module = _load_module(path, f"physplot_user_loader_{path.stem}")
+        if module is None:
+            continue
         if not hasattr(module, "load_data"):
             continue
         display_name = getattr(module, "title", None) or _loader_title_from_source(path)
@@ -69,10 +71,16 @@ def discover_loader_plotters(module) -> list[dict]:
     return entries
 
 
-def _plugin_files(folder: Path) -> list[Path]:
-    if not folder.exists():
-        return []
-    return sorted(path for path in folder.glob("*.py") if path.name != "__init__.py")
+def _plugin_files(folders: list[Path]) -> list[Path]:
+    paths_by_name = {}
+    for folder in folders:
+        if not folder.exists():
+            continue
+        for path in sorted(folder.glob("*.py")):
+            if path.name.startswith(".") or path.name == "__init__.py" or not _looks_like_python_source(path):
+                continue
+            paths_by_name.setdefault(path.name, path)
+    return sorted(paths_by_name.values(), key=lambda path: (path.stem != "default_loader", path.stem))
 
 
 def _load_module(path: Path, module_name: str):
@@ -80,8 +88,20 @@ def _load_module(path: Path, module_name: str):
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load plugin from {path}")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    except (ImportError, OSError, SyntaxError, ValueError) as exc:
+        print(f"Skipping plugin {path}: {exc}", file=sys.stderr)
+        return None
     return module
+
+
+def _looks_like_python_source(path: Path) -> bool:
+    try:
+        sample = path.read_bytes()[:4096]
+    except OSError:
+        return False
+    return b"\x00" not in sample
 
 
 def _normalize_plotter_entry(module, raw_entry) -> dict | None:
