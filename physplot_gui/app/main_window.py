@@ -1261,7 +1261,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if not workflow:
                 if not self.state.pp.workflow:
                     raise RuntimeError("Build or import a protocol sequence before running bulk automation.")
-                workflow = [step for step in self.state.pp.workflow if not isinstance(step, LoadDataStep)]
+                # Keep the load step: bulk runs reuse its loader plugin for every file.
+                workflow = list(self.state.pp.workflow)
             outputs = self.state.pp.run_bulk(
                 workflow,
                 payload["input_folder"],
