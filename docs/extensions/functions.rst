@@ -40,13 +40,13 @@ Put new function files in:
 
 .. code-block:: text
 
-   functions/
+   config/transformations/
 
 Use a clear filename, for example:
 
 .. code-block:: text
 
-   functions/15_normalize.py
+   config/transformations/15_normalize.py
 
 Required Structure
 ------------------
@@ -97,8 +97,8 @@ Minimal Template
 Step-by-Step: Build a New Function
 ----------------------------------
 
-1. Create a new file in ``functions/`` (for example
-   ``functions/15_normalize.py``).
+1. Create a new file in ``config/transformations/`` (for example
+   ``config/transformations/15_normalize.py``).
 2. Define ``DISPLAY_NAME`` for the GUI entry.
 3. Define ``DEFAULT_LABEL`` for generated labels.
 4. Implement ``transform(values)`` and return one value per input row.
@@ -128,6 +128,6 @@ Existing Examples
 
 See:
 
-- ``functions/01_identity.py``
-- ``functions/05_log10.py``
-- ``functions/14_xrd_baseline_remove.py``
+- ``config/transformations/01_identity.py``
+- ``config/transformations/05_log10.py``
+- ``config/transformations/14_xrd_baseline_remove.py``

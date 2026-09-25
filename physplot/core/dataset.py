@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy as copy_module
 from dataclasses import dataclass, field
 from pathlib import Path
 import re
@@ -52,6 +53,20 @@ class Dataset:
         self._normalize_roles()
         self._normalize_metadata()
         self.update_column_numbers()
+
+    def copy(self) -> "Dataset":
+        """Return an independent copy of the data, roles, and metadata.
+
+        ``__post_init__`` is bypassed so the copy keeps roles and metadata
+        exactly as they are instead of re-normalizing them.
+        """
+        duplicate = copy_module.copy(self)
+        duplicate.dataframe = self.dataframe.copy(deep=True)
+        duplicate.column_roles = dict(self.column_roles)
+        duplicate.column_metadata = _copy_mapping(self.column_metadata)
+        duplicate.derived_columns = list(self.derived_columns)
+        duplicate.metadata = _copy_mapping(self.metadata)
+        return duplicate
 
     def get_column_number(self, column: str) -> int:
         from .column_resolver import get_column_number
@@ -222,6 +237,20 @@ class Dataset:
             metadata.update(incoming)
             normalized[column] = metadata
         self.column_metadata = normalized
+
+
+def _copy_mapping(mapping: dict) -> dict:
+    """Deep-copy a metadata mapping, falling back per value when needed."""
+    try:
+        return copy_module.deepcopy(mapping)
+    except Exception:
+        duplicate = {}
+        for key, value in mapping.items():
+            try:
+                duplicate[key] = copy_module.deepcopy(value)
+            except Exception:
+                duplicate[key] = value
+        return duplicate
 
 
 def _normalize_role(role: str) -> str:

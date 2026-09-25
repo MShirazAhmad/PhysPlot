@@ -9,5 +9,5 @@ def test_plotter_registry_lists_expected_plotters():
     assert "errorbar" in plotters
     assert "overlay" in plotters
     assert "subplot_grid" in plotters
-    assert registry.list_plot_types("basic") == ["scatter", "line", "scatter_line"]
+    assert registry.list_plot_types("basic")[:3] == ["scatter", "line", "scatter_line"]
     assert registry.get("histogram").name == "Histogram Plotter"

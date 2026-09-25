@@ -164,11 +164,11 @@ not from separate bulk-run plot controls.
 
 **Figure 6. Custom file-loader system.**
 
-PhysPlot supports modular file loading via ``fileloader/``. Each loader is a separate ``.py`` module for a specific file structure.
+PhysPlot supports modular file loading via ``config/data_importers/``. Each loader is a separate ``.py`` module for a specific file structure.
 
 To use a custom loader:
 
-1. Add/copy the loader module to ``fileloader/``.
+1. Add/copy the loader module to ``config/data_importers/``.
 2. Restart PhysPlot if needed.
 3. Select the loader from **Data Importer**.
 4. Click **Import Data**.
@@ -196,7 +196,7 @@ General workflow:
 5. Click **Apply**.
 6. The transformed data appear in the selected output column.
 
-The **Functions** dropdown is generated from modules in ``functions/``, making the system extensible for custom scientific workflows.
+The **Functions** dropdown is generated from modules in ``config/transformations/``, making the system extensible for custom scientific workflows.
 
 .. _gui-exporting-processed-data:
 
@@ -240,8 +240,11 @@ Notes for Extending PhysPlot
 
 PhysPlot supports a modular extension workflow with these key locations:
 
-- ``fileloader/`` for custom file import structures
-- ``functions/`` for custom mathematical transformations
+- ``config/data_importers/`` for custom file import structures
+- ``config/transformations/`` for custom mathematical transformations
+- ``config/pipelines/`` for reusable transformation pipeline JSON files
+- ``config/sequences/`` for reusable protocol sequence Python files
+- ``config/protocol_modules/`` for reusable sequence helper modules
 - Figure Editor fitting tools for custom expression-based fits
 
 This design helps users extend workflows for different instruments, data structures, and analysis routines without repeated edits to the main GUI.

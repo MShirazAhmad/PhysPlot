@@ -1,7 +1,7 @@
 Function Plugin API
 ===================
 
-Function plugins live in the top-level ``functions`` folder. PhysPlot loads
+Function plugins live in the ``config/transformations`` folder. PhysPlot loads
 these files from disk, so their filenames may start with numbers for menu
 ordering, but their public API should stay simple and predictable.
 
@@ -35,46 +35,46 @@ Plugin Files Included with PhysPlot
    * - File
      - Display name
      - Core behavior
-   * - ``functions/01_identity.py``
+   * - ``config/transformations/01_identity.py``
      - ``x``
      - Returns the input values unchanged.
-   * - ``functions/02_square.py``
+   * - ``config/transformations/02_square.py``
      - ``x^2``
      - Squares each value.
-   * - ``functions/03_cube.py``
+   * - ``config/transformations/03_cube.py``
      - ``x^3``
      - Cubes each value.
-   * - ``functions/04_reciprocal.py``
+   * - ``config/transformations/04_reciprocal.py``
      - ``1/x``
      - Returns the reciprocal of each value.
-   * - ``functions/05_log10.py``
+   * - ``config/transformations/05_log10.py``
      - ``log10(x)``
      - Applies base-10 logarithm.
-   * - ``functions/06_log.py``
+   * - ``config/transformations/06_log.py``
      - ``ln(x)``
      - Applies natural logarithm.
-   * - ``functions/07_exponential.py``
+   * - ``config/transformations/07_exponential.py``
      - ``e^x``
      - Applies the exponential function.
-   * - ``functions/08_cos.py``
+   * - ``config/transformations/08_cos.py``
      - ``cos(x)``
      - Applies cosine.
-   * - ``functions/09_sin.py``
+   * - ``config/transformations/09_sin.py``
      - ``sin(x)``
      - Applies sine.
-   * - ``functions/10_tan.py``
+   * - ``config/transformations/10_tan.py``
      - ``tan(x)``
      - Applies tangent.
-   * - ``functions/11_arccos.py``
+   * - ``config/transformations/11_arccos.py``
      - ``arccos(x)``
      - Applies inverse cosine.
-   * - ``functions/12_arcsin.py``
+   * - ``config/transformations/12_arcsin.py``
      - ``arcsin(x)``
      - Applies inverse sine.
-   * - ``functions/13_arctan.py``
+   * - ``config/transformations/13_arctan.py``
      - ``arctan(x)``
      - Applies inverse tangent.
-   * - ``functions/14_xrd_baseline_remove.py``
+   * - ``config/transformations/14_xrd_baseline_remove.py``
      - ``XRD: Baseline Remove``
      - Estimates and subtracts a smooth baseline from diffraction-style data.
 

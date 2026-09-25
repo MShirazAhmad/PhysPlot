@@ -1,0 +1,9 @@
+{
+  "plotter_id": "basic",
+  "plot_type": "scatter_publication",
+  "base_plot_type": "scatter",
+  "description": "Basic scatter plot with a light grid, ready for publication styling",
+  "config": {
+    "grid": true
+  }
+}

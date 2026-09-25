@@ -88,3 +88,97 @@ def test_bulk_panel_payload_is_sequence_driven():
 
     window.close()
     app.quit()
+
+
+def _four_row_sequence(data_path):
+    return [
+        LoadDataStep(path=str(data_path), loader="csv", dataset_name="data"),
+        TransformColumnStep("Volts", "multiply", "Voltage_mV", params={"factor": 1000}),
+        TransformColumnStep("Time", "multiply", "Time_ms", params={"factor": 1000}),
+        SetRoleStep(roles={"x": "Time_ms", "y": "Voltage_mV"}),
+    ]
+
+
+def test_failing_step_shows_status_per_row_and_keeps_table(tmp_path):
+    data_path = tmp_path / "data.csv"
+    data_path.write_text("Time,Voltage\n1,2\n2,4\n", encoding="utf-8")
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    window.state.pp.workflow = _four_row_sequence(data_path)
+    window.state.timeline = window._sequence_rows_from_steps(window.state.pp.workflow)
+
+    window.apply_current_sequence()
+
+    panel = window.mode_manager.panels["Advanced"].sequence_builder
+    assert panel.timeline.rowCount() == 4
+    assert [panel.status_text(row) for row in range(4)] == ["ok", "failed", "skipped", "skipped"]
+    assert "Volts" in panel.timeline.item(1, 4).toolTip()
+    assert "row 2" in panel.timeline.item(2, 4).toolTip()
+    title, error = window.last_error
+    assert title == "Apply sequence failed"
+    assert str(error).startswith("Row 2 failed (TransformColumnStep)")
+    # The table shows the state reached before the failure: the loaded file.
+    assert window.central_table.column_names()[:2] == ["Time", "Voltage"]
+
+    window.close()
+    app.quit()
+
+
+def test_rerun_from_row_resumes_without_reloading(tmp_path):
+    data_path = tmp_path / "data.csv"
+    data_path.write_text("Time,Voltage\n1,2\n2,4\n", encoding="utf-8")
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    steps = _four_row_sequence(data_path)
+    window.state.pp.workflow = steps
+    window.state.timeline = window._sequence_rows_from_steps(steps)
+    window.apply_current_sequence()
+
+    load_calls = []
+    original_apply = steps[0].apply
+    steps[0].apply = lambda *args, **kwargs: load_calls.append(1) or original_apply(*args, **kwargs)
+    steps[1] = TransformColumnStep("Voltage", "multiply", "Voltage_mV", params={"factor": 1000})
+
+    window.rerun_from_timeline_step(1)
+
+    panel = window.mode_manager.panels["Advanced"].sequence_builder
+    assert load_calls == []
+    assert [panel.status_text(row) for row in range(4)] == ["ok", "ok", "ok", "ok"]
+    frame = window.central_table.to_dataframe()
+    assert frame["Voltage_mV"].tolist() == [2000, 4000]
+    assert frame["Time_ms"].tolist() == [1000, 2000]
+    assert window.state.roles["Voltage_mV"] == "Y"
+
+    window.close()
+    app.quit()
+
+
+def test_deleting_a_row_reports_failure_without_dialog(tmp_path):
+    data_path = tmp_path / "data.csv"
+    data_path.write_text("Time,Voltage\n1,2\n2,4\n", encoding="utf-8")
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    window.state.pp.workflow = [
+        LoadDataStep(path=str(data_path), loader="csv", dataset_name="data"),
+        TransformColumnStep("Voltage", "multiply", "Voltage_mV", params={"factor": 1000}),
+        SetRoleStep(roles={"x": "Time", "y": "Voltage_mV"}),
+    ]
+    window.state.timeline = window._sequence_rows_from_steps(window.state.pp.workflow)
+    window.apply_current_sequence()
+    window.last_error = None
+
+    window.delete_timeline_step(1)
+
+    panel = window.mode_manager.panels["Advanced"].sequence_builder
+    assert [panel.status_text(row) for row in range(2)] == ["ok", "failed"]
+    assert window.last_error is None
+    assert window.status.status.text().startswith("Status: Row 2 failed (SetRoleStep)")
+
+    window.close()
+    app.quit()

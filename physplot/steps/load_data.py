@@ -22,7 +22,7 @@ class LoadDataStep(WorkflowStep):
     """Load a dataset as the first step of a reusable sequence.
 
     ``loader`` names a backend loader such as ``"csv"`` or ``"nanoindentation"``.
-    ``loader_plugin`` points at a personal file-loader module from ``fileloader/``;
+    ``loader_plugin`` points at a personal file-loader module from ``config/data_importers/``;
     this keeps exported sequences runnable outside the GUI.
     """
 

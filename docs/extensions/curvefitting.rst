@@ -29,7 +29,7 @@ Where Curve Fits Appear in the UI
 
 Discovered legacy curve-fitting plugins are listed in the curve-fit
 configuration window. Expression-based Figure Editor fits do not require files
-under ``curvefitting/``. PhysPlot discovers file-based fit plugins at startup.
+under ``config/fit_functions/``. PhysPlot discovers file-based fit plugins at startup.
 
 Required File Location
 ----------------------
@@ -38,13 +38,13 @@ Put new curve-fitting files in:
 
 .. code-block:: text
 
-   curvefitting/
+   config/fit_functions/
 
 Use numbered filenames to control display order:
 
 .. code-block:: text
 
-   curvefitting/12_gaussian.py
+   config/fit_functions/12_gaussian.py
 
 Polynomial Template
 -------------------
@@ -100,8 +100,8 @@ Callable Template
 Step-by-Step: Build a New Curve-Fit Plugin
 ------------------------------------------
 
-1. Create a new file in ``curvefitting/`` (for example
-   ``curvefitting/12_gaussian.py``).
+1. Create a new file in ``config/fit_functions/`` (for example
+   ``config/fit_functions/12_gaussian.py``).
 2. Add ``DISPLAY_NAME``, ``DEFAULT_LABEL``, ``KIND``, and ``LABEL_MODES``.
 3. For ``KIND = "poly"``, add ``DEGREE``.
 4. For ``KIND = "callable"``, implement ``function(x, ...)`` and optionally
@@ -150,6 +150,6 @@ Existing Examples
 
 See:
 
-- ``curvefitting/01_linear.py``
-- ``curvefitting/10_tenth_degree.py``
-- ``curvefitting/11_exponential_decay.py``
+- ``config/fit_functions/01_linear.py``
+- ``config/fit_functions/10_tenth_degree.py``
+- ``config/fit_functions/11_exponential_decay.py``

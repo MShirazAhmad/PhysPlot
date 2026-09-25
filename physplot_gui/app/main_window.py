@@ -21,8 +21,15 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
 from physplot.plotting_modules import PlotterRegistry
-from physplot.user_paths import ensure_user_physplot_dirs
-from physplot.workflow import load_workflow_source
+from physplot.user_paths import (
+    bundled_plugin_dir,
+    ensure_user_physplot_dirs,
+    plugin_search_dirs,
+    user_physplot_dir,
+    writable_plugin_dir,
+)
+from physplot.execution import STATUS_FAILED, STATUS_OK, STATUS_SKIPPED, first_failure
+from physplot.workflow import discover_protocol_modules, load_workflow, load_workflow_source
 from physplot.steps import (
     CalculateColumnStep,
     DeleteColumnsStep,
@@ -38,6 +45,7 @@ from physplot.steps import (
 from physplot_gui.app.gui_state import GuiState
 from physplot_gui.app.mode_manager import ModeManager
 from physplot_gui.app.plugin_discovery import discover_fileloaders, discover_functions, discover_loader_plotters
+from physplot_gui.fit_styles import list_fit_style_presets
 from physplot_gui.plot_styles import apply_style_module, list_style_modules, style_directory
 from physplot_gui.style.theme import APP_STYLESHEET
 from physplot_gui.widgets.central_table import CentralTable
@@ -49,7 +57,12 @@ LOGO_WIDE = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot
 LOGO_ICON = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot.png"
 LSF_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "lsf.jpeg"
 PHYSLAB_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "physlab.png"
-FIGUREFORGE_PLUGIN_DIR = Path(__file__).resolve().parents[1] / "figureforge_plugins"
+FIGUREFORGE_PLUGIN_DIR = bundled_plugin_dir("figureforge_plugins")
+
+
+def figureforge_plugin_dirs() -> list[Path]:
+    """Bundled Figure Editor plugins first, then per-user overrides."""
+    return list(reversed(plugin_search_dirs("figureforge_plugins")))
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -58,6 +71,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.state = GuiState()
         self._active_loader_entry = None
         self._custom_plotters: dict[str, dict] = {}
+        self.last_error: tuple[str, Exception] | None = None
         ensure_user_physplot_dirs()
         self.setWindowTitle("PhysPlot")
         self.resize(1500, 900)
@@ -98,6 +112,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._add_menu_action(file_menu, "Import Data...", lambda: self.import_data("auto"), "Ctrl+O")
         self._add_menu_action(file_menu, "Import Folder...", self.import_folder)
         self._add_menu_action(file_menu, "Export Data...", self.export_data, "Ctrl+E")
+        file_menu.addSeparator()
+        self._add_menu_action(file_menu, "Open Config Folder", self.open_user_config_folder)
+        self._add_menu_action(file_menu, "Reload Config Modules", self.reload_config_modules, "Ctrl+Shift+R")
 
         self.protocol_menu = protocol_menu = menu_bar.addMenu("Protocol")
         self._add_menu_action(protocol_menu, "Import Sequence.py...", self.open_workflow)
@@ -105,6 +122,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._add_menu_action(protocol_menu, "Apply This Sequence", self.apply_current_sequence, "Ctrl+R")
         self._add_menu_action(protocol_menu, "Copy Sequence Code", self.copy_workflow_script)
         self._add_menu_action(protocol_menu, "Clear Sequence", self.clear_recording)
+        protocol_menu.addSeparator()
+        self.protocol_modules_menu = protocol_menu.addMenu("Insert Protocol Module")
+        self._populate_protocol_modules_menu()
 
         self.view_menu = view_menu = menu_bar.addMenu("View")
         self._add_menu_action(view_menu, "Simple Mode", lambda: self.mode_manager.set_mode("Simple"), "Ctrl+1")
@@ -130,6 +150,45 @@ class MainWindow(QtWidgets.QMainWindow):
         action.triggered.connect(lambda checked=False: callback())
         menu.addAction(action)
         return action
+
+    def _populate_protocol_modules_menu(self) -> None:
+        menu = self.protocol_modules_menu
+        menu.clear()
+        entries = discover_protocol_modules()
+        if not entries:
+            placeholder = menu.addAction("No protocol modules in config/protocol_modules")
+            placeholder.setEnabled(False)
+            return
+        for entry in entries:
+            action = self._add_menu_action(menu, entry["display_name"], lambda path=entry["path"]: self.insert_protocol_module(path))
+            if entry.get("description"):
+                action.setStatusTip(entry["description"])
+                action.setToolTip(entry["description"])
+
+    def insert_protocol_module(self, path) -> None:
+        """Append the steps of a reusable protocol module to the sequence."""
+        try:
+            steps = load_workflow(path)
+            self.state.pp.workflow.extend(steps)
+            self.state.timeline.extend(self._sequence_rows_from_steps(steps))
+            self.status.set_message(f"Inserted protocol module {Path(path).stem}")
+            self._refresh_all()
+        except Exception as exc:
+            self._error("Insert protocol module failed", exc)
+
+    def open_user_config_folder(self) -> None:
+        root = ensure_user_physplot_dirs() / "config"
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(root)))
+
+    def reload_config_modules(self) -> None:
+        """Re-scan every ``config/`` folder without restarting the application."""
+        ensure_user_physplot_dirs()
+        self._populate_protocol_modules_menu()
+        for panel in self.mode_manager.panels.values():
+            if hasattr(panel, "refresh_plugins"):
+                panel.refresh_plugins()
+        self._refresh_all()
+        self.status.set_message(f"Reloaded config modules from {user_physplot_dir() / 'config'}")
 
     def _header(self):
         header = QtWidgets.QGridLayout()
@@ -297,6 +356,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def style_module_entries(self) -> list[dict]:
         return [{"name": "None", "path": None}, *list_style_modules()]
+
+    def fit_style_entries(self) -> list[dict]:
+        return [{"name": "Default", "path": None, "style": None}, *list_fit_style_presets()]
 
     def refresh_style_modules(self) -> None:
         self.mode_manager.refresh_plots()
@@ -631,12 +693,14 @@ class MainWindow(QtWidgets.QMainWindow):
         spec = importlib.util.find_spec("FigureForge")
         if spec is None or not spec.submodule_search_locations:
             raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
-        if not FIGUREFORGE_PLUGIN_DIR.exists():
+        source_dirs = [directory for directory in figureforge_plugin_dirs() if directory.exists()]
+        if not source_dirs:
             raise RuntimeError(f"PhysPlot Figure Editor plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
         plugin_dir = Path(next(iter(spec.submodule_search_locations))) / "plugins"
         plugin_dir.mkdir(parents=True, exist_ok=True)
-        for plugin_source in FIGUREFORGE_PLUGIN_DIR.glob("*.py"):
-            shutil.copy2(plugin_source, plugin_dir / plugin_source.name)
+        for source_dir in source_dirs:
+            for plugin_source in source_dir.glob("*.py"):
+                shutil.copy2(plugin_source, plugin_dir / plugin_source.name)
         MainWindow._point_figureforge_at_plugin_dir(plugin_dir)
 
     @staticmethod
@@ -951,7 +1015,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self._refresh_all()
 
     def import_pipeline(self) -> None:
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Import Pipeline", str(Path.cwd()), "JSON Files (*.json)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Import Pipeline",
+            str(writable_plugin_dir("pipelines")),
+            "JSON Files (*.json)",
+        )
         if not path:
             return
         try:
@@ -961,7 +1030,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self._error("Import pipeline failed", exc)
 
     def export_pipeline(self) -> None:
-        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Export Pipeline", str(Path.cwd() / "pipeline.json"), "JSON Files (*.json)")
+        default_path = writable_plugin_dir("pipelines") / "pipeline.json"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Export Pipeline", str(default_path), "JSON Files (*.json)")
         if path:
             Path(path).write_text(json.dumps(self.state.transformations, indent=2), encoding="utf-8")
             self.status.set_message("Pipeline exported")
@@ -993,10 +1063,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self._refresh_all()
 
     def save_workflow(self) -> None:
+        default_path = writable_plugin_dir("sequences") / "sequence.py"
         path, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "Save Sequence.py",
-            str(Path.cwd() / "sequence.py"),
+            str(default_path),
             "Python Files (*.py)",
         )
         if not path:
@@ -1010,7 +1081,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self._error("Save workflow failed", exc)
 
     def open_workflow(self) -> None:
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Load Sequence.py", str(Path.cwd()), "Python Files (*.py)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Load Sequence.py",
+            str(writable_plugin_dir("sequences")),
+            "Python Files (*.py)",
+        )
         if path:
             try:
                 steps = self.state.pp.load_workflow(path)
@@ -1030,17 +1106,96 @@ class MainWindow(QtWidgets.QMainWindow):
             self._error("Apply sequence failed", RuntimeError("Build or import a protocol sequence first."))
             return
         try:
-            self._run_current_sequence("Sequence complete")
+            failure = self._run_current_sequence("Sequence complete")
         except Exception as exc:
             self._error("Apply sequence failed", exc)
+            return
+        if failure is not None:
+            message = self._failure_message(failure)
+            self._error("Apply sequence failed", RuntimeError(message))
+            self.status.set_message(message)
 
-    def _run_current_sequence(self, status_message: str) -> None:
+    def _run_current_sequence(self, status_message: str):
+        """Replay the whole sequence on the table and report per-step status.
+
+        Returns the failing ``StepResult`` or ``None``. The table always shows
+        the state reached before the failure, and the Status column shows
+        which rows ran, failed, or were skipped.
+        """
         self.sync_table_to_backend()
         steps = list(self.state.pp.workflow)
-        self.state.pp.run_workflow(steps, allow_column_number_fallback=True)
-        self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
-        self.status.set_message(status_message)
+        results = self.state.pp.run_workflow_detailed(steps, allow_column_number_fallback=True)
+        return self._show_sequence_results(results, status_message)
+
+    def rerun_from_timeline_step(self, row_index: int) -> None:
+        """Resume the sequence at a table row without replaying earlier rows."""
+        if not 0 <= row_index < len(self.state.timeline):
+            return
+        indices = self._row_workflow_indices(self.state.timeline[row_index])
+        if not indices:
+            self.status.set_message(f"Row {row_index + 1} has no replayable step")
+            return
+        try:
+            results = self.state.pp.rerun_from(min(indices), allow_column_number_fallback=True)
+        except Exception as exc:
+            self._error("Rerun failed", exc)
+            return
+        self._show_sequence_results(results, f"Reran from row {row_index + 1}")
+
+    def _show_sequence_results(self, results, status_message: str):
+        failure = first_failure(results)
+        if self.state.pp.dataset is not None:
+            self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
+        self.status.set_message(self._failure_message(failure) if failure is not None else status_message)
         self._refresh_all()
+        return failure
+
+    def _failure_message(self, failure) -> str:
+        row = self._timeline_row_for_step(failure.index)
+        where = f"Row {row + 1}" if row is not None else f"Step {failure.index + 1}"
+        return f"{where} failed ({failure.step_name}): {failure.error}"
+
+    def _timeline_row_for_step(self, step_index: int) -> int | None:
+        for row_index, row in enumerate(self.state.timeline):
+            if step_index in self._row_workflow_indices(row):
+                return row_index
+        return None
+
+    @staticmethod
+    def _row_workflow_indices(row: dict) -> list[int]:
+        workflow_indices = row.get("workflow_indices")
+        if workflow_indices is None:
+            workflow_index = row.get("workflow_index")
+            workflow_indices = [workflow_index] if isinstance(workflow_index, int) else []
+        return sorted({index for index in workflow_indices if isinstance(index, int)})
+
+    def _current_step_results(self) -> dict:
+        """Map step index to its latest result, ignoring results for edited steps."""
+        workflow = self.state.pp.workflow
+        current = {}
+        for result in getattr(self.state.pp, "last_results", None) or []:
+            if 0 <= result.index < len(workflow) and workflow[result.index] is result.step:
+                current[result.index] = result
+        return current
+
+    def timeline_row_status(self, row: dict) -> tuple[str | None, str | None]:
+        """Return ``(status, tooltip)`` for a Build Protocol row."""
+        results = self._current_step_results()
+        row_results = [results[index] for index in self._row_workflow_indices(row) if index in results]
+        if not row_results:
+            return None, None
+        failed = [result for result in row_results if result.status == STATUS_FAILED]
+        if failed:
+            return STATUS_FAILED, failed[0].error
+        if any(result.status == STATUS_SKIPPED for result in row_results):
+            failure = first_failure(list(results.values()))
+            if failure is not None:
+                row = self._timeline_row_for_step(failure.index)
+                where = f"row {row + 1}" if row is not None else f"step {failure.index + 1}"
+                return STATUS_SKIPPED, f"Not run because {where} failed."
+            return STATUS_SKIPPED, "Not run."
+        duration = sum(result.duration_s for result in row_results)
+        return STATUS_OK, f"Completed in {duration * 1000:.0f} ms"
 
     def apply_sequence_code(self, source: str) -> None:
         steps = load_workflow_source(source, name="physplot_sequence_editor")
@@ -1067,11 +1222,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def delete_timeline_step(self, index: int) -> None:
         if 0 <= index < len(self.state.timeline):
             row = self.state.timeline.pop(index)
-            workflow_indices = row.get("workflow_indices")
-            if workflow_indices is None:
-                workflow_index = row.get("workflow_index")
-                workflow_indices = [workflow_index] if isinstance(workflow_index, int) else []
-            removed = sorted({i for i in workflow_indices if isinstance(i, int)}, reverse=True)
+            removed = sorted(self._row_workflow_indices(row), reverse=True)
             for workflow_index in removed:
                 if 0 <= workflow_index < len(self.state.pp.workflow):
                     self.state.pp.workflow.pop(workflow_index)
@@ -1083,6 +1234,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 except Exception as exc:
                     self._error("Apply revised sequence failed", exc)
                     self._refresh_all()
+                # A failing step is reported in the Status column and status
+                # bar rather than a modal dialog so the user can keep editing.
             else:
                 self.status.set_message("Sequence cleared")
                 self._refresh_all()
@@ -1094,7 +1247,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self._browse_folder(field, "Output Folder")
 
     def browse_workflow_file(self, field: QtWidgets.QLineEdit) -> None:
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Workflow File", str(Path.cwd()), "Python Files (*.py)")
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Sequence File",
+            str(writable_plugin_dir("sequences")),
+            "Python Files (*.py)",
+        )
         if path:
             field.setText(path)
 
@@ -1349,4 +1507,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _error(self, title: str, exc: Exception) -> None:
         self.status.set_message(title)
+        self.last_error = (title, exc)
+        if QtGui.QGuiApplication.platformName() == "offscreen":
+            # Headless smoke tests and CI cannot dismiss a modal dialog.
+            print(f"{title}: {exc}", file=sys.stderr)
+            return
         QtWidgets.QMessageBox.warning(self, title, str(exc))

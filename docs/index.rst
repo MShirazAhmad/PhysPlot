@@ -37,7 +37,7 @@ new loaders, functions, plotters, templates, and workflow files, see
 File Loader plugins
 ~~~~~~~~~~~~~~~~~~~
 
-- Add ``.py`` files to ``fileloader/`` with ``title`` or ``DISPLAY_NAME`` and
+- Add ``.py`` files to ``config/data_importers/`` with ``title`` or ``DISPLAY_NAME`` and
   ``load_data(file_path)``.
 - Built-in loaders include ``auto``, ``csv``, ``txt``, ``excel``,
   ``nanoindentation``, and ``dataframe``.
@@ -47,7 +47,7 @@ File Loader plugins
 Transform Function plugins
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Add ``.py`` files to ``functions/`` with ``DISPLAY_NAME``, ``DEFAULT_LABEL``, and ``transform(values)``.
+- Add ``.py`` files to ``config/transformations/`` with ``DISPLAY_NAME``, ``DEFAULT_LABEL``, and ``transform(values)``.
 - Built-in transform categories include identity, powers, reciprocal, logarithmic, exponential, and trigonometric operations.
 - Functions are auto-discovered and shown in Simple Mode's **Apply Mathematical
   Transformation** panel.
@@ -55,7 +55,7 @@ Transform Function plugins
 Curve-Fitting plugins
 ~~~~~~~~~~~~~~~~~~~~~
 
-- Add ``.py`` files to ``curvefitting/`` for polynomial or callable models.
+- Add ``.py`` files to ``config/fit_config/transformations/`` for polynomial or callable models.
 - Files are discovered at startup and shown in the curve-fit configuration list.
 - Use this for custom equations and domain-specific fitting workflows.
 
@@ -75,6 +75,7 @@ Project links
    user_guide/data_entry
    user_guide/data_import
    user_guide/data_manipulation
+   user_guide/protocol_sequences
    user_guide/plot_generation
    user_guide/curve_fitting
    user_guide/plot_customization

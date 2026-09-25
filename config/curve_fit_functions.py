@@ -15,7 +15,7 @@ Return type:
 
 Optional main/runtime behavior:
     This file is retained for compatibility. The current application discovers
-    curve-fitting plugins from the top-level ``curvefitting`` folder.
+    curve-fitting plugins from ``config/fit_functions``.
 """
 
 from __future__ import annotations

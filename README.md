@@ -121,19 +121,20 @@ Upgrade pip and install the project requirements:
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip install -e ".[dev]"
 ```
 
 Launch PhysPlot:
 
 ```bash
-physplot-gui
+.venv/bin/python -m physplot_gui
 ```
 
-Alternatively:
+When the virtual environment is activated, the console entry point is also
+available:
 
 ```bash
-python -m physplot_gui
+physplot-gui
 ```
 
 ---
@@ -147,9 +148,9 @@ PhysPlot has been tested with:
 | Python | 3.12.x (Homebrew) |
 | Operating System | macOS (Apple Silicon) |
 
-The tested package versions are maintained in **requirements.txt**.
-
-Installing dependencies directly from **requirements.txt** is recommended to ensure compatibility and reproducible behavior.
+The package metadata in **pyproject.toml** is the source of truth for runtime
+and development dependencies. **requirements.txt** mirrors the runtime
+dependencies for environments that require requirements-file installs.
 
 ---
 

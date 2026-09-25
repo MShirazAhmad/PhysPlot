@@ -34,13 +34,13 @@ Put new file-loader files in:
 
 .. code-block:: text
 
-   fileloader/
+   config/data_importers/
 
 Use a clear filename:
 
 .. code-block:: text
 
-   fileloader/my_instrument_loader.py
+   config/data_importers/my_instrument_loader.py
 
 Required Structure
 ------------------
@@ -102,8 +102,8 @@ Minimal CSV-Like Template
 Step-by-Step: Build a New Loader
 --------------------------------
 
-1. Create a new file in ``fileloader/`` (for example
-   ``fileloader/my_device_loader.py``).
+1. Create a new file in ``config/data_importers/`` (for example
+   ``config/data_importers/my_device_loader.py``).
 2. Define a human-readable ``title`` string.
 3. Implement ``load_data(file_path)`` to parse your format and return a 2D
    array-like result.
@@ -147,5 +147,5 @@ Existing Examples
 
 See:
 
-- ``fileloader/`` for user/plugin-style loaders
+- ``config/data_importers/`` for user/plugin-style loaders
 - ``physplot/loaders/`` for built-in backend loaders

@@ -31,6 +31,7 @@ PhysPlot/
     api.py                      Public PhysPlot facade
     bulk.py                     Folder/batch runner
     workflow.py                 Import workflow steps from .py source
+    execution.py                StepResult, per-step execution, rerun snapshots
     __main__.py                 CLI entry point
     core/
       dataset.py                DataFrame wrapper, roles, metadata
@@ -54,7 +55,9 @@ PhysPlot/
       main_window.py            Main orchestration window
       mode_manager.py           Simple/Advanced stacked panel switcher
       gui_state.py              Shared GUI state across modes
-      plugin_discovery.py       fileloader/functions discovery
+      plugin_discovery.py       config/data_importers and config/transformations discovery
+    fit_styles.py               config/figureforge_fit_styles presets (user folder first)
+    plot_styles.py              config/templates figure templates (user folder first)
     panels/
       simple_mode_panel.py      Three-panel Simple Mode
       advanced_mode_panel.py    Build Protocol / Run Sequence tabs
@@ -65,8 +68,23 @@ PhysPlot/
       column_role_header.py     Role dropdown header
       mode_switcher.py          Simple/Advanced switcher
       status_bar.py             Bottom status bar
-  fileloader/                   User-discoverable personal file loaders
-  functions/                    User-discoverable personal transform functions
+    plotting_modules/
+      user_modules.py           config/plotter_modules and config/plot_types discovery
+    user_paths.py               Documents/PhysPlot resolution and config search order
+    workflow.py                 Sequence loading and config/protocol_modules discovery
+  config/                       User-editable modules (see config/README.md)
+    data_importers/             Data Importer loaders
+    transformations/            Mathematical Transformation functions
+    plotter_modules/            Plotter Modules
+    plot_types/                 Plot Type presets (JSON)
+    protocol_modules/           Reusable protocol fragments
+    sequences/, pipelines/      Complete sequences and transformation pipelines
+    templates/                  Figure templates (JSON)
+    fit_functions/              Legacy curve-fit models
+    figureforge_fit_styles/     LSQ fit-style presets (JSON)
+    figureforge_plugins/        Figure Editor plugins
+  installer/windows/PhysPlot.iss  Inno Setup script; seeds Documents/PhysPlot/config
+  scripts/build_windows_installer.ps1  PyInstaller + Inno Setup build driver
   tests/                        Backend and GUI smoke tests
 ```
 
@@ -123,7 +141,18 @@ Important behavior:
 - `Apply Code to Table` appears only in Code view and rebuilds the protocol
   table from the edited Python source.
 - Deleting a row removes those workflow steps and immediately replays the
-  revised protocol so the spreadsheet reflects the edited sequence.
+  revised protocol so the spreadsheet reflects the edited sequence. A failure
+  during that replay is shown in the Status column and status bar, not in a
+  modal dialog.
+- The Status column shows `OK`, `Failed`, or `Skipped` per row from
+  `PhysPlot.last_results` (`physplot/execution.py::StepResult`). Results are
+  matched to rows by step identity, so replacing a step clears its status.
+- Right-click a row for "Rerun from this step": `PhysPlot.rerun_from` restores
+  the snapshot taken before that step and resumes there. Snapshots are tagged
+  with a fingerprint of the earlier steps' code; if those changed, the latest
+  still-valid earlier snapshot is used.
+- GUI replays use `run_workflow_detailed(raise_on_error=False)`; headless
+  `run_workflow` still raises the first error and keeps no snapshots.
 
 ### Run Sequence
 
@@ -325,11 +354,11 @@ WORKFLOW_STEPS = [
 
 ### Draft 4: Personal File Loader With Loader-Owned Plotter
 
-Personal file loaders live in `fileloader/`. A loader can define column names,
+Personal file loaders live in `config/data_importers/`. A loader can define column names,
 default roles, and allowed plotter metadata. The GUI discovers it automatically.
 
 ```python
-# fileloader/my_instrument_loader.py
+# config/data_importers/my_instrument_loader.py
 import pandas as pd
 
 DISPLAY_NAME = "My Instrument Loader"
@@ -375,7 +404,7 @@ Before marking work production-ready:
 ```bash
 python -m pytest
 QT_QPA_PLATFORM=offscreen python -m pytest tests/test_protocol_sequence_editor.py
-QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
+QT_QPA_PLATFORM=offscreen .venv/bin/python -m physplot_gui
 rm -rf build dist python_physplot.egg-info
 python -m build
 python -m twine check dist/*
