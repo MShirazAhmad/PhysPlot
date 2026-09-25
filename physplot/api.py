@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from .core.formula import evaluate_formula
+from .execution import STATUS_OK, SnapshotStore, StepResult, execute_steps
 from .core.transformations import get_transform
 from .loaders import get_loader
 from .plotting_modules import PlotterRegistry
@@ -41,6 +42,8 @@ class PhysPlot:
         self.last_figure = None
         self.last_plot_path = None
         self.recording = False
+        self.last_results: list[StepResult] = []
+        self._snapshots = SnapshotStore()
 
     def load(self, path, loader="auto", dataset_name=None):
         self.dataset = get_loader(loader).load(path, dataset_name=dataset_name)
@@ -196,8 +199,10 @@ class PhysPlot:
     def plot_with_module(self, plotter_id, plot_type=None, record=True, **config):
         """Render a plot through the modular plotter registry."""
         self._require_dataset()
-        plotter = PlotterRegistry.default().get(plotter_id)
-        figure = plotter.plot(self.dataset, plot_type=plot_type, config=config)
+        registry = PlotterRegistry.default()
+        plotter = registry.get(plotter_id)
+        base_plot_type, plot_config = registry.resolve_plot_type(plotter_id, plot_type, config)
+        figure = plotter.plot(self.dataset, plot_type=base_plot_type, config=plot_config)
         fit_result = apply_lsq_fit_overlay(figure, self.dataset, config.get("lsq_fit"))
         if fit_result is not None:
             self.fit_result = {
@@ -294,9 +299,98 @@ class PhysPlot:
         return run_folder(workflow, input_folder, output_folder, **kwargs)
 
     def run_workflow(self, steps, allow_column_number_fallback=False):
-        for step in steps:
-            step.apply(self, allow_column_number_fallback=allow_column_number_fallback)
+        """Run steps in order and raise the first failure.
+
+        Per-step outcomes are still recorded on ``last_results``. Use
+        ``run_workflow_detailed`` to get results without raising and to keep
+        resume points for ``rerun_from``.
+        """
+        execute_steps(
+            self,
+            steps,
+            allow_column_number_fallback=allow_column_number_fallback,
+            raise_on_error=True,
+        )
         return self
+
+    def run_workflow_detailed(
+        self,
+        steps,
+        *,
+        start_index=0,
+        allow_column_number_fallback=False,
+        raise_on_error=False,
+        keep_snapshots=True,
+    ) -> list[StepResult]:
+        """Run steps and return one ``StepResult`` per step.
+
+        Execution stops at the first failing step; that step is ``failed``
+        and every later step is ``skipped``. With ``raise_on_error`` the
+        failure is re-raised after ``last_results`` is set. With
+        ``keep_snapshots`` the state before each executed step is saved so
+        ``rerun_from`` can resume without replaying earlier steps.
+        """
+        snapshots = None
+        if keep_snapshots:
+            if start_index == 0:
+                self._snapshots.clear()
+            else:
+                self._snapshots.discard_after(start_index)
+            snapshots = self._snapshots
+        return execute_steps(
+            self,
+            steps,
+            start_index=start_index,
+            allow_column_number_fallback=allow_column_number_fallback,
+            raise_on_error=raise_on_error,
+            snapshots=snapshots,
+        )
+
+    def rerun_from(
+        self,
+        index,
+        steps=None,
+        *,
+        allow_column_number_fallback=False,
+        raise_on_error=False,
+    ) -> list[StepResult]:
+        """Restore the saved state before step ``index`` and run from there.
+
+        ``steps`` defaults to ``self.workflow``. Steps before ``index`` must be
+        unchanged since the run that saved the state; editing ``index`` or a
+        later step is fine. If the exact resume point was evicted, the latest
+        valid earlier one is used. Raises ``RuntimeError`` when no valid saved
+        state exists, in which case run the whole sequence first.
+        """
+        steps = list(self.workflow if steps is None else steps)
+        if not 0 <= index < len(steps):
+            raise IndexError(f"Step {index + 1} does not exist in a sequence of {len(steps)} steps.")
+        snapshot = self._snapshots.best_for(steps, index)
+        if snapshot is None:
+            raise RuntimeError(
+                f"No saved state before step {index + 1}. Run the whole sequence first, "
+                "or the steps before it have changed since the last run."
+            )
+        previous = {
+            result.index: result
+            for result in self.last_results
+            if result.index < len(steps) and steps[result.index] is result.step
+        }
+        prior_results = [
+            StepResult(i, steps[i], STATUS_OK, duration_s=previous[i].duration_s if i in previous else 0.0)
+            for i in range(snapshot.index)
+        ]
+        self._snapshots.discard_after(snapshot.index)
+        snapshot.restore_into(self)
+        return execute_steps(
+            self,
+            steps,
+            start_index=snapshot.index,
+            allow_column_number_fallback=allow_column_number_fallback,
+            raise_on_error=raise_on_error,
+            snapshots=self._snapshots,
+            prior_results=prior_results,
+        )
 
     def get_active_dataset(self):
         self._require_dataset()

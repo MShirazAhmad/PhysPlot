@@ -96,7 +96,7 @@ def test_style_selection_survives_simple_mode_refresh(tmp_path, monkeypatch):
 
 
 def test_figureforge_template_plugin_menu_name():
-    plugin_source = Path("physplot_gui/figureforge_plugins/physplot_save_style_module.py").read_text(encoding="utf-8")
+    plugin_source = Path("config/figureforge_plugins/physplot_save_style_module.py").read_text(encoding="utf-8")
     assert 'name = "Save as Template"' in plugin_source
 
 

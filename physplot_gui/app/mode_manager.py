@@ -12,25 +12,33 @@ class ModeManager(QtCore.QObject):
     def __init__(self, actions, parent=None):
         super().__init__(parent)
         self.stack = QtWidgets.QStackedWidget()
-        self.stack.setMinimumHeight(168)
-        self.stack.setMaximumHeight(184)
         self.panels = {
             "Simple": SimpleModePanel(actions),
             "Advanced": AdvancedModePanel(actions),
         }
         for panel in self.panels.values():
             self.stack.addWidget(panel)
+        self._fit_stack_to("Simple")
 
     def set_mode(self, mode: str) -> None:
         panel = self.panels[mode]
+        self._fit_stack_to(mode)
+        self.stack.setCurrentWidget(panel)
+        self.mode_changed.emit(mode)
+
+    def _fit_stack_to(self, mode: str) -> None:
+        """Size the lower area to the active panel so controls never overlap.
+
+        Simple Mode is compact and takes exactly the height its three panels
+        need; Advanced Mode keeps a taller, bounded area for the sequence table.
+        """
         if mode == "Simple":
-            self.stack.setMinimumHeight(168)
-            self.stack.setMaximumHeight(184)
+            height = self.panels["Simple"].sizeHint().height()
+            self.stack.setMinimumHeight(height)
+            self.stack.setMaximumHeight(height)
         else:
             self.stack.setMinimumHeight(300)
             self.stack.setMaximumHeight(430)
-        self.stack.setCurrentWidget(panel)
-        self.mode_changed.emit(mode)
 
     def refresh_columns(self, columns: list[str]) -> None:
         for panel in self.panels.values():

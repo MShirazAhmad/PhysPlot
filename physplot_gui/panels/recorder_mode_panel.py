@@ -1,8 +1,16 @@
 """Recorder mode controls."""
 
-from physplot.qt_compat import QtCore, QtWidgets
+from physplot.qt_compat import QtCore, QtGui, QtWidgets
 
 from .bulk_panel import BulkPanel
+
+STATUS_COLUMN = 4
+DELETE_COLUMN = 5
+STATUS_STYLES = {
+    "ok": ("OK", "#12823b"),
+    "failed": ("Failed", "#d21f2b"),
+    "skipped": ("Skipped", "#94a3b8"),
+}
 
 
 class SequenceTablePanel(QtWidgets.QFrame):
@@ -46,10 +54,16 @@ class SequenceTablePanel(QtWidgets.QFrame):
         header.addWidget(self.tracking_badge)
         layout.addLayout(header)
         self.stack = QtWidgets.QStackedWidget()
-        self.timeline = QtWidgets.QTableWidget(0, 5)
-        self.timeline.setHorizontalHeaderLabels(["#", "Operation", "Details", "Target/File/Column", "Delete"])
-        self.timeline.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        self.timeline = QtWidgets.QTableWidget(0, 6)
+        self.timeline.setHorizontalHeaderLabels(["#", "Operation", "Details", "Target/File/Column", "Status", "Delete"])
+        header_view = self.timeline.horizontalHeader()
+        header_view.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+        header_view.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header_view.setSectionResizeMode(STATUS_COLUMN, QtWidgets.QHeaderView.ResizeToContents)
         self.timeline.verticalHeader().hide()
+        if show_delete:
+            self.timeline.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+            self.timeline.customContextMenuRequested.connect(self._show_row_menu)
         self.code_view = QtWidgets.QPlainTextEdit()
         self.code_view.setReadOnly(not editable_code)
         self.code_view.setObjectName("CodeView")
@@ -96,14 +110,15 @@ class SequenceTablePanel(QtWidgets.QFrame):
                 item = QtWidgets.QTableWidgetItem(value)
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.timeline.setItem(index, column, item)
+            self.timeline.setItem(index, STATUS_COLUMN, self._status_item(row))
             if self.show_delete:
                 delete_button = QtWidgets.QPushButton("Delete")
                 delete_button.clicked.connect(lambda checked=False, i=index: self._delete_row(i))
-                self.timeline.setCellWidget(index, 4, delete_button)
+                self.timeline.setCellWidget(index, DELETE_COLUMN, delete_button)
             else:
                 item = QtWidgets.QTableWidgetItem("")
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
-                self.timeline.setItem(index, 4, item)
+                self.timeline.setItem(index, DELETE_COLUMN, item)
         if not (self.editable_code and self._code_dirty and self.stack.currentIndex() == 1):
             if hasattr(self.actions, "sequence_code_text"):
                 source = self.actions.sequence_code_text()
@@ -122,6 +137,40 @@ class SequenceTablePanel(QtWidgets.QFrame):
     @staticmethod
     def _fallback_code_line(row: dict) -> str:
         return f"# {row.get('action', 'Step')}: {row.get('details', '')} -> {row.get('target', '')}"
+
+    def _status_item(self, row: dict) -> QtWidgets.QTableWidgetItem:
+        """Build the Status cell from the backend step results for ``row``."""
+        status, message = (None, None)
+        if hasattr(self.actions, "timeline_row_status"):
+            status, message = self.actions.timeline_row_status(row)
+        text, color = STATUS_STYLES.get(status, ("", None))
+        item = QtWidgets.QTableWidgetItem(text)
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        item.setData(QtCore.Qt.ItemDataRole.UserRole, status)
+        if color:
+            item.setForeground(QtGui.QBrush(QtGui.QColor(color)))
+            font = item.font()
+            font.setBold(status == "failed")
+            item.setFont(font)
+        if message:
+            item.setToolTip(message)
+        return item
+
+    def status_text(self, index: int) -> str:
+        item = self.timeline.item(index, STATUS_COLUMN)
+        if item is None:
+            return ""
+        return item.data(QtCore.Qt.ItemDataRole.UserRole) or ""
+
+    def _show_row_menu(self, position) -> None:
+        index = self.timeline.rowAt(position.y())
+        if index < 0:
+            return
+        menu = QtWidgets.QMenu(self.timeline)
+        rerun = menu.addAction("Rerun from this step")
+        rerun.setEnabled(hasattr(self.actions, "rerun_from_timeline_step"))
+        rerun.triggered.connect(lambda checked=False, i=index: self.actions.rerun_from_timeline_step(i))
+        menu.exec(self.timeline.viewport().mapToGlobal(position))
 
     def _delete_row(self, index: int) -> None:
         window = self.window()

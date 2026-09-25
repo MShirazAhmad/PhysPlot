@@ -1,4 +1,10 @@
-"""Reusable figure templates shared by PhysPlot and the Figure Editor."""
+"""Reusable figure templates shared by PhysPlot and the Figure Editor.
+
+Templates are JSON files discovered from ``config/templates``. The per-user
+``Documents/PhysPlot/config/templates`` folder is searched first and wins on
+name clashes; the bundled folder provides the defaults. New templates are
+saved into the per-user folder so they survive reinstalls.
+"""
 
 from __future__ import annotations
 
@@ -7,13 +13,28 @@ import os
 import re
 from pathlib import Path
 
+from physplot.user_paths import bundled_plugin_dir, plugin_search_dirs, writable_plugin_dir
+
 
 STYLE_SCHEMA_VERSION = 1
-DEFAULT_STYLE_DIR = Path.cwd() / "styling"
+STYLE_DIR_ENV = "PHYSPLOT_STYLE_DIR"
+DEFAULT_STYLE_DIR = bundled_plugin_dir("templates")
 
 
 def style_directory() -> Path:
-    return Path(os.environ.get("PHYSPLOT_STYLE_DIR", DEFAULT_STYLE_DIR)).expanduser()
+    """Return the folder new templates are written to."""
+    configured = os.environ.get(STYLE_DIR_ENV)
+    if configured:
+        return Path(configured).expanduser()
+    return writable_plugin_dir("templates")
+
+
+def style_directories() -> list[Path]:
+    """Return every folder searched for templates, editable folder first."""
+    configured = os.environ.get(STYLE_DIR_ENV)
+    if configured:
+        return [Path(configured).expanduser()]
+    return plugin_search_dirs("templates")
 
 
 def style_path_from_name(name: str) -> Path:
@@ -24,22 +45,26 @@ def style_path_from_name(name: str) -> Path:
 
 
 def list_style_modules() -> list[dict]:
-    directory = style_directory()
-    if not directory.exists():
-        return []
     entries = []
-    for path in sorted(directory.glob("*.json")):
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
+    seen = set()
+    for directory in style_directories():
+        if not directory.exists():
             continue
-        entries.append(
-            {
-                "name": payload.get("name") or path.stem,
-                "path": str(path),
-            }
-        )
-    return entries
+        for path in sorted(directory.glob("*.json")):
+            if path.name in seen:
+                continue
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            seen.add(path.name)
+            entries.append(
+                {
+                    "name": payload.get("name") or path.stem,
+                    "path": str(path),
+                }
+            )
+    return sorted(entries, key=lambda entry: entry["name"].lower())
 
 
 def save_style_module(figure, name: str, path: str | Path | None = None) -> Path:

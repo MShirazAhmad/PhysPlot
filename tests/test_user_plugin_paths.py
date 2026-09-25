@@ -4,7 +4,7 @@ from physplot_gui.app.plugin_discovery import discover_fileloaders, discover_fun
 
 def test_user_plugin_directory_overrides_bundled_function(monkeypatch, tmp_path):
     user_root = tmp_path / "PhysPlot"
-    functions_dir = user_root / "functions"
+    functions_dir = user_root / "config" / "transformations"
     functions_dir.mkdir(parents=True)
     (functions_dir / "01_identity.py").write_text(
         "DISPLAY_NAME = 'Edited Identity'\n"
@@ -24,7 +24,7 @@ def test_user_plugin_directory_overrides_bundled_function(monkeypatch, tmp_path)
 
 def test_user_plugin_directory_overrides_bundled_fileloader(monkeypatch, tmp_path):
     user_root = tmp_path / "PhysPlot"
-    fileloader_dir = user_root / "fileloader"
+    fileloader_dir = user_root / "config" / "data_importers"
     fileloader_dir.mkdir(parents=True)
     (fileloader_dir / "default_loader.py").write_text(
         "title = 'Edited Default Loader'\n"
@@ -49,5 +49,17 @@ def test_ensure_user_physplot_dirs_creates_editable_tree(monkeypatch, tmp_path):
     root = ensure_user_physplot_dirs()
 
     assert root == user_root
-    for folder_name in ("fileloader", "functions", "curvefitting", "test_data"):
-        assert (user_root / folder_name).is_dir()
+    for folder_name in (
+        "data_importers",
+        "transformations",
+        "fit_functions",
+        "templates",
+        "figureforge_fit_styles",
+        "pipelines",
+        "sequences",
+        "plotter_modules",
+        "plot_types",
+        "protocol_modules",
+    ):
+        assert (user_root / "config" / folder_name).is_dir()
+    assert (user_root / "test_data").is_dir()

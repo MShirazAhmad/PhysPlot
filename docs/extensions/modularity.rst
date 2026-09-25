@@ -3,7 +3,14 @@ Modularity and Auto-Loading Map
 
 PhysPlot is intentionally modular. Most user extensions are ordinary Python or
 JSON files placed in predictable folders. The GUI scans these locations at
-startup or when the user clicks a reload button.
+startup, when the user clicks a reload button, or after
+**File > Reload Config Modules**.
+
+Every ``config/`` folder below has a per-user twin in
+``Documents/PhysPlot/config/`` (created on first launch and seeded by the
+Windows installer; relocate it with ``PHYSPLOT_USER_DIR``). The user copy is
+searched first and a file with the same name there overrides the bundled one,
+so modules can be added, edited, or removed without reinstalling.
 
 Where Files Live
 ----------------
@@ -17,7 +24,7 @@ Where Files Live
      - How it is loaded
      - Where it appears
    * - User file loaders
-     - ``fileloader/*.py``
+     - ``config/data_importers/*.py``
      - Scanned at GUI startup by ``physplot_gui.app.plugin_discovery``
      - Simple Mode **Data Importer**
    * - Built-in loaders
@@ -25,7 +32,7 @@ Where Files Live
      - Registered by the backend loader registry
      - GUI loader list and backend API
    * - User transform functions
-     - ``functions/*.py``
+     - ``config/transformations/*.py``
      - Scanned at GUI startup by ``physplot_gui.app.plugin_discovery``
      - Simple Mode **Apply Mathematical Transformation**
    * - Built-in transforms
@@ -36,16 +43,24 @@ Where Files Live
      - ``physplot/plotting_modules/``
      - Registered by ``PlotterRegistry.default()``
      - Simple Mode **Plotter Module** and headless workflows
+   * - User plotter modules
+     - ``config/plotter_modules/*.py``
+     - Registered by ``PlotterRegistry.default()`` through ``physplot.plotting_modules.user_modules``
+     - Simple Mode **Plotter Module** and ``PlotModuleStep``
+   * - Plot-type presets
+     - ``config/plot_types/*.json``
+     - Merged into ``PlotterRegistry.list_plot_types()`` and ``resolve_plot_type()``
+     - Simple Mode **Plot Type** and ``PlotModuleStep(plot_type=...)``
    * - Loader-owned plotters
-     - Declared inside ``fileloader/*.py``
+     - Declared inside ``config/data_importers/*.py``
      - Read from ``PLOTTERS`` / ``PLOTTER_MODULES`` / ``ALLOWED_PLOTTERS``
      - Simple Mode **Plotter Module**
    * - Figure templates
-     - ``styling/*.json`` by default
+     - ``config/templates/*.json`` by default
      - Scanned by ``physplot_gui.plot_styles.list_style_modules()``
      - Simple Mode **Template** dropdown after **Reload**
    * - Curve-fit plugins
-     - ``curvefitting/*.py``
+     - ``config/fit_functions/*.py``
      - Scanned for legacy fit model lists
      - Legacy curve-fit configuration
    * - Figure Editor fit function
@@ -56,19 +71,34 @@ Where Files Live
      - Stored in workflow config, not a separate plugin file
      - Saved inside ``PlotModuleStep(config={"lsq_fit": ...})``
      - Simple Mode **Plotter Module**
-   * - Generated workflows
-     - User-selected ``Sequence.py`` / ``workflow.py``
+   * - Complete reusable sequences
+     - ``config/sequences/*.py`` by default
      - Imported by ``physplot.workflow.load_workflow_source()``
      - **Protocol > Import/Export Sequence.py**
+   * - Protocol modules
+     - ``config/protocol_modules/*.py``
+     - Discovered by ``physplot.workflow.discover_protocol_modules()``
+     - **Protocol > Insert Protocol Module** appends their steps
+   * - Transformation pipelines
+     - ``config/pipelines/*.json`` by default
+     - Imported/exported by Advanced pipeline actions
+     - Reusable transformation-only pipelines
 
 Startup Versus Reload
 ---------------------
 
-Some files require an app restart because the GUI scans them once at startup:
+All ``config/`` folders are scanned at startup. To pick up new or edited files
+while the app is running use **File > Reload Config Modules**, which re-scans:
 
-- ``fileloader/*.py``
-- ``functions/*.py``
-- ``curvefitting/*.py``
+- ``config/data_importers/*.py``
+- ``config/transformations/*.py``
+- ``config/plotter_modules/*.py`` and ``config/plot_types/*.json``
+- ``config/protocol_modules/*.py``
+- ``config/templates/*.json`` and ``config/figureforge_fit_styles/*.json``
+  (also refreshed by their **Reload** buttons in Simple Mode)
+
+Legacy ``config/fit_functions/*.py`` models are read when the legacy fit list
+is built.
 
 Figure templates are different. They are JSON files and can be refreshed while
 the app is open:
@@ -84,7 +114,7 @@ Create a file such as:
 
 .. code-block:: text
 
-   fileloader/my_instrument_loader.py
+   config/data_importers/my_instrument_loader.py
 
 Minimum structure:
 
@@ -138,7 +168,7 @@ Create a file such as:
 
 .. code-block:: text
 
-   functions/15_normalize.py
+   config/transformations/15_normalize.py
 
 Minimum structure:
 
@@ -166,7 +196,7 @@ Default location:
 
 .. code-block:: text
 
-   styling/*.json
+   config/templates/*.json
 
 Custom location:
 
@@ -181,6 +211,38 @@ Workflow:
 3. Choose **Figure Editor > PhysPlot > Save as Template**.
 4. Back in PhysPlot, click **Reload** beside **Template**.
 5. Select the template before generating a new plot.
+
+Creating and Reusing Sequences
+------------------------------
+
+Complete protocol sequences are normal Python files saved under:
+
+.. code-block:: text
+
+   config/sequences/*.py
+
+The sequence file should define ``WORKFLOW_STEPS`` or ``build_workflow()``.
+Use **Protocol > Export Sequence.py** to save the current Build Protocol
+sequence, and **Protocol > Import Sequence.py** or **Run Sequence > Sequence
+File** to reload it later.
+
+Use ``config/protocol_modules/`` for smaller reusable fragments. Each fragment
+is itself a sequence file (``WORKFLOW_STEPS`` plus optional ``DISPLAY_NAME``
+and ``DESCRIPTION``) and can be appended to the current Build Protocol
+sequence with **Protocol > Insert Protocol Module**.
+
+Creating and Reusing Pipelines
+------------------------------
+
+Transformation pipelines are JSON files saved under:
+
+.. code-block:: text
+
+   config/pipelines/*.json
+
+Use the Advanced pipeline import/export actions for reusable transformation-only
+pipelines. Use ``config/sequences/`` when the reusable file should also include
+load, role, plotting, fitting, or bulk-run workflow steps.
 
 Creating a New Backend Plotter Module
 -------------------------------------
@@ -203,8 +265,8 @@ Built-in plotters are registered in the plotting-module registry. A backend
 plotter is the right place for reusable scientific plotting logic that must run
 in notebooks, command-line workflows, and bulk folder runs.
 
-Generated Workflow Files
-------------------------
+Generated Workflow File Format
+------------------------------
 
 Protocol files are normal Python. They contain ``WORKFLOW_STEPS`` made from
 step classes such as ``LoadDataStep``, ``SetRoleStep``, ``TransformColumnStep``,

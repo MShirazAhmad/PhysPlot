@@ -19,7 +19,7 @@ Loader selection
 PhysPlot uses built-in and plugin-based file loaders. Choose the active loader
 from Simple Mode's **Data Importer** panel before clicking **Import Data**.
 
-Loader plugins are auto-discovered at startup from the ``fileloader/`` folder.
+Loader plugins are auto-discovered at startup from the ``config/data_importers/`` folder.
 Built-in loaders are:
 
 - Auto Loader

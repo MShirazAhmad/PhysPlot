@@ -4,7 +4,18 @@ import sys
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_submodules
 
-datas = [('fileloader', 'fileloader'), ('functions', 'functions'), ('curvefitting', 'curvefitting'), ('config', 'config'), ('styling', 'styling')]
+# Bundle the editable config tree without caches or macOS resource forks. At
+# runtime physplot.user_paths.project_root() resolves this copy from
+# sys._MEIPASS and the Documents/PhysPlot/config copy takes precedence.
+import os
+
+datas = []
+for root, dirs, files in os.walk('config'):
+    dirs[:] = [d for d in dirs if d != '__pycache__']
+    for name in files:
+        if name.endswith(('.pyc', '.pyo')) or name == '.DS_Store' or name.startswith('._'):
+            continue
+        datas.append((os.path.join(root, name), root))
 hiddenimports = []
 datas += collect_data_files('physplot')
 hiddenimports += collect_submodules('physplot')

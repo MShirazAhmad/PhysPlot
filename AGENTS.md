@@ -26,8 +26,17 @@ on the right. Help/About links live in the native menu bar.
 ```text
 physplot/                  Backend API, datasets, loaders, plotters, steps
 physplot_gui/              PyQt6 desktop GUI
-fileloader/                User/plugin-style personal file loaders
-functions/                 User/plugin-style personal transform functions
+config/data_importers/     Data Importer loaders (title + load_data)
+config/transformations/    Mathematical Transformation functions (transform)
+config/plotter_modules/    Plotter Modules (plot() or BasePlotter subclasses)
+config/plot_types/         Plot Type presets (JSON) for existing plotters
+config/protocol_modules/   Reusable protocol fragments (WORKFLOW_STEPS)
+config/sequences/          Complete reusable protocol sequence Python files
+config/pipelines/          Reusable transformation pipeline JSON files
+config/templates/          Figure template JSON files
+config/fit_functions/      Legacy curve-fit model plugins
+config/figureforge_fit_styles/  FigureForge/Simple Mode fit-style presets
+config/figureforge_plugins/     Figure Editor (FigureForge) plugins
 tests/                     Backend and GUI smoke tests
 docs/                      Maintainer and user-facing project documentation
 ```
@@ -43,24 +52,33 @@ python -m build
 python -m twine check dist/*
 ```
 
-When the local GUI-only environment exists, use it for direct PyQt smoke checks:
+Use the local ``.venv`` for direct PyQt smoke checks:
 
 ```bash
-QT_QPA_PLATFORM=offscreen .gui-venv/bin/python -m physplot_gui
+QT_QPA_PLATFORM=offscreen .venv/bin/python -m physplot_gui
 ```
 
-On macOS, prefer a Python 3.12 virtual environment for local GUI work if the
-system Python is newer than the Qt/FigureForge dependency stack supports:
+On macOS, prefer Python 3.12 for local GUI work:
 
 ```bash
-/opt/homebrew/bin/python3.12 -m venv .gui-venv
-.gui-venv/bin/python -m pip install -e ".[dev]"
-.gui-venv/bin/python -m physplot_gui
+/opt/homebrew/bin/python3.12 -m venv .venv
+.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m physplot_gui
 ```
+
+Every `config/` subfolder is user-editable. At startup PhysPlot searches
+`Documents/PhysPlot/config/<folder>/` first (override with `PHYSPLOT_USER_DIR`)
+and falls back to the bundled copy; the Windows installer seeds the Documents
+tree from `config/`. *File > Reload Config Modules* re-scans without a restart.
+Discovery lives in `physplot/user_paths.py`, `physplot/plotting_modules/user_modules.py`,
+`physplot/workflow.py`, and `physplot_gui/app/plugin_discovery.py`.
 
 ## Design Rules
 
 - Preserve the table-first layout.
+- Reusable modules belong under `config/`, never in new root-level folders.
+  New module kinds must be discovered through `plugin_search_dirs()` so the
+  Documents copy keeps working without a reinstall.
 - Do not duplicate backend logic in the GUI.
 - Keep Simple Mode to three panels: Data Importer, Transformation, Plotter Module.
 - Build Protocol is the editable sequence source of truth.

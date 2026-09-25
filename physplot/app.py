@@ -165,7 +165,7 @@ def _discover_loader_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    return _discover_plugin_files(plugin_search_dirs("fileloader"), default_first=True)
+    return _discover_plugin_files(plugin_search_dirs("data_importers"), default_first=True)
 
 
 def _load_loader_module(loader_path):
@@ -179,7 +179,7 @@ def _load_loader_module(loader_path):
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    module_name = f"fileloader.{loader_path.stem}"
+    module_name = f"physplot_config_data_importers.{loader_path.stem}"
     spec = importlib.util.spec_from_file_location(module_name, loader_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load file loader from {loader_path}")
@@ -203,7 +203,7 @@ def _discover_function_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    return _discover_plugin_files(plugin_search_dirs("functions"))
+    return _discover_plugin_files(plugin_search_dirs("transformations"))
 
 
 def _load_function_module(function_path):
@@ -217,7 +217,7 @@ def _load_function_module(function_path):
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    module_name = f"functions.{function_path.stem}"
+    module_name = f"physplot_config_transformations.{function_path.stem}"
     spec = importlib.util.spec_from_file_location(module_name, function_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load function from {function_path}")
@@ -239,7 +239,7 @@ def _discover_curve_fit_files():
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    return _discover_plugin_files(plugin_search_dirs("curvefitting"))
+    return _discover_plugin_files(plugin_search_dirs("fit_functions"))
 
 
 def _discover_plugin_files(folders, default_first=False):
@@ -267,7 +267,7 @@ def _load_curve_fit_module(curve_fit_path):
     Returns:
         object: Result described by the method name and GUI side effects.
     """
-    module_name = f"curvefitting.{curve_fit_path.stem}"
+    module_name = f"physplot_config_fit_functions.{curve_fit_path.stem}"
     spec = importlib.util.spec_from_file_location(module_name, curve_fit_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load curve fitting function from {curve_fit_path}")

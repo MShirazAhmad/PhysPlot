@@ -41,16 +41,22 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#BuildOutput}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\..\fileloader\*"; DestDir: "{userdocs}\PhysPlot\fileloader"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
-Source: "..\..\functions\*"; DestDir: "{userdocs}\PhysPlot\functions"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
-Source: "..\..\curvefitting\*"; DestDir: "{userdocs}\PhysPlot\curvefitting"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
-Source: "..\..\test_data\*"; DestDir: "{userdocs}\PhysPlot\test_data"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
+Source: "..\..\config\*"; DestDir: "{userdocs}\PhysPlot\config"; Excludes: "__pycache__,*.pyc,.DS_Store,._*"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
+Source: "..\..\test_data\*"; DestDir: "{userdocs}\PhysPlot\test_data"; Excludes: ".DS_Store,._*"; Flags: ignoreversion recursesubdirs createallsubdirs onlyifdoesntexist
 
 [Dirs]
 Name: "{userdocs}\PhysPlot"
-Name: "{userdocs}\PhysPlot\fileloader"
-Name: "{userdocs}\PhysPlot\functions"
-Name: "{userdocs}\PhysPlot\curvefitting"
+Name: "{userdocs}\PhysPlot\config"
+Name: "{userdocs}\PhysPlot\config\data_importers"
+Name: "{userdocs}\PhysPlot\config\transformations"
+Name: "{userdocs}\PhysPlot\config\fit_functions"
+Name: "{userdocs}\PhysPlot\config\templates"
+Name: "{userdocs}\PhysPlot\config\figureforge_fit_styles"
+Name: "{userdocs}\PhysPlot\config\pipelines"
+Name: "{userdocs}\PhysPlot\config\sequences"
+Name: "{userdocs}\PhysPlot\config\plotter_modules"
+Name: "{userdocs}\PhysPlot\config\plot_types"
+Name: "{userdocs}\PhysPlot\config\protocol_modules"
 Name: "{userdocs}\PhysPlot\test_data"
 
 [Icons]

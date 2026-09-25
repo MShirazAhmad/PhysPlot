@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Default LSQ Fit",
+  "line_style": "--",
+  "line_width": 2.0,
+  "label": "",
+  "show_legend": true
+}

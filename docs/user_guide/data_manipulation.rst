@@ -32,7 +32,7 @@ Supported functions
 - ``cos(x)``, ``sin(x)``, ``tan(x)``
 - ``arccos(x)``, ``arsin(x)``, ``artan(x)``
 
-Additional functions can be added as ``.py`` files under ``functions/`` and
+Additional functions can be added as ``.py`` files under ``config/transformations/`` and
 are discovered when PhysPlot starts.
 
 .. image:: ../_static/gui_walkthrough/07_custom_function_transform_system.png

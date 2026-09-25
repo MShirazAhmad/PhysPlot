@@ -12,6 +12,9 @@ QFrame#Panel {
     border: 1px solid #dddddd;
     border-radius: 6px;
 }
+QFrame#Panel QLabel {
+    background: transparent;
+}
 QLabel#PanelTitle {
     color: #0f172a;
     font-weight: 700;

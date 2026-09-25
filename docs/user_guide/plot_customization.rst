@@ -21,9 +21,9 @@ The template is saved as a JSON file under:
 
 .. code-block:: text
 
-   styling/*.json
+   config/templates/*.json
 
-PhysPlot reads templates from ``styling/`` by default. To use another template
+PhysPlot reads templates from ``config/templates/`` by default. To use another template
 folder, set ``PHYSPLOT_STYLE_DIR`` before launching the app:
 
 .. code-block:: bash

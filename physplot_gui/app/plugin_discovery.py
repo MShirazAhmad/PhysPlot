@@ -11,13 +11,13 @@ from physplot.user_paths import plugin_search_dirs
 
 
 def discover_functions() -> list[dict]:
-    """Find simple transform plugins in ``functions/``.
+    """Find simple transform plugins in ``config/transformations/``.
 
     A function plugin is any ``.py`` file exposing ``transform(values)``.
     Optional ``DISPLAY_NAME`` controls the label shown in the GUI.
     """
     entries = []
-    for path in _plugin_files(plugin_search_dirs("functions")):
+    for path in _plugin_files(plugin_search_dirs("transformations")):
         module = _load_module(path, f"physplot_user_function_{path.stem}")
         if module is None:
             continue
@@ -29,13 +29,13 @@ def discover_functions() -> list[dict]:
 
 
 def discover_fileloaders() -> list[dict]:
-    """Find personal file-loader plugins in ``fileloader/``.
+    """Find personal file-loader plugins in ``config/data_importers/``.
 
     A loader plugin must expose ``load_data(file_path)``. Optional
     ``COLUMN_NAMES`` and ``DEFAULT_COLUMN_ROLES`` are picked up later by the GUI.
     """
     entries = []
-    for path in _plugin_files(plugin_search_dirs("fileloader")):
+    for path in _plugin_files(plugin_search_dirs("data_importers")):
         module = _load_module(path, f"physplot_user_loader_{path.stem}")
         if module is None:
             continue

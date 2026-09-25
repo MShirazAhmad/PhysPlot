@@ -1,7 +1,7 @@
 Curve-Fitting Plugin API
 ========================
 
-Legacy curve-fitting plugins live in the top-level ``curvefitting`` folder.
+Legacy curve-fitting plugins live in the ``config/fit_functions`` folder.
 PhysPlot reads these files to populate the legacy curve-fitting configuration
 screen and to choose the correct fitting routine. Modern Basic Plotter output
 also supports expression-based fitting through **Figure Editor > Fitting > Add
@@ -56,47 +56,47 @@ Included Fit Plugins
      - Display name
      - Kind
      - Meaning
-   * - ``curvefitting/01_linear.py``
+   * - ``config/fit_functions/01_linear.py``
      - ``Linear``
      - ``poly``
      - First-degree polynomial.
-   * - ``curvefitting/02_quadratic.py``
+   * - ``config/fit_functions/02_quadratic.py``
      - ``Quadratic``
      - ``poly``
      - Second-degree polynomial.
-   * - ``curvefitting/03_cubic.py``
+   * - ``config/fit_functions/03_cubic.py``
      - ``Cubic``
      - ``poly``
      - Third-degree polynomial.
-   * - ``curvefitting/04_fourth_degree.py``
+   * - ``config/fit_functions/04_fourth_degree.py``
      - ``4th degree``
      - ``poly``
      - Fourth-degree polynomial.
-   * - ``curvefitting/05_fifth_degree.py``
+   * - ``config/fit_functions/05_fifth_degree.py``
      - ``5th degree``
      - ``poly``
      - Fifth-degree polynomial.
-   * - ``curvefitting/06_sixth_degree.py``
+   * - ``config/fit_functions/06_sixth_degree.py``
      - ``6th degree``
      - ``poly``
      - Sixth-degree polynomial.
-   * - ``curvefitting/07_seventh_degree.py``
+   * - ``config/fit_functions/07_seventh_degree.py``
      - ``7th degree``
      - ``poly``
      - Seventh-degree polynomial.
-   * - ``curvefitting/08_eighth_degree.py``
+   * - ``config/fit_functions/08_eighth_degree.py``
      - ``8th degree``
      - ``poly``
      - Eighth-degree polynomial.
-   * - ``curvefitting/09_ninth_degree.py``
+   * - ``config/fit_functions/09_ninth_degree.py``
      - ``9th degree``
      - ``poly``
      - Ninth-degree polynomial.
-   * - ``curvefitting/10_tenth_degree.py``
+   * - ``config/fit_functions/10_tenth_degree.py``
      - ``10th degree``
      - ``poly``
      - Tenth-degree polynomial.
-   * - ``curvefitting/11_exponential_decay.py``
+   * - ``config/fit_functions/11_exponential_decay.py``
      - ``A*exp(-bx)``
      - ``callable``
      - Exponential decay model.
