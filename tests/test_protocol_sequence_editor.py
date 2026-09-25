@@ -1,5 +1,6 @@
 import os
 
+import pandas as pd
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -179,6 +180,43 @@ def test_deleting_a_row_reports_failure_without_dialog(tmp_path):
     assert [panel.status_text(row) for row in range(2)] == ["ok", "failed"]
     assert window.last_error is None
     assert window.status.status.text().startswith("Status: Row 2 failed (SetRoleStep)")
+
+    window.close()
+    app.quit()
+
+
+def test_simple_mode_plugin_transform_is_recorded_and_replays(tmp_path, monkeypatch):
+    monkeypatch.setenv("PHYSPLOT_USER_DIR", str(tmp_path / "PhysPlotUser"))
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.state.load_dataframe(pd.DataFrame({"Time": [0, 1, 2], "Voltage": [1.0, 2.0, 3.0]}), name="sample")
+    window.central_table.set_dataframe(window.state.dataframe, window.state.roles)
+    window._refresh_all()
+
+    panel = window.mode_manager.panels["Simple"]
+    panel.input_column.setCurrentIndex(panel.input_column.findData("Voltage"))
+    panel.function.setCurrentIndex(panel.function.findText("x^2"))
+    panel.offset.setText("0.5")
+    panel.output_column.setEditText("Voltage_sq")
+    panel._apply()
+
+    assert window.last_error is None
+    (step,) = window.state.pp.workflow
+    assert isinstance(step, TransformColumnStep)
+    assert (step.input_column, step.function_name, step.output) == ("Voltage", "02_square", "Voltage_sq")
+    assert step.params == {"multiplier": 1.0, "offset": 0.5}
+    assert window.central_table.to_dataframe()["Voltage_sq"].tolist() == [1.5, 4.5, 9.5]
+    assert window.state.timeline[-1]["details"] == "x^2"
+    assert "'02_square'" in window.state.timeline[-1]["code"]
+    assert "function_name='02_square'" in window.sequence_code_text()
+
+    # Replaying on fresh data must recreate the plugin column from the sequence alone.
+    window.state.load_dataframe(pd.DataFrame({"Time": [0, 1], "Voltage": [4.0, 5.0]}), name="fresh")
+    window.central_table.set_dataframe(window.state.dataframe, window.state.roles)
+    window.apply_current_sequence()
+
+    assert window.last_error is None
+    assert window.central_table.to_dataframe()["Voltage_sq"].tolist() == [16.5, 25.5]
 
     window.close()
     app.quit()
