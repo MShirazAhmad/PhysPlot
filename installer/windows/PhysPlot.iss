@@ -32,6 +32,8 @@ ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest
 SetupLogging=yes
 UninstallDisplayName={#MyAppName}
+UninstallDisplayIcon={app}\{#MyAppExeName}
+SetupIconFile=..\icons\PhysPlot.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

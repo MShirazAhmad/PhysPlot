@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 
 from .api import PhysPlot
-from .steps.load_data import load_input, plugin_load_step
+from .steps.load_data import LoadDataStep, load_input, plugin_load_step
 from .workflow import load_workflow
 
 MODULE_ID = "physplot.bulk"
@@ -17,7 +17,7 @@ MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
 
 LOGGER = logging.getLogger(__name__)
-TABULAR_SUFFIXES = {".csv", ".txt", ".dat", ".xls", ".xlsx"}
+TABULAR_SUFFIXES = {".csv", ".txt", ".dat", ".tsv", ".msa", ".xls", ".xlsx", ".xrdml"}
 
 
 def run_folder(
@@ -28,12 +28,17 @@ def run_folder(
     allow_column_number_fallback=False,
 ):
     steps = load_workflow(workflow) if not isinstance(workflow, list) else workflow
-    # A sequence loaded through a personal plugin (e.g. OES .HRF) processes files
-    # with that file's extension; otherwise the built-in tabular formats.
-    template = plugin_load_step(steps)
+    # A sequence recorded on a plugin format (e.g. OES .HRF, via a loader plugin
+    # or Auto Loader) processes files with that extension; otherwise the
+    # built-in tabular formats.
+    template = plugin_load_step(steps) or next(
+        (step for step in steps if isinstance(step, LoadDataStep) and step.path), None
+    )
     suffixes = TABULAR_SUFFIXES
     if template is not None and template.path and loader == "auto":
-        suffixes = {Path(str(template.path)).suffix.lower()}
+        suffix = Path(str(template.path)).suffix.lower()
+        if template.loader_plugin or suffix not in TABULAR_SUFFIXES:
+            suffixes = {suffix}
     input_folder = Path(input_folder)
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)

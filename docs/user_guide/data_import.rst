@@ -8,8 +8,11 @@ Supported formats
 
 - ``.csv``, ``.txt``, ``.dat``, ``.tsv``
 - ``.xls``, ``.xlsx``
+- Malvern Panalytical ``.xrdml`` XRD scans
 - nanoindentation files through the built-in nanoindentation loader
-- OES ``.HRF`` spectra through the ``OES HRF Loader`` plugin
+- OES ``.HRF`` spectra through the ``OES HRF Loader`` plugin (also picked by
+  **Auto Loader**)
+- any format a loader plugin declares in ``FILE_EXTENSIONS``
 - DataFrames through the backend API
 
 Instrument exports
@@ -49,7 +52,23 @@ Built-in loaders are:
 - TXT Loader
 - Excel Loader
 - Nanoindentation Loader
+- XRDML Loader (Panalytical XRD)
 - DataFrame Loader
+
+XRDML files
+-----------
+
+**Auto Loader** reads ``.xrdml`` files directly (schema 1.5 and 1.7 tested).
+The table has the scanned axis (``2Theta``, or ``Omega`` for rocking curves)
+and ``Intensity``, which are suggested as X and Y. For repeated scans
+("reps"), ``Intensity`` is the sum of the scans' raw counts, the same values
+the instrument software writes to CSV. ``Intensity 1`` ... ``Intensity N`` hold
+the individual scans. Attenuation factors are not applied, matching that
+export.
+
+Wavelengths (``kAlpha1``, ``kAlpha2``, ratio), anode, tube voltage and
+current, sample name, step size, counting time, attenuation factors and
+start time are stored in the dataset metadata under ``xrdml``.
 
 Import steps
 ------------

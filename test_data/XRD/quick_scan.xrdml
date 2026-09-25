@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xrdMeasurements xmlns="http://www.xrdml.com/XRDMeasurement/1.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.xrdml.com/XRDMeasurement/1.7 http://www.xrdml.com/XRDMeasurement/1.7/XRDMeasurement.xsd" status="Aborted">
+	<comment>
+		<entry>Synthetic PhysPlot test data; values are simulated.</entry>
+	</comment>
+	<sample type="To be analyzed">
+		<id></id>
+		<name>Synthetic sample</name>
+		<preparedBy></preparedBy>
+	</sample>
+	<xrdMeasurement measurementType="Repeated scan" status="Aborted" sampleMode="Reflection">
+		<comment>
+		<entry>Synthetic PhysPlot test data; values are simulated.</entry>
+	</comment>
+		<usedWavelength intended="K-Alpha 1">
+			<kAlpha1 unit="Angstrom">1.5405980</kAlpha1>
+			<kAlpha2 unit="Angstrom">1.5444260</kAlpha2>
+			<kBeta unit="Angstrom">1.3922500</kBeta>
+			<ratioKAlpha2KAlpha1>0.5000</ratioKAlpha2KAlpha1>
+		</usedWavelength>
+		<incidentBeamPath>
+			<radius unit="mm">240.00</radius>
+			<xRayTube id="1010048" name="Empyrean Cu LFF HR (9430 033 7310x) DK419151">
+				<tension unit="kV">45.0</tension>
+				<current unit="mA">40.0</current>
+				<anodeMaterial>Cu</anodeMaterial>
+				<focus type="Line">
+					<length unit="mm">12.0</length>
+					<width unit="mm">0.4</width>
+					<takeOffAngle unit="deg">4.4</takeOffAngle>
+				</focus>
+			</xRayTube>
+			<xRayMirror id="27020009" name="Bragg-Brentano HD" hybrid="false">
+				<crystal type="Graded" shape="Flat">BB/HD</crystal>
+				<acceptanceAngle unit="deg">0.800</acceptanceAngle>
+				<length unit="mm">55.3</length>
+			</xRayMirror>
+			<sollerSlit id="21010002" name="Soller slits 0.04 rad.">
+				<opening unit="rad">0.0400</opening>
+			</sollerSlit>
+			<mask id="22030008" name="Fixed mask 4 mm">
+				<width unit="mm">4.00</width>
+			</mask>
+			<antiScatterSlit id="22010004" name="Fixed slit 1/2°" xsi:type="fixedAntiScatterSlitType">
+				<height unit="mm">0.76</height>
+			</antiScatterSlit>
+			<divergenceSlit id="22010007" name="Fixed slit 1/8°" xsi:type="fixedDivergenceSlitType">
+				<distanceToSample unit="mm">140.00</distanceToSample>
+				<height unit="mm">0.19</height>
+			</divergenceSlit>
+		</incidentBeamPath>
+		<sampleMovement xsi:type="spinningSampleMovementType">
+			<spinnerRevolutionTime unit="seconds">2.0</spinnerRevolutionTime>
+		</sampleMovement>
+		<diffractedBeamPath>
+			<radius unit="mm">240.00</radius>
+			<antiScatterSlit id="22090010" name="AS slit 8.0 mm (PIXcel)" xsi:type="fixedAntiScatterSlitType">
+				<height unit="mm">8.00</height>
+			</antiScatterSlit>
+			<sollerSlit id="21020003" name="Large Soller slits 0.04 rad.">
+				<opening unit="rad">0.0400</opening>
+			</sollerSlit>
+			<detector id="7010020" name="PIXcel3D-Medipix3 1x1 detector" xsi:type="areaDetectorType">
+				<phd unit="%">
+					<lowerLevel>25.0</lowerLevel>
+					<upperLevel>70.0</upperLevel>
+				</phd>
+				<mode>Scanning</mode>
+				<activeChannelsEquatorial>255</activeChannelsEquatorial>
+				<activeChannelsAxial>255</activeChannelsAxial>
+				<pitchEquatorial unit="mm">0.05500</pitchEquatorial>
+				<pitchAxial unit="mm">0.05500</pitchAxial>
+				<readOutPeriod unit="seconds">0.075</readOutPeriod>
+			</detector>
+		</diffractedBeamPath>
+		<scan appendNumber="0" mode="Continuous" scanAxis="Gonio" status="Aborted">
+			<header>
+				<startTimeStamp>2000-01-01T12:00:00+00:00</startTimeStamp>
+				<endTimeStamp>2000-01-01T12:00:00+00:00</endTimeStamp>
+				<author>
+					<name>PhysPlot</name>
+				</author>
+				<source>
+					<applicationSoftware version="5.5a">Data Collector</applicationSoftware>
+					<instrumentControlSoftware version="8.0f 20181031">EMPYREAN</instrumentControlSoftware>
+					<instrumentID>0000000000000000</instrumentID>
+				</source>
+			</header>
+			<dataPoints>
+				<positions axis="2Theta" unit="deg">
+					<startPosition>10.00376514</startPosition>
+					<endPosition>13.11564214</endPosition>
+				</positions>
+				<positions axis="Omega" unit="deg">
+					<startPosition>5.00188257</startPosition>
+					<endPosition>6.55782107</endPosition>
+				</positions>
+				<positions axis="Phi" unit="deg">
+					<commonPosition>84.5</commonPosition>
+				</positions>
+				<commonCountingTime unit="seconds">17.595</commonCountingTime>
+				<intensities unit="counts">162 184 164 155 209 174 186 163 186 193 181 173 168 196 178 176 186 199 140 173 200 172 177 150 194 171 157 177 188 152 198 191 157 170 178 166 205 175 188 152 167 187 184 161 161 188 172 166 182 177 181 142 179 170 171 169 198 154 184 189 160 185 187 188 159 176 180 165 170 167 172 182 155 177 160 187 196 167 169 171 193 185 187 177 177 183 175 156 170 180 173 159 173 178 179 166 157 233 171 182 203 199 231 227 294 242 279 262 317 354 329 430 425 503 509 494 508 566 627 618 591 638 636 613 580 591 546 543 529 529 508 435 401 362 348 321 309 281 257 249 201 213 211 194 196 183 179 182 172 174 193 201 195 169 169 182 178 161 178 162 161 160 183 163 163 151 191 161 188 165 182 156 180 189 166 188 172 165 172 184 164 165 148 170 186 173 153 171 155 162 173 162 164 167 159 199 185 195 171 177 173 167 158 204 153 162 152 192 172 177 163 147 156 160 161 181 184 157 174 157 136 170 187 152 170 173 172 167 164 159 181 145 168 173 147 165 170 184</intensities>
+			</dataPoints>
+		</scan>
+	</xrdMeasurement>
+</xrdMeasurements>

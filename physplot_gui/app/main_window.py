@@ -60,6 +60,24 @@ PHYSLAB_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "physl
 FIGUREFORGE_PLUGIN_DIR = bundled_plugin_dir("figureforge_plugins")
 
 
+# Menu labels and descriptions for built-in transformations; sequences keep the
+# function names, so relabelling here never breaks saved protocols.
+BUILTIN_FUNCTIONS = {
+    "identity": ("identity", "Copy the column, plus the offset."),
+    "normalize_max": ("normalize_max", "Divide by the column's largest absolute value."),
+    "multiply": ("multiply", "Multiply by a factor (edit it in the sequence Code view)."),
+    "add": ("add", "Add the offset."),
+    "subtract": ("subtract", "Subtract the offset."),
+    "divide": ("divide", "Divide by a factor (edit it in the sequence Code view)."),
+    "log": ("log", "Natural logarithm (ln)."),
+    "log10": ("log10", "Base-10 logarithm."),
+    "baseline_subtract": (
+        "subtract first value",
+        "Subtract the column's first value (one constant). For background removal use XRD: Baseline Remove.",
+    ),
+}
+
+
 def figureforge_plugin_dirs() -> list[Path]:
     """Bundled Figure Editor plugins first, then per-user overrides."""
     return list(reversed(plugin_search_dirs("figureforge_plugins")))
@@ -311,9 +329,14 @@ class MainWindow(QtWidgets.QMainWindow):
         return list_transforms()
 
     def simple_function_entries(self) -> list[dict]:
-        entries = [{"display_name": "identity", "function_name": "identity"}]
-        entries.extend({"display_name": name, "function_name": name} for name in list_transforms())
-        entries.extend(discover_functions())
+        entries = []
+        for name in ["identity", *list_transforms()]:
+            label, tooltip = BUILTIN_FUNCTIONS.get(name, (name, ""))
+            entries.append({"display_name": label, "function_name": name, "tooltip": tooltip})
+        for entry in discover_functions():
+            summary = (entry["module"].__doc__ or "").strip().splitlines()
+            tooltip = f"{summary[0]} ({entry['path'].name})" if summary else entry["path"].name
+            entries.append({**entry, "tooltip": tooltip})
         seen = set()
         unique = []
         for entry in entries:
@@ -407,7 +430,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Import Data",
             str(Path.cwd()),
-            "Data Files (*.csv *.txt *.dat *.xls *.xlsx);;All Files (*)",
+            "Data Files (*.csv *.txt *.dat *.tsv *.msa *.xls *.xlsx *.xrdml *.hrf);;All Files (*)",
         )
         if not path:
             return
@@ -632,6 +655,11 @@ class MainWindow(QtWidgets.QMainWindow):
                     from FigureForge.gui import MainWindow
 
                     app = QApplication.instance() or QApplication(sys.argv)
+                    icon_path = os.environ.get("PHYSPLOT_APP_ICON")
+                    if icon_path:
+                        from PySide6.QtGui import QIcon
+
+                        app.setWindowIcon(QIcon(icon_path))
                     splash = create_splash()
                     window = MainWindow(splash, figure)
                     window.plugin_menu.setTitle("Figure Editor")
@@ -651,7 +679,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
                 text=True,
-                env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory())},
+                env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory()), "PHYSPLOT_APP_ICON": str(LOGO_ICON)},
             )
         except Exception:
             try:

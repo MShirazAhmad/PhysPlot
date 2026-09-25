@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-import importlib.util
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
+from physplot.loaders.plugins import load_plugin_module, plugin_dataframe
 
 from .base import WorkflowStep
 
 MODULE_ID = "physplot.steps.load_data"
 MODULE_VERSION = "1.0.0"
-MODULE_REVISION = "2026-06-05-r1"
+MODULE_REVISION = "2026-09-25-r1"
 MODULE_API_VERSION = "1"
 MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
@@ -39,16 +37,8 @@ class LoadDataStep(WorkflowStep):
                 raise RuntimeError("LoadDataStep has no path and no active dataset is loaded.")
             return physplot.dataset
         if self.loader_plugin:
-            module = _load_module(self.loader_plugin)
-            loaded = module.load_data(self.path)
-            if isinstance(loaded, pd.DataFrame):
-                df = loaded.copy()
-            else:
-                table_data = np.asarray(loaded)
-                if table_data.ndim == 1:
-                    table_data = table_data.reshape(-1, 1)
-                names = _plugin_column_names(module, table_data.shape[1])
-                df = pd.DataFrame(table_data, columns=names)
+            module = load_plugin_module(self.loader_plugin)
+            df = plugin_dataframe(module, module.load_data(self.path))
             dataset = physplot.load(df, loader="dataframe", dataset_name=self.dataset_name or Path(str(self.path)).stem)
             dataset.metadata["loader_plugin"] = str(self.loader_plugin)
             return dataset
@@ -92,25 +82,3 @@ def load_input(physplot, path, steps, loader="auto") -> list:
 def plugin_load_step(steps):
     """Return the first ``LoadDataStep`` that uses a personal loader plugin, if any."""
     return next((step for step in steps if isinstance(step, LoadDataStep) and step.loader_plugin), None)
-
-
-def _load_module(path):
-    """Import a personal loader module recorded in a saved sequence file."""
-    path = Path(path)
-    spec = importlib.util.spec_from_file_location(f"physplot_sequence_loader_{path.stem}", path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Could not load file loader plugin from {path}.")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def _plugin_column_names(module, column_count: int) -> list[str]:
-    """Use loader-declared ``COLUMN_NAMES`` when available, then pad defaults."""
-    raw_names = getattr(module, "COLUMN_NAMES", None) or getattr(module, "column_names", None)
-    if callable(raw_names):
-        raw_names = raw_names()
-    names = [str(name).strip() for name in (raw_names or []) if str(name).strip()]
-    if len(names) < column_count:
-        names.extend(f"Column {index}" for index in range(len(names) + 1, column_count + 1))
-    return names[:column_count]

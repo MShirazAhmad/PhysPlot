@@ -11,6 +11,7 @@ from physplot.core.dataset import Dataset
 from physplot.core.metadata import infer_suggested_role, parse_column_label
 
 from .text_table import read_text_table
+from .xrdml import read_xrdml
 
 MODULE_ID = "physplot.loaders.base"
 MODULE_VERSION = "1.0.0"
@@ -77,7 +78,7 @@ class CSVLoader(BaseLoader):
 class TXTLoader(BaseLoader):
     loader_id = "txt"
     name = "TXT Loader"
-    supported_extensions = (".txt", ".dat", ".tsv")
+    supported_extensions = (".txt", ".dat", ".tsv", ".msa")
     file_format = "txt"
 
     def read_dataframe(self, path: Path) -> pd.DataFrame:
@@ -117,6 +118,34 @@ class NanoindentationLoader(BaseLoader):
         dataset = super().dataset_from_dataframe(df, dataset_name, source_path=source_path)
         dataset.metadata["dataset_type"] = "nanoindentation"
         dataset.metadata["instrument_family"] = "Agilent/KLA/Keysight"
+        return dataset
+
+
+class XRDMLLoader(BaseLoader):
+    loader_id = "xrdml"
+    name = "XRDML Loader (Panalytical XRD)"
+    supported_extensions = (".xrdml",)
+    file_format = "xrdml"
+
+    def read_dataframe(self, path: Path) -> pd.DataFrame:
+        frame, metadata = read_xrdml(path)
+        frame.attrs["xrdml"] = metadata
+        return frame
+
+    def dataset_from_dataframe(
+        self,
+        df: pd.DataFrame,
+        dataset_name: str,
+        source_path: Path | None = None,
+    ) -> Dataset:
+        dataset = super().dataset_from_dataframe(df, dataset_name, source_path=source_path)
+        xrdml = dict(df.attrs.get("xrdml", {}))
+        dataset.metadata["dataset_type"] = "xrd"
+        dataset.metadata["xrdml"] = xrdml
+        axis = df.columns[0]
+        for column, column_metadata in dataset.column_metadata.items():
+            column_metadata["suggested_role"] = "X" if column == axis else "Y" if column == "Intensity" else "Ignore"
+            column_metadata["unit"] = "deg" if column == axis else "counts"
         return dataset
 
 
@@ -206,6 +235,7 @@ def loader_classes() -> dict[str, type[BaseLoader]]:
         "txt": TXTLoader,
         "excel": ExcelLoader,
         "nanoindentation": NanoindentationLoader,
+        "xrdml": XRDMLLoader,
         "dataframe": DataFrameLoader,
     }
 
@@ -216,7 +246,16 @@ def list_loaders() -> list[BaseLoader]:
 
 def loader_for_path(path: Path) -> BaseLoader:
     suffix = path.suffix.lower()
-    for loader_cls in (CSVLoader, TXTLoader, ExcelLoader):
+    for loader_cls in (CSVLoader, TXTLoader, ExcelLoader, XRDMLLoader):
         if suffix in loader_cls.supported_extensions:
             return loader_cls()
-    raise ValueError(f"No loader available for extension '{suffix}'.")
+    from .plugins import plugin_loader_for_suffix  # plugins imports this module
+
+    plugin_loader = plugin_loader_for_suffix(suffix)
+    if plugin_loader is not None:
+        return plugin_loader
+    built_in = ", ".join(sorted({ext for cls in (CSVLoader, TXTLoader, ExcelLoader, XRDMLLoader) for ext in cls.supported_extensions}))
+    raise ValueError(
+        f"No loader for '{suffix}' files. Built-in formats: {built_in}. To open other formats, add "
+        f"FILE_EXTENSIONS = [\"{suffix}\"] to a loader plugin in config/data_importers/."
+    )

@@ -67,6 +67,38 @@ def test_tab_separated_csv_with_row_labels(tmp_path):
     assert frame["Value.1"].tolist() == [35.911, 41.711]
 
 
+def test_origin_table_with_fit_statistics_on_first_row_only(tmp_path):
+    path = tmp_path / "peaks.csv"
+    path.write_text(
+        "\ty0\txc\tA\tStatistics\tStatistics\n"
+        "\tValue\tValue\tValue\tReduced Chi-Sqr\tAdj. R-Square\n"
+        "Peak1\t2.67\t35.91\t356.3\t9.53\t0.998\n"
+        "Peak2\t2.67\t41.71\t262.1\n"
+        "Peak3\t2.67\t60.47\t214.5\n",
+        encoding="utf-8",
+    )
+
+    frame = load(path).dataframe
+
+    assert list(frame.columns)[1:] == ["Value", "Value.1", "Value.2", "Reduced Chi-Sqr", "Adj. R-Square"]
+    assert frame["Value.1"].tolist() == [35.91, 41.71, 60.47]
+    assert frame["Reduced Chi-Sqr"].iloc[0] == 9.53 and frame["Reduced Chi-Sqr"].isna().sum() == 2
+
+
+def test_emsa_msa_spectrum_loads(tmp_path):
+    path = tmp_path / "spectrum.msa"
+    path.write_text(
+        "#FORMAT      : EMSA/MAS SPECTRAL DATA FILE\n#XUNITS      : keV\n#SPECTRUM    : Spectral Data Starts Here\n"
+        "0.00, 0.\n0.01, 12.\n0.02, 40.\n#ENDOFDATA   : \n",
+        encoding="utf-8",
+    )
+
+    frame = load(path).dataframe
+
+    assert frame.shape == (3, 2)
+    assert frame.iloc[:, 1].tolist() == [0.0, 12.0, 40.0]
+
+
 def test_phi_xps_spectrum_stored_as_rows_is_transposed(tmp_path):
     energies = [1200 - 0.8 * i for i in range(30)]
     counts = [14000 + i for i in range(30)]

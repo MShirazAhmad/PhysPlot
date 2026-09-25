@@ -343,3 +343,38 @@ def test_simple_mode_area_fits_styled_panels_without_a_resize():
 
     window.close()
     app.quit()
+
+
+def test_simple_mode_input_defaults_to_y_column_and_function_labels(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    from physplot.qt_compat import QtCore
+
+    hrf = Path(__file__).resolve().parents[1] / "test_data" / "OES" / "spectrum_1.HRF"
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    panel = window.mode_manager.panels["Simple"]
+    monkeypatch.setattr(QtWidgets.QFileDialog, "getOpenFileName", lambda *args, **kwargs: (str(hrf), ""))
+
+    window.import_data("auto")
+
+    assert panel.input_column.currentData() == "Intensity"
+
+    # A choice survives new output columns; only new data resets it.
+    panel.input_column.setCurrentIndex(panel.input_column.findData("Wavelength"))
+    panel.function.setCurrentIndex(panel.function.findText("x^2"))
+    panel.output_column.setEditText("Wavelength_sq")
+    panel._apply()
+    assert window.last_error is None
+    assert panel.input_column.currentData() == "Wavelength"
+
+    index = panel.function.findText("subtract first value")
+    assert panel.function.itemData(index)["function_name"] == "baseline_subtract"
+    tooltip = panel.function.itemData(index, QtCore.Qt.ItemDataRole.ToolTipRole)
+    assert "XRD: Baseline Remove" in tooltip
+    square = panel.function.findText("x^2")
+    assert "02_square.py" in panel.function.itemData(square, QtCore.Qt.ItemDataRole.ToolTipRole)
+    assert panel.function.findText("baseline_subtract") == -1
+
+    window.close()
+    app.quit()

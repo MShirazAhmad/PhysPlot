@@ -18,7 +18,12 @@ class AutoWidthComboBox(QtWidgets.QComboBox):
         # Must be set before the first size query: QComboBox caches its minimum size.
         self.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.setMinimumContentsLength(minimum_characters)
-        self.currentTextChanged.connect(self.setToolTip)
+        self.currentIndexChanged.connect(self._update_tooltip)
+
+    def _update_tooltip(self, index: int) -> None:
+        """Show the selected item's description, or its full label when it has none."""
+        tooltip = self.itemData(index, QtCore.Qt.ItemDataRole.ToolTipRole) if index >= 0 else None
+        self.setToolTip(tooltip or self.currentText())
 
     def showPopup(self) -> None:
         self._resize_popup_to_contents()
@@ -41,6 +46,7 @@ class SimpleModePanel(QtWidgets.QWidget):
         super().__init__(parent)
         self.actions = actions
         self._columns: list[str] = []
+        self._data_key = None
         self._plotter_entries: list[dict] = []
         self._needs_scroll = False
         self._fitted = 0
@@ -144,8 +150,7 @@ class SimpleModePanel(QtWidgets.QWidget):
 
         self.input_column = AutoWidthComboBox()
         self.function = AutoWidthComboBox()
-        for entry in self.actions.simple_function_entries():
-            self.function.addItem(entry["display_name"], entry)
+        self._fill_function_menu()
         self.offset = QtWidgets.QLineEdit("0")
         self.offset.setMaximumWidth(72)
         self.output_column = AutoWidthComboBox()
@@ -283,8 +288,7 @@ class SimpleModePanel(QtWidgets.QWidget):
         function_current = self.function.currentText()
         self.function.blockSignals(True)
         self.function.clear()
-        for entry in self.actions.simple_function_entries():
-            self.function.addItem(entry["display_name"], entry)
+        self._fill_function_menu()
         index = self.function.findText(function_current)
         if index >= 0:
             self.function.setCurrentIndex(index)
@@ -293,10 +297,30 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.refresh_plotters()
         self.refresh_fit_styles()
 
+    def _fill_function_menu(self) -> None:
+        for entry in self.actions.simple_function_entries():
+            self.function.addItem(entry["display_name"], entry)
+            if entry.get("tooltip"):
+                self.function.setItemData(self.function.count() - 1, entry["tooltip"], QtCore.Qt.ItemDataRole.ToolTipRole)
+        self.function._update_tooltip(self.function.currentIndex())
+
     def refresh_columns(self, columns: list[str]) -> None:
-        """Refresh input/output column menus without duplicating default names."""
+        """Refresh input/output column menus without duplicating default names.
+
+        New data (not just added output columns) selects the Y-role column as
+        the transformation input, since that is what is usually transformed.
+        """
         self._columns = list(columns)
         current = self.input_column.currentData()
+        state = getattr(self.actions, "state", None)
+        dataset = getattr(getattr(state, "pp", None), "dataset", None)
+        data_key = (dataset.name, str(dataset.source_path)) if dataset is not None else None
+        new_data = data_key != self._data_key
+        self._data_key = data_key
+        roles = getattr(state, "roles", {}) or {}
+        y_column = next((column for column in columns if roles.get(column) == "Y"), None)
+        if new_data and y_column is not None:
+            current = y_column
         output_current = self.output_column.currentData() or self.output_column.currentText()
         self.input_column.clear()
         self.output_column.clear()

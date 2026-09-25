@@ -33,7 +33,7 @@ def infer_suggested_role(column_name: str, unit: str | None = None) -> str:
     tokens = set(re.findall(r"[a-z0-9]+", name))
     if name in {"time", "t", "seconds", "s"} or unit_l in {"s", "sec", "second", "seconds"}:
         return "X"
-    if tokens & {"x", "position", "wavelength", "depth"}:
+    if tokens & {"x", "position", "wavelength", "depth", "angle", "2theta", "theta", "omega"}:
         return "X"
     if tokens & {"voltage", "signal", "intensity", "force", "load", "y"}:
         return "Y"
