@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from physplot.user_paths import plugin_search_dirs
+from physplot.user_paths import plugin_search_dirs, user_plugin_dir
 
 MODULE_ID = "physplot.core.transformations"
 MODULE_VERSION = "1.0.0"
@@ -93,8 +93,19 @@ def get_transform(name: str):
         return TRANSFORMS[name]
     entry = find_plugin_transform(name)
     if entry is None:
-        raise ValueError(f"Unknown transformation '{name}'.")
+        raise ValueError(
+            f"Unknown transformation '{name}'. It is not built in, and no plugin file '{name}.py' "
+            f"or DISPLAY_NAME '{name}' was found in {_display_path(user_plugin_dir('transformations'))} "
+            "or the bundled config/transformations. Restore the plugin file or choose another function."
+        )
     return _plugin_callable(entry)
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return f"~/{path.relative_to(Path.home())}"
+    except ValueError:
+        return str(path)
 
 
 def discover_plugin_transforms() -> list[dict]:
@@ -133,13 +144,26 @@ def _plugin_callable(entry: dict):
     name = entry["name"]
 
     def apply_plugin(series: pd.Series, multiplier=1.0, offset=0.0, **params) -> pd.Series:
-        values = pd.to_numeric(series, errors="coerce").to_numpy(dtype=float)
-        result = np.asarray(module.transform(values, **params), dtype=float)
+        # Copy so a plugin that edits ``values`` in place cannot change the source column.
+        values = pd.to_numeric(series, errors="coerce").to_numpy(dtype=float, copy=True)
+        try:
+            raw = module.transform(values, **params)
+        except (Exception, SystemExit) as exc:  # user code: report which plugin failed
+            raise RuntimeError(f"Transformation '{name}' failed: {type(exc).__name__}: {exc}") from exc
+        if raw is None:
+            raise ValueError(f"Transformation '{name}' returned None; transform(values) must return the new values.")
+        try:
+            result = np.asarray(raw, dtype=float)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Transformation '{name}' returned non-numeric values: {exc}") from exc
+        if result.ndim > 1:
+            result = np.squeeze(result)  # accept (n, 1) and (1, n) column vectors
         if result.ndim == 0:
             result = np.full(values.shape, float(result))
         if result.shape != values.shape:
             raise ValueError(
-                f"Transformation '{name}' returned {result.size} values for a column of {values.size} rows."
+                f"Transformation '{name}' returned an array of shape {result.shape} for a column of "
+                f"{values.size} rows; return one value per row."
             )
         return pd.Series(result * multiplier + offset, index=series.index)
 
@@ -180,7 +204,10 @@ def _load_plugin_module(path: Path):
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load transformation plugin from {path}.")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    except SystemExit as exc:  # e.g. a script-style plugin running argparse at import
+        raise RuntimeError(f"{path.name} called sys.exit({exc.code!r}) while loading.") from exc
     return module
 
 

@@ -318,6 +318,10 @@ class MainWindow(QtWidgets.QMainWindow):
         unique = []
         for entry in entries:
             key = entry.get("display_name")
+            if key in seen and entry.get("name"):
+                # A plugin whose DISPLAY_NAME matches another entry stays reachable.
+                entry = {**entry, "display_name": f"{key} ({entry['name']})"}
+                key = entry["display_name"]
             if key in seen:
                 continue
             seen.add(key)
@@ -1266,6 +1270,12 @@ class MainWindow(QtWidgets.QMainWindow):
             )
             self.status.set_message(f"Bulk complete: {len(outputs)} outputs")
         except Exception as exc:
+            input_path = getattr(exc, "input_path", None)
+            if input_path is not None:
+                exc = RuntimeError(
+                    f"Bulk run stopped at {Path(input_path).name}: {exc}\n\n"
+                    "Files before it in the input folder were exported; later files were not run."
+                )
             self._error("Bulk run failed", exc)
 
     def _browse_folder(self, field: QtWidgets.QLineEdit, title: str) -> None:

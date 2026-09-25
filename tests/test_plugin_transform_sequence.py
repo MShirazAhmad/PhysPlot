@@ -80,8 +80,10 @@ def test_registered_transforms_win_and_unknown_names_fail(user_dir):
 
     assert get_transform("log").__name__ == "log"
     assert "log" not in {entry["name"] for entry in discover_plugin_transforms()}
-    with pytest.raises(ValueError, match="Unknown transformation 'not_a_plugin'"):
+    with pytest.raises(ValueError, match="Unknown transformation 'not_a_plugin'") as error:
         get_transform("not_a_plugin")
+    assert str(folder) in str(error.value)
+    assert "Restore the plugin file" in str(error.value)
 
 
 def test_plugin_must_return_one_value_per_row(user_dir):
@@ -91,7 +93,7 @@ def test_plugin_must_return_one_value_per_row(user_dir):
     pp = PhysPlot()
     pp.load(pd.DataFrame({"Signal": [1.0, 2.0]}), loader="dataframe")
 
-    with pytest.raises(ValueError, match="returned 1 values for a column of 2 rows"):
+    with pytest.raises(ValueError, match=r"returned an array of shape \(1,\) for a column of 2 rows"):
         pp.transform("Signal", "bad_length", output="Out")
 
 
@@ -141,3 +143,71 @@ def test_exported_plugin_sequence_runs_in_fresh_process(user_dir, tmp_path):
     )
 
     assert pd.read_csv(output_dir / "data.csv")["Voltage_cube"].tolist() == [8.0, 27.0]
+
+
+BROKEN_PLUGINS = {
+    "raises": ("def transform(values):\n    return 1 / 0\n", RuntimeError, "'raises' failed: ZeroDivisionError"),
+    "no_return": ("def transform(values):\n    values * 2\n", ValueError, "'no_return' returned None"),
+    "strings": ("def transform(values):\n    return ['a'] * len(values)\n", ValueError, "non-numeric values"),
+    "exit_in_transform": (
+        "import sys\ndef transform(values):\n    sys.exit('bye')\n",
+        RuntimeError,
+        "'exit_in_transform' failed: SystemExit",
+    ),
+    "exit_on_import": ("import sys\nsys.exit('bye')\ndef transform(values):\n    return values\n", RuntimeError, "called sys.exit"),
+}
+
+
+@pytest.mark.parametrize("name", sorted(BROKEN_PLUGINS))
+def test_broken_plugin_fails_its_step_with_the_plugin_name(user_dir, name):
+    source, error_type, message = BROKEN_PLUGINS[name]
+    folder = user_dir / "config" / "transformations"
+    folder.mkdir(parents=True)
+    (folder / f"{name}.py").write_text(source, encoding="utf-8")
+    pp = PhysPlot()
+    pp.load(pd.DataFrame({"V": [1.0, 2.0]}), loader="dataframe")
+
+    results = pp.run_workflow_detailed([TransformColumnStep("V", name, "Out")])
+
+    assert results[0].status == "failed"
+    assert message in results[0].error
+    with pytest.raises(error_type, match=message):
+        pp.transform("V", name, output="Out")
+    assert "Out" not in pp.dataset.dataframe.columns
+
+
+def test_plugin_that_exits_on_import_does_not_stop_discovery(user_dir):
+    folder = user_dir / "config" / "transformations"
+    folder.mkdir(parents=True)
+    (folder / "00_exits.py").write_text("import sys\nsys.exit('bye')\n", encoding="utf-8")
+
+    names = [entry["name"] for entry in discover_plugin_transforms()]
+
+    assert "00_exits" not in names
+    assert "02_square" in names
+
+
+def test_plugin_editing_values_in_place_leaves_source_column_unchanged(user_dir):
+    folder = user_dir / "config" / "transformations"
+    folder.mkdir(parents=True)
+    (folder / "in_place.py").write_text("def transform(values):\n    values *= 2\n    return values\n", encoding="utf-8")
+    pp = PhysPlot()
+    pp.load(pd.DataFrame({"V": [1.0, 2.0]}), loader="dataframe")
+
+    pp.transform("V", "in_place", output="Doubled")
+
+    assert pp.dataset.dataframe["V"].tolist() == [1.0, 2.0]
+    assert pp.dataset.dataframe["Doubled"].tolist() == [2.0, 4.0]
+
+
+def test_plugin_column_vector_result_is_accepted(user_dir):
+    folder = user_dir / "config" / "transformations"
+    folder.mkdir(parents=True)
+    (folder / "column.py").write_text(
+        "import numpy as np\ndef transform(values):\n    return np.asarray(values).reshape(-1, 1) + 1\n",
+        encoding="utf-8",
+    )
+    pp = PhysPlot()
+    pp.load(pd.DataFrame({"V": [1.0, 2.0]}), loader="dataframe")
+
+    assert pp.transform("V", "column", output="Out").tolist() == [2.0, 3.0]

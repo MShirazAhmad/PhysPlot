@@ -220,3 +220,126 @@ def test_simple_mode_plugin_transform_is_recorded_and_replays(tmp_path, monkeypa
 
     window.close()
     app.quit()
+
+
+def test_code_view_syntax_error_explains_line_and_keeps_sequence(monkeypatch):
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    window.apply_sequence_code(
+        "from physplot.steps import SetRoleStep\nWORKFLOW_STEPS = [SetRoleStep(roles={'x': 'Time'})]\n"
+    )
+    panel = window.mode_manager.panels["Advanced"].sequence_builder
+    panel._set_view_mode(1)
+    panel.code_view.setPlainText("from physplot.steps import SetRoleStep\nWORKFLOW_STEPS = [SetRoleStep(\n")
+    messages = []
+    monkeypatch.setattr(QtWidgets.QMessageBox, "warning", lambda parent, title, text: messages.append(text))
+
+    panel.apply_code_button.click()
+
+    assert len(messages) == 1
+    assert "Python syntax error on line 2" in messages[0]
+    assert "WORKFLOW_STEPS = [SetRoleStep(" in messages[0]
+    assert "not changed" in messages[0]
+    assert panel.code_view.textCursor().selectedText() == "WORKFLOW_STEPS = [SetRoleStep("
+    assert [type(step) for step in window.state.pp.workflow] == [SetRoleStep]
+
+    window.close()
+    app.quit()
+
+
+def test_bulk_failure_names_the_input_file(tmp_path):
+    input_folder = tmp_path / "input"
+    input_folder.mkdir()
+    pd.DataFrame({"Voltage": [1.0, 2.0]}).to_csv(input_folder / "a_good.csv", index=False)
+    pd.DataFrame({"Voltage": ["high", "low"]}).to_csv(input_folder / "b_text.csv", index=False)
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.state.pp.workflow = [TransformColumnStep("Voltage", "multiply", "V2", params={"factor": 2})]
+
+    window.run_bulk_workflow({"input_folder": str(input_folder), "workflow_file": "", "output_folder": str(tmp_path / "out")})
+
+    title, error = window.last_error
+    assert title == "Bulk run failed"
+    assert str(error).startswith("Bulk run stopped at b_text.csv: Column 'Voltage' does not contain numeric values")
+    assert (tmp_path / "out" / "a_good" / "data.csv").exists()
+
+    window.close()
+    app.quit()
+
+
+def test_plugin_with_clashing_display_name_stays_in_function_menu(tmp_path, monkeypatch):
+    folder = tmp_path / "PhysPlotUser" / "config" / "transformations"
+    folder.mkdir(parents=True)
+    (folder / "50_scaled_log.py").write_text("DISPLAY_NAME = 'log10'\ndef transform(values):\n    return values\n")
+    monkeypatch.setenv("PHYSPLOT_USER_DIR", str(tmp_path / "PhysPlotUser"))
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+
+    labels = {entry["display_name"]: entry for entry in window.simple_function_entries()}
+
+    assert labels["log10"].get("function_name") == "log10"
+    assert labels["log10 (50_scaled_log)"]["name"] == "50_scaled_log"
+
+    window.close()
+    app.quit()
+
+
+def test_long_status_message_does_not_widen_window():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.resize(1200, 800)
+    window.show()
+    app.processEvents()
+    width_before = window.width()
+    minimum_before = window.minimumSizeHint().width()
+    message = "Row 2 failed (TransformColumnStep): " + "very long error detail " * 40
+
+    window.status.set_message(message)
+    app.processEvents()
+
+    assert window.width() == width_before
+    assert window.minimumSizeHint().width() == minimum_before
+    assert window.status.status.text() == f"Status: {message.strip()}"
+    assert window.status.status.toolTip() == f"Status: {message.strip()}"
+
+    window.close()
+    app.quit()
+
+
+def test_main_window_fits_laptop_screens_and_simple_mode_scrolls():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.show()
+    app.processEvents()
+    panel = window.mode_manager.panels["Simple"]
+
+    assert window.minimumSizeHint().width() <= 1280
+    window.resize(1100, 800)
+    app.processEvents()
+    assert window.width() == 1100
+    assert panel._needs_scroll
+    assert window.mode_manager.stack.height() == panel.fitted_height()
+
+    window.resize(2400, 800)
+    app.processEvents()
+    assert not panel._needs_scroll
+    assert window.mode_manager.stack.height() == panel.fitted_height()
+
+    window.close()
+    app.quit()
+
+
+def test_simple_mode_area_fits_styled_panels_without_a_resize():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.resize(2400, 900)
+    window.show()
+    for _ in range(3):
+        app.processEvents()
+    panel = window.mode_manager.panels["Simple"]
+
+    assert window.mode_manager.stack.height() >= panel._content.sizeHint().height()
+
+    window.close()
+    app.quit()

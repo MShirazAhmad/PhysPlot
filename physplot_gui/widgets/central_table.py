@@ -192,6 +192,16 @@ class CentralTable(QtWidgets.QWidget):
             [self._display_column_header(index, name) for index, name in enumerate(self._column_names)]
         )
         self.table.setVerticalHeaderLabels([""] + [str(index) for index in range(1, self.table.rowCount())])
+        self._fit_columns_to_headers()
+
+    def _fit_columns_to_headers(self, columns=None) -> None:
+        """Widen columns whose header label would be clipped; never shrink user-sized columns."""
+        header = self.table.horizontalHeader()
+        header.ensurePolished()
+        for column in range(self.table.columnCount()) if columns is None else columns:
+            needed = header.sectionSizeHint(column)
+            if needed > self.table.columnWidth(column):
+                self.table.setColumnWidth(column, needed)
 
     def _display_column_header(self, index: int, name: str) -> str:
         default_name = f"Column {index + 1}"
@@ -306,6 +316,7 @@ class CentralTable(QtWidgets.QWidget):
         self._column_names[column] = new_name
         self._roles[new_name] = role
         self.table.setHorizontalHeaderItem(column, QtWidgets.QTableWidgetItem(self._display_column_header(column, new_name)))
+        self._fit_columns_to_headers([column])
         self.column_renamed.emit(old_name, new_name)
         self.structure_changed.emit()
         self.table_edited.emit()
