@@ -6,12 +6,34 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Importing Data <gui-
 Supported formats
 -----------------
 
-- ``.txt``
-- ``.csv``
-- ``.tsv``
-- ``.xlsx``
+- ``.csv``, ``.txt``, ``.dat``, ``.tsv``
+- ``.xls``, ``.xlsx``
 - nanoindentation files through the built-in nanoindentation loader
+- OES ``.HRF`` spectra through the ``OES HRF Loader`` plugin
 - DataFrames through the backend API
+
+Instrument exports
+------------------
+
+Text exports often put metadata above the data. When a plain read does not
+give at least two numeric columns, PhysPlot finds the numeric table itself:
+
+- It skips header blocks such as Malvern Panalytical XRD
+  ``[Measurement conditions]`` sections and EDAX EDS ``Path :``/``KV :`` lines.
+  The skipped lines are kept in the dataset metadata as ``header_lines``.
+- It detects comma, tab, semicolon or whitespace separators, so tab-separated
+  files saved as ``.csv`` load correctly. Quoted values such as ``"7.74"``
+  are numbers.
+- It turns spectra stored as rows, such as PHI XPS energy and count rows,
+  into columns.
+
+Binary files (for example AFM ``.dat`` scans), empty files and damaged
+workbooks are reported by name instead of with a parser traceback.
+
+Sequences recorded on a file loaded through a loader plugin, such as
+``.HRF``, reuse that plugin for **Run Sequence** bulk runs,
+``physplot run-workflow`` and an exported ``Sequence.py``'s ``run()``.
+Bulk runs then process the files in the folder that have the same extension.
 
 Loader selection
 ----------------

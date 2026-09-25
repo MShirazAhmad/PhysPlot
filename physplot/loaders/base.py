@@ -10,9 +10,11 @@ import pandas as pd
 from physplot.core.dataset import Dataset
 from physplot.core.metadata import infer_suggested_role, parse_column_label
 
+from .text_table import read_text_table
+
 MODULE_ID = "physplot.loaders.base"
 MODULE_VERSION = "1.0.0"
-MODULE_REVISION = "2026-05-30-r1"
+MODULE_REVISION = "2026-09-25-r1"
 MODULE_API_VERSION = "1"
 MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
@@ -49,6 +51,8 @@ class BaseLoader:
             "rows": len(df),
             "columns": len(df.columns),
         }
+        if df.attrs.get("header_lines"):
+            metadata["header_lines"] = list(df.attrs["header_lines"])
         return Dataset(
             name=dataset_name,
             dataframe=df,
@@ -67,20 +71,17 @@ class CSVLoader(BaseLoader):
     file_format = "csv"
 
     def read_dataframe(self, path: Path) -> pd.DataFrame:
-        return pd.read_csv(path)
+        return read_text_table(path, pd.read_csv)
 
 
 class TXTLoader(BaseLoader):
     loader_id = "txt"
     name = "TXT Loader"
-    supported_extensions = (".txt", ".dat")
+    supported_extensions = (".txt", ".dat", ".tsv")
     file_format = "txt"
 
     def read_dataframe(self, path: Path) -> pd.DataFrame:
-        try:
-            return pd.read_csv(path, sep=None, engine="python")
-        except Exception:
-            return pd.read_csv(path, sep=r"\s+")
+        return read_text_table(path, _read_sniffed_text)
 
 
 class ExcelLoader(BaseLoader):
@@ -90,7 +91,7 @@ class ExcelLoader(BaseLoader):
     file_format = "excel"
 
     def read_dataframe(self, path: Path) -> pd.DataFrame:
-        return pd.read_excel(path)
+        return _read_excel(path)
 
 
 class NanoindentationLoader(BaseLoader):
@@ -102,13 +103,10 @@ class NanoindentationLoader(BaseLoader):
     def read_dataframe(self, path: Path) -> pd.DataFrame:
         suffix = path.suffix.lower()
         if suffix in {".xls", ".xlsx"}:
-            return pd.read_excel(path)
+            return _read_excel(path)
         if suffix == ".csv":
-            return pd.read_csv(path)
-        try:
-            return pd.read_csv(path, sep=None, engine="python")
-        except Exception:
-            return pd.read_csv(path, sep=r"\s+")
+            return read_text_table(path, pd.read_csv)
+        return read_text_table(path, _read_sniffed_text)
 
     def dataset_from_dataframe(
         self,
@@ -155,6 +153,22 @@ class AutoLoader(BaseLoader):
         dataset.loader_id = self.loader_id
         dataset.loader_name = self.name
         return dataset
+
+
+def _read_sniffed_text(path: Path) -> pd.DataFrame:
+    try:
+        return pd.read_csv(path, sep=None, engine="python")
+    except Exception:
+        return pd.read_csv(path, sep=r"\s+")
+
+
+def _read_excel(path: Path) -> pd.DataFrame:
+    try:
+        return pd.read_excel(path)
+    except Exception as exc:
+        if "excel" in str(exc).lower() or type(exc).__name__ in {"OptionError", "BadZipFile", "XLRDError"}:
+            raise ValueError(f"'{path.name}' is not a readable Excel workbook ({type(exc).__name__}: {exc}).") from exc
+        raise
 
 
 def build_column_metadata(df: pd.DataFrame) -> dict[str, dict]:
