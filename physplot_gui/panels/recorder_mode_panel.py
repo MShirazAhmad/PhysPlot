@@ -199,8 +199,31 @@ class SequenceTablePanel(QtWidgets.QFrame):
             self._code_dirty = False
             return True
         except Exception as exc:
-            QtWidgets.QMessageBox.warning(self, "Apply code to table failed", str(exc))
+            self._show_code_error(exc)
             return False
+
+    def _show_code_error(self, exc: Exception) -> None:
+        """Explain a failed code apply in the message itself; macOS hides dialog titles."""
+        if isinstance(exc, SyntaxError) and exc.lineno:
+            detail = f"Python syntax error on line {exc.lineno}: {exc.msg}."
+            if exc.text and exc.text.strip():
+                detail += f"\n\n    {exc.text.strip()}"
+            self._select_code_line(exc.lineno)
+        else:
+            detail = f"{type(exc).__name__}: {exc}"
+        QtWidgets.QMessageBox.warning(
+            self,
+            "Apply code to table failed",
+            f"The sequence code could not be applied.\n\n{detail}\n\nThe table and sequence were not changed.",
+        )
+
+    def _select_code_line(self, line: int) -> None:
+        block = self.code_view.document().findBlockByLineNumber(max(0, line - 1))
+        if block.isValid():
+            cursor = QtGui.QTextCursor(block)
+            cursor.select(QtGui.QTextCursor.SelectionType.LineUnderCursor)
+            self.code_view.setTextCursor(cursor)
+            self.code_view.setFocus()
 
     def _update_code_button_visibility(self) -> None:
         if self.apply_code_button is not None:

@@ -39,8 +39,9 @@ def run_folder(
         pp.load(path, loader=loader)
         try:
             pp.run_workflow(steps, allow_column_number_fallback=allow_column_number_fallback)
-        except Exception:
+        except Exception as exc:
             LOGGER.exception("Workflow failed for %s", path)
+            exc.input_path = path  # lets callers such as the GUI name the failing file
             raise
         dataset_output = output_folder / path.stem
         pp.export(dataset_output)

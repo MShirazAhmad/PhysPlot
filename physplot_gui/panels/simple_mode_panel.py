@@ -6,7 +6,19 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 
 
 class AutoWidthComboBox(QtWidgets.QComboBox):
-    """Compact combo box whose popup expands to fit long scientific labels."""
+    """Compact combo box whose popup expands to fit long scientific labels.
+
+    The closed box is sized from a short minimum length instead of its longest
+    item, so Simple Mode fits laptop-width windows; the popup and tooltip still
+    show the full label.
+    """
+
+    def __init__(self, parent=None, minimum_characters: int = 6):
+        super().__init__(parent)
+        # Must be set before the first size query: QComboBox caches its minimum size.
+        self.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.setMinimumContentsLength(minimum_characters)
+        self.currentTextChanged.connect(self.setToolTip)
 
     def showPopup(self) -> None:
         self._resize_popup_to_contents()
@@ -23,19 +35,71 @@ class AutoWidthComboBox(QtWidgets.QComboBox):
 
 
 class SimpleModePanel(QtWidgets.QWidget):
+    height_changed = QtCore.pyqtSignal()
+
     def __init__(self, actions, parent=None):
         super().__init__(parent)
         self.actions = actions
         self._columns: list[str] = []
         self._plotter_entries: list[dict] = []
+        self._needs_scroll = False
+        self._fitted = 0
 
-        layout = QtWidgets.QHBoxLayout(self)
+        self._content = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout(self._content)
         layout.setContentsMargins(0, 6, 0, 6)
         layout.setSpacing(6)
         layout.addWidget(self._data_importer_panel(), 4)
         layout.addWidget(self._transform_panel(), 5)
         layout.addWidget(self._plotter_panel(), 12)
+
+        # On screens narrower than the three panels, scroll sideways instead of
+        # forcing the main window wider than the screen.
+        self._scroll = QtWidgets.QScrollArea()
+        self._scroll.setWidget(self._content)
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        self._scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._scroll.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._scroll.viewport().setAutoFillBackground(False)
+        self._content.setAutoFillBackground(False)
+        outer = QtWidgets.QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.addWidget(self._scroll)
+        self._content.installEventFilter(self)
         self.refresh_plotters()
+
+    def sizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(self._content.sizeHint().width(), self.fitted_height())
+
+    def minimumSizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(0, self.fitted_height())
+
+    def fitted_height(self) -> int:
+        """Height of the three panels, plus the scrollbar while one is shown."""
+        height = self._content.sizeHint().height()
+        if self._needs_scroll:
+            height += self._scroll.horizontalScrollBar().sizeHint().height()
+        return height
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        self._refit()
+
+    def eventFilter(self, watched, event) -> bool:
+        # Panels ask for a new layout once styled and when their contents change.
+        if watched is self._content and event.type() == QtCore.QEvent.Type.LayoutRequest:
+            QtCore.QTimer.singleShot(0, self._refit)
+        return super().eventFilter(watched, event)
+
+    def _refit(self) -> None:
+        """Re-fit to the panels' real height and toggle room for the scrollbar."""
+        self._needs_scroll = self._content.minimumSizeHint().width() > self.width()
+        height = self.fitted_height()
+        if height != self._fitted:
+            self._fitted = height
+            self.updateGeometry()
+            self.height_changed.emit()
 
     def _data_importer_panel(self):
         frame = self._panel()
@@ -64,10 +128,10 @@ class SimpleModePanel(QtWidgets.QWidget):
         layout.addWidget(QtWidgets.QLabel("Data Loader:"), 1, 0)
         layout.addWidget(self.loader, 1, 1, 1, 2)
         layout.addWidget(import_button, 2, 0)
-        layout.addWidget(import_folder_button, 2, 1)
-        layout.addWidget(export_button, 2, 2)
+        layout.addWidget(import_folder_button, 2, 1, 1, 2)
+        layout.addWidget(export_button, 3, 0)
         layout.setColumnStretch(1, 1)
-        layout.setRowStretch(3, 1)
+        layout.setRowStretch(4, 1)
         return frame
 
     def _transform_panel(self):
@@ -129,7 +193,7 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.fit_label.setPlaceholderText("label")
         self.fit_style_preset = AutoWidthComboBox()
         self.fit_style_preset.currentIndexChanged.connect(self._fit_style_changed)
-        self.fit_line_style = AutoWidthComboBox()
+        self.fit_line_style = AutoWidthComboBox(minimum_characters=2)
         self.fit_line_style.addItems(["--", "-", "-.", ":"])
         self.fit_line_width = QtWidgets.QLineEdit("2")
         self.fit_line_width.setMaximumWidth(52)
@@ -175,21 +239,25 @@ class SimpleModePanel(QtWidgets.QWidget):
         layout.addLayout(fit_params_layout, 2, 3)
         fit_style_layout = QtWidgets.QHBoxLayout()
         fit_style_layout.setSpacing(6)
-        fit_style_layout.addWidget(self.fit_style_preset, 2)
+        fit_style_layout.addWidget(self.fit_style_preset, 1)
         fit_style_layout.addWidget(reload_fit_styles_button)
-        fit_style_layout.addWidget(self.fit_label, 2)
-        fit_style_layout.addWidget(self.fit_line_style)
-        fit_style_layout.addWidget(self.fit_line_width)
-        fit_style_layout.addWidget(self.fit_show_legend)
         layout.addWidget(QtWidgets.QLabel("Fit Style:"), 3, 2)
         layout.addLayout(fit_style_layout, 3, 3)
+        # Fit line options share the button row so the panel stays narrow.
+        fit_line_layout = QtWidgets.QHBoxLayout()
+        fit_line_layout.setSpacing(6)
+        fit_line_layout.addWidget(self.fit_label, 1)
+        fit_line_layout.addWidget(self.fit_line_style)
+        fit_line_layout.addWidget(self.fit_line_width)
+        fit_line_layout.addWidget(self.fit_show_legend)
+        layout.addWidget(QtWidgets.QLabel("Fit Line:"), 4, 2)
+        layout.addLayout(fit_line_layout, 4, 3)
 
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.setSpacing(8)
         button_layout.addWidget(generate_button, 1)
         button_layout.addWidget(export_button, 1)
-        button_layout.addStretch(2)
-        layout.addLayout(button_layout, 4, 0, 1, 4)
+        layout.addLayout(button_layout, 4, 0, 1, 2)
         layout.setColumnStretch(1, 2)
         layout.setColumnStretch(3, 3)
         self.refresh_styles()

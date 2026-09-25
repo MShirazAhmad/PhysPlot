@@ -18,7 +18,12 @@ class ModeManager(QtCore.QObject):
         }
         for panel in self.panels.values():
             self.stack.addWidget(panel)
+        self.panels["Simple"].height_changed.connect(self._refit_simple)
         self._fit_stack_to("Simple")
+
+    def _refit_simple(self) -> None:
+        if self.stack.currentWidget() is self.panels["Simple"]:
+            self._fit_stack_to("Simple")
 
     def set_mode(self, mode: str) -> None:
         panel = self.panels[mode]
