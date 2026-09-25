@@ -37,6 +37,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
+    "appdirs>=1.4",
     "FigureForge>=0.3.3",
     "matplotlib>=3.8",
     "numpy>=1.24",
@@ -44,6 +45,7 @@ dependencies = [
     "pandas>=2.0",
     "PyQt6>=6.6",
     "scipy>=1.10",
+    "xlrd>=2.0",
 ]
 
 [project.optional-dependencies]

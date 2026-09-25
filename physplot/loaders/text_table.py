@@ -83,7 +83,7 @@ def find_numeric_table(text: str) -> pd.DataFrame | None:
             _numeric_count(split[start - 1]) < min(_numeric_count(row) for row in body)
         ):
             header = split[start - 1]
-    frame = pd.DataFrame([row[:width] for row in body])
+    frame = pd.DataFrame([row[:width] + [""] * (width - len(row)) for row in body])
     if transposed:
         frame = frame.T.reset_index(drop=True)
     frame.columns = _unique_names(header, frame.shape[1])
@@ -98,15 +98,20 @@ def find_numeric_table(text: str) -> pd.DataFrame | None:
 
 
 def _numeric_blocks(split: list[list[str]]):
-    """Yield (start, end, width) for runs of numeric rows with a constant field count."""
-    start, width = None, None
+    """Yield (start, end, width) for runs of numeric rows of similar width.
+
+    Rows may be a little ragged (e.g. fit statistics on the first row only);
+    ``width`` is the widest row of the run.
+    """
+    start, first_width, width = None, None, None
     for index, fields in enumerate(split + [[]]):
         is_data = len(fields) >= 2 and _numeric_count(fields) >= max(2, (len(fields) + 1) // 2)
-        if is_data and start is not None and len(fields) == width:
+        if is_data and start is not None and abs(len(fields) - first_width) <= max(1, first_width // 2):
+            width = max(width, len(fields))
             continue
         if start is not None:
             yield start, index, width
-        start, width = (index, len(fields)) if is_data else (None, None)
+        start, first_width, width = (index, len(fields), len(fields)) if is_data else (None, None, None)
 
 
 def _split(line: str, delimiter: str | None) -> list[str]:

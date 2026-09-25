@@ -1,7 +1,7 @@
 # PhysPlot
 
 <p align="center">
-  <img src="physplot/inc/PhysPlotWide.png" alt="PhysPlot logo" width="420">
+  <img src="physplot/inc/PhysPlotWide1.png" alt="PhysPlot logo" width="420">
 </p>
 
 > **⚠️ Experimental Development Branch**

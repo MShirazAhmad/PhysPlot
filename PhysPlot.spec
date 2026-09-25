@@ -9,6 +9,8 @@ from PyInstaller.utils.hooks import collect_submodules
 # sys._MEIPASS and the Documents/PhysPlot/config copy takes precedence.
 import os
 
+ICON = 'installer/icons/PhysPlot.icns' if sys.platform == 'darwin' else 'installer/icons/PhysPlot.ico'
+
 datas = []
 for root, dirs, files in os.walk('config'):
     dirs[:] = [d for d in dirs if d != '__pycache__']
@@ -53,6 +55,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=ICON,
 )
 coll = COLLECT(
     exe,
@@ -67,6 +70,6 @@ if sys.platform == 'darwin':
     app = BUNDLE(
         coll,
         name='PhysPlot.app',
-        icon=None,
+        icon=ICON,
         bundle_identifier=None,
     )
