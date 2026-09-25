@@ -121,7 +121,42 @@ Practical Rules
 - Return the same number of values that you received.
 - Use ``numpy.asarray(values, dtype=float)`` if you need NumPy operations.
 - Avoid changing files, opening windows, or modifying the table directly.
-- Handle edge cases such as blank columns, zeros, or repeated values.
+- Handle edge cases such as blank columns, zeros, or repeated values. Blank or
+  non-numeric cells arrive as ``NaN``.
+- Do not name a file after a built-in transformation (``normalize_max``,
+  ``multiply``, ``add``, ``subtract``, ``divide``, ``log``, ``log10``,
+  ``baseline_subtract``); such files are skipped. Keep the ``NN_`` prefix.
+
+Sequences and Headless Runs
+---------------------------
+
+Applying a function plugin records a ``TransformColumnStep`` in the protocol
+sequence. Its ``function_name`` is the file stem, and the Simple Mode offset
+(and multiplier) are stored as parameters:
+
+.. code-block:: python
+
+   TransformColumnStep(
+       input_column="Voltage",
+       function_name="02_square",
+       output="Voltage_sq",
+       params={"multiplier": 1.0, "offset": 0.5},
+   )
+
+The step computes ``transform(values) * multiplier + offset``. The backend
+resolves the name against the same folders the GUI uses (``Documents/PhysPlot/
+config/transformations`` first, then the bundled ``config/transformations``),
+so **Apply This Sequence**, exported ``Sequence.py`` files and bulk runs replay
+the plugin without the GUI. Notebooks can call it directly by file stem or
+``DISPLAY_NAME``:
+
+.. code-block:: python
+
+   pp.transform("Voltage", "02_square", output="Voltage_sq")
+   pp.transform("Voltage", "x^2", output="Voltage_sq")
+
+Extra keyword arguments are passed to ``transform(values, **params)``. Renaming
+or deleting a plugin file breaks saved sequences that use it.
 
 Existing Examples
 -----------------

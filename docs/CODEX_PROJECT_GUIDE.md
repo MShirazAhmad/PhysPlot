@@ -35,7 +35,7 @@ PhysPlot/
     __main__.py                 CLI entry point
     core/
       dataset.py                DataFrame wrapper, roles, metadata
-      transformations.py        Registered column transformations
+      transformations.py        Registered transforms + config/transformations plugin resolution
       formula.py                Formula evaluation
       column_resolver.py        Name/number column resolution
     loaders/

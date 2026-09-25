@@ -858,23 +858,17 @@ class MainWindow(QtWidgets.QMainWindow):
         return df[column_name].astype(str).str.strip().ne("").any()
 
     def _apply_function_plugin(self, input_column: str, output_column: str, entry: dict, multiplier: float, offset: float) -> None:
-        self.sync_table_to_backend()
-        try:
-            df = self.central_table.to_dataframe()
-            if input_column not in df.columns:
-                raise ValueError(f"Input column '{input_column}' does not exist.")
-            if output_column not in df.columns:
-                df[output_column] = ""
-            values = pd.to_numeric(df[input_column], errors="coerce").fillna(0.0).to_numpy(dtype=float)
-            transformed = np.asarray(entry["module"].transform(values), dtype=float) * multiplier + offset
-            df[output_column] = transformed[: len(df.index)]
-            self.state.refresh_dataset_values(df)
-            self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
-            self._record("Transform", entry["display_name"], f"{input_column} -> {output_column}")
-            self.status.set_message("Transformation applied")
-            self._refresh_all()
-        except Exception as exc:
-            self._error("Transformation failed", exc)
+        # The backend resolves the plugin by file stem, so the recorded
+        # TransformColumnStep replays in sequences, exports and bulk runs.
+        self._apply_transform(
+            {
+                "input": input_column,
+                "function": entry["name"],
+                "params": {"multiplier": multiplier, "offset": offset},
+                "output": output_column,
+                "label": entry["display_name"],
+            }
+        )
 
     def add_pipeline_step(self, payload: dict) -> None:
         self.apply_pipeline_step(payload)
@@ -904,7 +898,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.central_table.set_dataframe(self.state.dataframe, self.state.roles)
             self._append_sequence(
                 "Transform",
-                step["function"],
+                step.get("label") or step["function"],
                 f"{step['input']} -> {step['output']}",
                 workflow_index=workflow_index,
             )

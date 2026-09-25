@@ -7,25 +7,18 @@ import importlib.util
 import sys
 from pathlib import Path
 
+from physplot.core.transformations import discover_plugin_transforms
 from physplot.user_paths import plugin_search_dirs
 
 
 def discover_functions() -> list[dict]:
     """Find simple transform plugins in ``config/transformations/``.
 
-    A function plugin is any ``.py`` file exposing ``transform(values)``.
-    Optional ``DISPLAY_NAME`` controls the label shown in the GUI.
+    Discovery lives in the backend so recorded sequences resolve plugins the
+    same way headlessly. Entries carry ``name`` (the file stem recorded in the
+    sequence), ``display_name``, ``path`` and ``module``.
     """
-    entries = []
-    for path in _plugin_files(plugin_search_dirs("transformations")):
-        module = _load_module(path, f"physplot_user_function_{path.stem}")
-        if module is None:
-            continue
-        if not hasattr(module, "transform"):
-            continue
-        display_name = getattr(module, "DISPLAY_NAME", path.stem.replace("_", " ").title())
-        entries.append({"display_name": display_name, "path": path, "module": module})
-    return entries
+    return discover_plugin_transforms()
 
 
 def discover_fileloaders() -> list[dict]:
