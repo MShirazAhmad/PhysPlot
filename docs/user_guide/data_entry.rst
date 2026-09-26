@@ -25,6 +25,6 @@ Use **File > Import Data...** or Simple Mode's **Data Importer** panel to load
 new data into the table. Manual edits to cells are recorded as workflow steps
 so the sequence can be replayed.
 
-.. image:: ../_static/gui_walkthrough/01_main_window_overview.png
+.. image:: ../_static/gui_walkthrough/walk_01_overview.png
    :alt: Data entry and table controls
    :width: 700px

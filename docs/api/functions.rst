@@ -88,3 +88,12 @@ output column, and refreshing the plot.
 
 Files with spaces in their names cannot be imported as normal Python modules.
 Prefer filenames such as ``15_my_function.py``.
+
+Transformation Resolution
+-------------------------
+
+Built-in transforms and ``config/transformations`` plugins are resolved by the
+backend, so recorded plugin steps replay without the GUI.
+
+.. automodule:: physplot.core.transformations
+   :members: get_transform, list_transforms, discover_plugin_transforms, find_plugin_transform

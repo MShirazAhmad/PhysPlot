@@ -71,6 +71,6 @@ The Figure Editor opens with the generated Matplotlib figure and lets you inspec
 
 Use **Figure Editor > PhysPlot > Save as Template** to save the current appearance. Back in Simple Mode, click **Reload** next to **Template** and select the saved template before generating another plot.
 
-.. image:: ../_static/gui_walkthrough/04_plot_generated_and_formatting_window.png
+.. image:: ../_static/gui_walkthrough/walk_10_figure_editor.png
    :alt: Plot generation and output window
    :width: 700px

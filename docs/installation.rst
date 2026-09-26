@@ -4,27 +4,42 @@ Installation
 Prerequisites
 -------------
 
-- Python 3.10 or newer
+- Python 3.11, 3.12 or 3.13. The Figure Editor (FigureForge) does not support
+  newer Python versions yet and keeps numpy below 2.
 - pip
 
-For local GUI development, Python 3.12 is the recommended default because the
-Qt/FigureForge dependency stack has reliable wheels on macOS and Windows.
+Python 3.12 is the recommended default because the Qt/FigureForge dependency
+stack has reliable wheels on macOS and Windows. PhysPlot is not yet published on
+PyPI; install it with the macOS command below, the Windows installer, or from
+source.
 
-Install from PyPI
------------------
+macOS: one command
+------------------
 
-.. code-block:: bash
-
-   python -m pip install python-physplot
-
-Launch the GUI:
+Open **Terminal** and paste:
 
 .. code-block:: bash
 
-   physplot-gui
+   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+
+The script:
+
+- finds Python 3.11–3.13, or installs Python 3.12 with Homebrew (without
+  Homebrew it asks you to install Python 3.12 from python.org first),
+- downloads PhysPlot and installs it with its dependencies into ``~/.physplot``
+  (about 1 GB the first time),
+- creates **PhysPlot.app** in ``~/Applications``.
+
+Run the same command again to update. Uninstall with
+``rm -rf ~/.physplot ~/Applications/PhysPlot.app``; your files in
+``Documents/PhysPlot`` are kept. Set ``PHYSPLOT_REF`` to install another branch
+or tag (``curl … | PHYSPLOT_REF=<ref> bash``).
+
+Install from source
+-------------------
 
 Clone the repository
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 

@@ -25,3 +25,21 @@ Loader Base Classes
 .. automodule:: physplot.loaders.base
    :members:
    :undoc-members:
+
+XRDML Loader
+------------
+
+.. automodule:: physplot.loaders.xrdml
+   :members:
+
+Instrument Text Tables
+----------------------
+
+.. automodule:: physplot.loaders.text_table
+   :members:
+
+Loader Plugins
+--------------
+
+.. automodule:: physplot.loaders.plugins
+   :members:

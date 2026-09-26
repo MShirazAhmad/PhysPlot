@@ -48,6 +48,6 @@ For each fit, you can:
   - Equation
   - Custom Label
 
-.. image:: ../_static/gui_walkthrough/05_curve_fitting_label_mode.png
+.. image:: ../_static/gui_walkthrough/walk_06_plotter_module.png
    :alt: Curve fitting controls
    :width: 700px

@@ -2,33 +2,63 @@
 
 ## Install
 
+### macOS: one command
+
+Open **Terminal** and paste:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+```
+
+This does three things:
+
+1. **Python.** Finds Python 3.11–3.13 on your Mac. If there is none, it installs
+   Python 3.12 with Homebrew; without Homebrew, it asks you to install Python 3.12
+   from [python.org](https://www.python.org/downloads/macos/) and run the command again.
+2. **PhysPlot.** Downloads PhysPlot and installs it with its dependencies into
+   `~/.physplot`. The first install downloads about 1 GB (mostly Qt) and takes a few
+   minutes.
+3. **App.** Creates **PhysPlot.app** in `~/Applications`, with the PhysPlot icon.
+
+Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
+`~/Applications`.
+
+- **Update:** run the same command again.
+- **Uninstall:** `rm -rf ~/.physplot ~/Applications/PhysPlot.app`. Your own files in
+  `Documents/PhysPlot/` are kept.
+- **Command line:** the install also provides `~/.physplot/venv/bin/physplot` (see
+  [Bulk Runs and Headless Use](Bulk-Runs-and-Headless)).
+- **A specific version:** put `PHYSPLOT_REF=<branch or tag>` before `bash`, for
+  example `… | PHYSPLOT_REF=indevelopment bash`.
+
+### Windows
+
+Run the installer (`PhysPlot-<version>-Windows-Setup.exe`). It installs the app and
+copies the sample data to `Documents\PhysPlot\test_data`.
+
+### From source (any system)
+
 PhysPlot needs Python 3.11–3.13. The upper limit comes from the Figure Editor
 (FigureForge), which also keeps numpy below 2.
 
 ```bash
-python -m pip install python-physplot
-```
-
-From a source checkout, use a virtual environment:
-
-```bash
+git clone https://github.com/MShirazAhmad/PhysPlot.git
+cd PhysPlot
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e ".[dev]"
 ```
 
-On Windows, the installer (`PhysPlot-<version>-Windows-Setup.exe`) installs the app
-and copies the sample data to `Documents\PhysPlot\test_data`.
+Install in editable mode (`-e`) so the bundled `config/` folder (transformations,
+loaders, templates) is found. PhysPlot is not yet published on PyPI.
 
 ## Launch
 
-```bash
-physplot-gui
-```
+Open **PhysPlot.app** (macOS) or the Start-menu shortcut (Windows). From a source
+checkout, run `physplot-gui` or `python -m physplot_gui`.
 
-or, from a checkout, `python -m physplot_gui`. The first start creates your editable
-settings folder, `Documents/PhysPlot/config/`. Anything you put there (loaders,
-transformations, templates, plotter modules) overrides the bundled copy with the same
-file name.
+The first start creates your editable settings folder, `Documents/PhysPlot/config/`.
+Anything you put there (loaders, transformations, templates, plotter modules) overrides
+the bundled copy with the same file name.
 
 ## A tour of the window
 

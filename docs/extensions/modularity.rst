@@ -34,7 +34,7 @@ Where Files Live
    * - User transform functions
      - ``config/transformations/*.py``
      - Scanned at GUI startup by ``physplot_gui.app.plugin_discovery``
-     - Simple Mode **Apply Mathematical Transformation**
+     - Simple Mode **2. Mathematical Transformation**
    * - Built-in transforms
      - ``physplot/core/transformations.py``
      - Listed by the backend transformation registry

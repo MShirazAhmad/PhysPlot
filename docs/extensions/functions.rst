@@ -21,7 +21,7 @@ Where Functions Appear in the UI
 
 Discovered function plugins are available in:
 
-- Simple Mode's **Apply Mathematical Transformation** panel.
+- Simple Mode's **2. Mathematical Transformation** panel.
 - The transform dropdown used when building replayable workflow steps.
 
 PhysPlot discovers function files at startup.
@@ -51,17 +51,21 @@ Use a clear filename, for example:
 Required Structure
 ------------------
 
-Every function plugin should define:
-
-``DISPLAY_NAME``
-   Text shown in the PhysPlot Functions dropdown.
-
-``DEFAULT_LABEL``
-   Default label used by the app when a label is needed.
+Every function plugin must define:
 
 ``transform(values)``
    Function that receives a one-dimensional numeric sequence and returns a
    sequence of the same length.
+
+Optional:
+
+``DISPLAY_NAME``
+   Text shown in the Function dropdown (default: the file name).
+
+``DEFAULT_LABEL``
+   Default label used by the app when a label is needed.
+
+The first line of the module docstring is shown as the menu tooltip.
 
 Minimal Template
 ----------------
@@ -99,10 +103,10 @@ Step-by-Step: Build a New Function
 
 1. Create a new file in ``config/transformations/`` (for example
    ``config/transformations/15_normalize.py``).
-2. Define ``DISPLAY_NAME`` for the GUI entry.
-3. Define ``DEFAULT_LABEL`` for generated labels.
+2. Define ``DISPLAY_NAME`` for the GUI entry (optional).
+3. Define ``DEFAULT_LABEL`` for generated labels (optional).
 4. Implement ``transform(values)`` and return one value per input row.
-5. Restart PhysPlot so the function appears in the transformation dropdown.
+5. Choose **File > Reload Config Modules** (or restart PhysPlot) so the function appears in the Function dropdown.
 
 Function Categories
 -------------------

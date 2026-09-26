@@ -6,26 +6,29 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Exporting Processed 
 Export behavior
 ---------------
 
-Click **Export Data** from Simple Mode or use **File > Export Data...** to save
-the current table output.
+Click **Export Data** in Simple Mode's **1. Data Importer** panel, or choose
+**File > Export Data...**, then pick a folder. PhysPlot writes:
 
-Backend exports can also include metadata, column summaries, generated workflow
-source, fit results, and ``plot.png`` when a figure exists.
+- ``data.csv``: the current table.
+- ``columns.csv``: column metadata and provenance (source columns,
+  transformations, formulas).
+- ``workflow.py``: the protocol that produced the table.
+- ``fit.json`` and ``plot.png``: when a fit or a figure exists.
 
-Workflow
---------
+Reproducible runs
+-----------------
 
-1. Click **Export Data** or choose **File > Export Data...**.
-2. Choose destination path and filename.
-3. Confirm save.
-
-For reproducible runs, export the protocol with **Protocol > Export
-Sequence.py...** and run it later with:
+Export the protocol with **Protocol > Export Sequence.py...** and run it later
+on the same or other files:
 
 .. code-block:: bash
 
-   physplot run-workflow sequence.py --input data.csv --output outputs/run
+   physplot run-workflow Sequence.py --input data.csv --output outputs/run
+   physplot run-bulk Sequence.py --input-folder data/ --output-folder outputs/batch
 
-.. image:: ../_static/gui_walkthrough/08_export_data_workflow.png
-   :alt: Data export workflow
+Or process a folder from **Advanced > Run Sequence**; each input file gets its
+own output folder with the files listed above.
+
+.. image:: ../_static/gui_walkthrough/bulk_01_run_sequence.png
+   :alt: Run Sequence bulk export
    :width: 700px

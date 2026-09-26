@@ -59,9 +59,20 @@ Every loader should define:
 
 Optional:
 
+``COLUMN_NAMES``
+   Column names for a loader that returns a plain 2D array.
+
 ``DEFAULT_COLUMN_ROLES``
-   A list of default role labels such as ``["X", "Y"]``. PhysPlot
-   applies these roles automatically after import.
+   A list of default role labels such as ``["X", "Y"]`` or
+   ``["X-axis", "Y-axis"]``. PhysPlot applies these roles automatically after
+   import.
+
+``FILE_EXTENSIONS``
+   File types this loader reads, for example ``[".hrf"]``. **Auto Loader** then
+   picks this loader for those files, so they open without choosing a loader
+   and load the same way in replayed sequences, exported ``Sequence.py`` files,
+   ``physplot run-workflow``, and bulk runs. A bulk run over a sequence recorded
+   on such a file processes the files with that extension.
 
 Minimal CSV-Like Template
 -------------------------

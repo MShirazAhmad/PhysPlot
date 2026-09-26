@@ -55,6 +55,6 @@ Color options
 
 Blue, Green, Red, Cyan, Magenta, Yellow, Black, White.
 
-.. image:: ../_static/gui_walkthrough/04_plot_generated_and_formatting_window.png
+.. image:: ../_static/gui_walkthrough/walk_10_figure_editor.png
    :alt: Plot customization options
    :width: 700px
