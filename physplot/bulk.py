@@ -28,7 +28,7 @@ def run_folder(
     allow_column_number_fallback=False,
 ):
     steps = load_workflow(workflow) if not isinstance(workflow, list) else workflow
-    # A sequence recorded on a plugin format (e.g. OES .HRF, via a loader plugin
+    # A sequence recorded on a plugin format (e.g. Rigaku .ras, via a loader plugin
     # or Auto Loader) processes files with that extension; otherwise the
     # built-in tabular formats.
     template = plugin_load_step(steps) or next(

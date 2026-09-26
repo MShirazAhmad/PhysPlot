@@ -54,3 +54,27 @@ def test_figure_editor_process_gets_the_physplot_icon(monkeypatch):
     for _, temp_path in window._figureforge_processes:
         temp_path.unlink(missing_ok=True)
     window.close()
+
+
+def test_dialog_exec_compat_and_about_dialog_open_and_close():
+    from physplot.qt_compat import QtCore
+    from physplot_gui.app.main_window import MainWindow
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    box = QtWidgets.QMessageBox()
+    QtCore.QTimer.singleShot(50, box.accept)
+    assert box.exec_() == QtWidgets.QDialog.DialogCode.Accepted.value
+
+    window = MainWindow()
+    closed = []
+
+    def close_about():
+        dialog = app.activeModalWidget()
+        closed.append(dialog.windowTitle() if dialog else None)
+        if dialog:
+            dialog.accept()
+
+    QtCore.QTimer.singleShot(100, close_about)
+    window.show_about_dialog()
+    assert closed == ["About PhysPlot"]
+    window.close()

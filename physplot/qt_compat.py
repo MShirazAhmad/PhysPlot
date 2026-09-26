@@ -50,7 +50,15 @@ Qt.LeftToRight = Qt.LayoutDirection.LeftToRight
 QtWidgets.QAction = QtGui.QAction
 QtWidgets.QActionGroup = QtGui.QActionGroup
 QtWidgets.QApplication.exec_ = QtWidgets.QApplication.exec
-QtWidgets.QDialog.exec_ = QtWidgets.QDialog.exec
+
+
+def _dialog_exec(self, *args):
+    # A plain alias of the unbound PyQt6 method does not bind to the instance, so
+    # dialog.exec_() would raise TypeError; a real function binds like any method.
+    return QtWidgets.QDialog.exec(self, *args)
+
+
+QtWidgets.QDialog.exec_ = _dialog_exec
 QtWidgets.QMessageBox.Critical = QtWidgets.QMessageBox.Icon.Critical
 QtWidgets.QMessageBox.Ok = QtWidgets.QMessageBox.StandardButton.Ok
 QtWidgets.QFileDialog.Options = QtWidgets.QFileDialog.Option

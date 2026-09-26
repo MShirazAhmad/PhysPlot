@@ -2,7 +2,7 @@
 
 A loader plugin defines ``load_data(file_path)`` returning a DataFrame or 2D
 table, and optionally ``COLUMN_NAMES``, ``DEFAULT_COLUMN_ROLES`` and
-``FILE_EXTENSIONS`` (e.g. ``[".hrf"]``). Auto Loader uses the first plugin
+``FILE_EXTENSIONS`` (e.g. ``[".ras"]``). Auto Loader uses the first plugin
 that declares a file's extension when no built-in loader handles it, so such
 files load the same way in the GUI, in replayed sequences and in bulk runs.
 """

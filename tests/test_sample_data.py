@@ -6,6 +6,7 @@ import pytest
 
 from physplot import PhysPlot
 from physplot.bulk import run_folder
+from physplot.loaders.plugins import PluginLoader
 from physplot.steps import LoadDataStep, TransformColumnStep
 from physplot.user_paths import bundled_plugin_dir
 
@@ -20,6 +21,17 @@ AUTO_LOADED = {
     "XRD/panalytical_export.csv": ["Angle", "Intensity"],
     "EDS/smartquant_spot.csv": ["Element", "Weight %", "Atomic %", "Error %"],
 }
+
+
+# Samples a user opens by choosing a loader plugin in the Data Loader menu, because a
+# built-in loader already owns their extension.
+PLUGIN_LOADED = {"Thermal/tga_calcium_oxalate.txt": "ta_instruments_loader.py"}
+
+
+def _load_sample(name):
+    if name in PLUGIN_LOADED:
+        return PluginLoader(bundled_plugin_dir("data_importers") / PLUGIN_LOADED[name]).load(TEST_DATA / name)
+    return PhysPlot().load(TEST_DATA / name)
 
 
 @pytest.mark.parametrize("name", sorted(AUTO_LOADED))
@@ -38,7 +50,7 @@ def test_sample_columns(name):
     ),
 )
 def test_every_sample_has_numeric_data(name):
-    frame = PhysPlot().load(TEST_DATA / name).dataframe
+    frame = _load_sample(name).dataframe
 
     numeric = [column for column in frame.columns if frame[column].dtype.kind in "if"]
     assert len(frame) >= 2 and len(numeric) >= 2
@@ -94,3 +106,23 @@ def test_plugin_extensions_and_unknown_extension_message(monkeypatch, tmp_path):
     assert PhysPlot().load(data).dataframe["b"].tolist() == [2.0, 4.0]
     with pytest.raises(ValueError, match=r"No loader for '\.abc' files.*FILE_EXTENSIONS"):
         PhysPlot().load(unknown)
+
+
+def test_utf16_text_through_auto_loader_names_the_encoding():
+    with pytest.raises(ValueError, match="UTF-16 text"):
+        PhysPlot().load(TEST_DATA / "Thermal" / "tga_calcium_oxalate.txt")
+
+
+def test_ras_anneal_series_bulk_runs_with_the_rigaku_plugin(tmp_path):
+    folder = TEST_DATA / "XRD" / "anneal_series"
+    steps = [
+        LoadDataStep(path=str(folder / "tio2_400C.ras"), loader="auto"),
+        TransformColumnStep("Intensity", "14_xrd_baseline_remove", "Intensity_bg", params={"multiplier": 1.0, "offset": 0.0}),
+        TransformColumnStep("Intensity_bg", "normalize_max", "Intensity_norm"),
+    ]
+
+    outputs = run_folder(steps, folder, tmp_path / "out")
+
+    assert sorted(path.name for path in outputs) == ["tio2_400C", "tio2_600C", "tio2_800C"]
+    header = (tmp_path / "out" / "tio2_800C" / "data.csv").read_text().splitlines()[0]
+    assert header == "2Theta,Intensity,Intensity_bg,Intensity_norm"

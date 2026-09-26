@@ -135,3 +135,28 @@ def test_blank_simple_transform_is_status_noop(monkeypatch):
     assert window.status.status.text() == "Status: Enter or import data before applying a transformation"
     window.close()
     app.processEvents()
+
+
+def test_plot_type_choice_survives_window_refresh(monkeypatch):
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.state.load_dataframe(pd.DataFrame({"Time": [0, 1], "Voltage": [1.0, 2.0]}), name="sample")
+    window.state.pp.set_roles(x="Time", y="Voltage")
+    window.central_table.set_dataframe(window.state.dataframe, window.state.roles)
+    window._refresh_all()
+    panel = window.mode_manager.panels["Simple"]
+    monkeypatch.setattr(window, "_open_figureforge_editor", lambda figure: None)
+
+    panel.plotter.setCurrentIndex(panel.plotter.findData("basic"))
+    panel.plot_type.setCurrentText("line")
+    panel._generate_plot()
+
+    # Generating (and any other table change) refreshes the plotter lists.
+    assert window.state.timeline[-1]["details"] == "Create basic line"
+    assert panel.plot_type.currentText() == "line"
+
+    # A plotter that does not offer the previous type falls back to its first type.
+    panel.plotter.setCurrentIndex(panel.plotter.findData("histogram"))
+    assert panel.plot_type.currentText() == "histogram"
+    window.close()
+    app.processEvents()

@@ -35,6 +35,11 @@ def read_text_table(path: Path, read_plain: Callable[[Path], pd.DataFrame]) -> p
     raw = path.read_bytes()
     if not raw.strip():
         raise ValueError(f"'{path.name}' is empty.")
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        raise ValueError(
+            f"'{path.name}' is UTF-16 text, which the built-in text loaders do not read. "
+            "Choose a loader plugin for this instrument in the Data Loader menu."
+        )
     if b"\x00" in raw[:8192]:
         raise ValueError(f"'{path.name}' is a binary file, not a text table; PhysPlot cannot read this format.")
     plain, plain_error = None, None
