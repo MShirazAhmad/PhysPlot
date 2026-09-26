@@ -10,8 +10,8 @@ Prerequisites
 
 Python 3.12 is the recommended default because the Qt/FigureForge dependency
 stack has reliable wheels on macOS and Windows. PhysPlot is not yet published on
-PyPI; install it with the macOS command below, the Windows installer, or from
-source.
+PyPI; install it with the one-command installers below (macOS or Windows), the
+Windows setup program, or from source.
 
 macOS: one command
 ------------------
@@ -34,6 +34,23 @@ Run the same command again to update. Uninstall with
 ``rm -rf ~/.physplot ~/Applications/PhysPlot.app``; your files in
 ``Documents/PhysPlot`` are kept. Set ``PHYSPLOT_REF`` to install another branch
 or tag (``curl … | PHYSPLOT_REF=<ref> bash``).
+
+Windows: one command
+--------------------
+
+Open **PowerShell** and paste:
+
+.. code-block:: powershell
+
+   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+
+The script finds Python 3.11–3.13 through the ``py`` launcher or ``PATH`` (or
+installs Python 3.12 with ``winget``), downloads PhysPlot and installs it with its
+dependencies into ``%LOCALAPPDATA%\PhysPlot``, and adds a **PhysPlot** shortcut
+to the Start menu. Close PhysPlot and run the same command again to update.
+Uninstall by deleting ``%LOCALAPPDATA%\PhysPlot`` and the Start-menu shortcut;
+your files in ``Documents\PhysPlot`` are kept. Set ``$env:PHYSPLOT_REF`` first
+to install another branch or tag.
 
 Install from source
 -------------------

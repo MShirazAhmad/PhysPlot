@@ -31,10 +31,34 @@ Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
 - **A specific version:** put `PHYSPLOT_REF=<branch or tag>` before `bash`, for
   example `… | PHYSPLOT_REF=indevelopment bash`.
 
-### Windows
+### Windows: one command
 
-Run the installer (`PhysPlot-<version>-Windows-Setup.exe`). It installs the app and
-copies the sample data to `Documents\PhysPlot\test_data`.
+Open **PowerShell** (Start menu → type *PowerShell*) and paste:
+
+```powershell
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+```
+
+This does the same three things as on macOS:
+
+1. **Python.** Finds Python 3.11–3.13 (through the `py` launcher or `PATH`). If there
+   is none, it installs Python 3.12 with `winget`; accept its prompts. Without
+   `winget`, it asks you to install Python 3.12 from
+   [python.org](https://www.python.org/downloads/windows/) (tick *Add python.exe to
+   PATH*) and run the command again.
+2. **PhysPlot.** Downloads PhysPlot and installs it with its dependencies into
+   `%LOCALAPPDATA%\PhysPlot`. The first install takes a few minutes.
+3. **Shortcut.** Adds **PhysPlot** to the Start menu, with the PhysPlot icon.
+
+- **Update:** close PhysPlot, then run the same command again.
+- **Uninstall:** delete `%LOCALAPPDATA%\PhysPlot` and the PhysPlot Start-menu
+  shortcut (the script prints the exact command). Your files in
+  `Documents\PhysPlot\` are kept.
+- **A specific version:** run `$env:PHYSPLOT_REF = "<branch or tag>"` first.
+
+A classic setup program (`PhysPlot-<version>-Windows-Setup.exe`) can also be built with
+`scripts/build_windows_installer.ps1`; it additionally copies the sample data to
+`Documents\PhysPlot\test_data`.
 
 ### From source (any system)
 

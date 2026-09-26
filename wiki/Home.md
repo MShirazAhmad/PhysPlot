@@ -8,17 +8,23 @@ whole folders of files.
 
 ![PhysPlot main window](images/getting-started/start_01_window_tour.png)
 
-## Install on macOS
+## Install
 
-Paste this into **Terminal**. It installs PhysPlot and creates **PhysPlot.app** in
-`~/Applications`:
+**macOS**: paste this into **Terminal**. It installs PhysPlot and creates
+**PhysPlot.app** in `~/Applications`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
 ```
 
-Windows users run the PhysPlot installer. Details and other options are in
-[Getting Started](Getting-Started#install).
+**Windows**: paste this into **PowerShell**. It installs PhysPlot and adds it to
+the Start menu:
+
+```powershell
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+```
+
+Details and other options are in [Getting Started](Getting-Started#install).
 
 ## Start here
 
