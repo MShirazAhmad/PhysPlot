@@ -64,3 +64,23 @@ def test_plot_module_step_replays_lsq_fit_overlay(tmp_path):
 
     runner.plot_with_module("basic", "scatter")
     assert runner.fit_result is None
+
+
+def test_set_roles_is_recorded_so_exported_sequences_replay_without_manual_roles(tmp_path):
+    pp = PhysPlot()
+    pp.load(pd.DataFrame({"Time": [0, 1, 2], "Voltage": [1.0, 2.0, 3.0]}), loader="dataframe")
+    pp.set_roles(x="Time", y="Voltage")
+    pp.plot_with_module("basic", "line")
+    path = pp.save_workflow(tmp_path / "workflow.py")
+
+    runner = PhysPlot()
+    runner.load(pd.DataFrame({"Time": [0, 1, 2], "Voltage": [2.0, 4.0, 6.0]}), loader="dataframe")
+    runner.run_workflow(load_workflow(path))
+
+    assert [type(step).__name__ for step in pp.workflow] == ["SetRoleStep", "PlotModuleStep"]
+    assert runner.dataset.column_roles["Time"] == "X"
+    assert isinstance(runner.last_figure, Figure)
+    assert len(runner.workflow) == 0
+    import matplotlib.pyplot as plt
+
+    plt.close("all")
