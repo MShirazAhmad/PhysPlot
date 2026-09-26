@@ -68,8 +68,8 @@ def load_input(physplot, path, steps, loader="auto") -> list:
     """Load ``path`` the way ``steps`` loads data and return the remaining steps.
 
     A personal loader plugin recorded in the sequence's ``LoadDataStep`` is
-    reused for the new file, so sequences built on plugin formats (e.g. OES
-    ``.HRF``) run headlessly and in bulk. Otherwise ``loader`` is used.
+    reused for the new file, so sequences built on plugin formats (e.g. Rigaku
+    ``.ras``) run headlessly and in bulk. Otherwise ``loader`` is used.
     """
     template = plugin_load_step(steps)
     if template is not None and loader == "auto":

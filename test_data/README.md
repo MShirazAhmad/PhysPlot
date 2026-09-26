@@ -2,7 +2,7 @@
 
 Example files for trying PhysPlot and for the test suite. The Windows installer
 copies this folder to `Documents\PhysPlot\test_data`. Files in the instrument
-folders (`XRD/`, `EDS/`, `XPS/`, `OES/`) keep the exact layout of real instrument
+folders (`XRD/`, `EDS/`, `XPS/`, `OES/`, `Thermal/`, `FTIR/`) keep the exact layout of real instrument
 exports, but their values are simulated and their metadata (operators, paths,
 projects, dates) is replaced with placeholders.
 
@@ -17,6 +17,10 @@ projects, dates) is replaced with placeholders.
 | `XRD/quick_scan.xrdml` | Panalytical XRDML 1.7, one scan | Auto Loader | `2Theta`, `Intensity` (238 points) |
 | `XRD/repeated_scans.xrdml` | Panalytical XRDML 1.7, 3 scans | Auto Loader | `2Theta`, `Intensity` (sum of scans), `Intensity 1`–`3` |
 | `XRD/schema1.5_scan.XRDML` | Panalytical XRDML 1.5 | Auto Loader | `2Theta`, `Intensity` (6155 points) |
+| `XRD/smartlab_si_powder.ras` | Rigaku SmartLab `.ras`, Si powder with an attenuated peak | Auto Loader (Rigaku RAS Loader plugin) | `2Theta`, `Intensity` (attenuator-corrected) |
+| `XRD/anneal_series/tio2_400C.ras`–`tio2_800C.ras` | Rigaku `.ras`, TiO₂ annealed at 400/600/800 °C (anatase → rutile) | Auto Loader; bulk run a sequence recorded on one of them | `2Theta`, `Intensity` |
+| `Thermal/tga_calcium_oxalate.txt` | TA Instruments Universal Analysis TGA export (UTF-16) | TA Instruments TGA/DSC Loader | `Time (min)`, `Temperature (°C)`, `Weight (%)`, `Weight (mg)`, purge flows |
+| `FTIR/polystyrene_film.jdx` | JCAMP-DX FTIR transmission spectrum | Auto Loader (JCAMP-DX Spectrum Loader plugin) | `Wavenumber (1/cm)`, `Transmittance` |
 | `XRD/panalytical_export.csv` | Panalytical CSV export with a `[Measurement conditions]` header | Auto Loader | `Angle`, `Intensity` |
 | `XRD/origin_peak_fit.csv` | Origin peak-fit table, tab-separated with row labels | Auto Loader | Fit parameters per peak |
 | `EDS/edax_map.csv` | EDAX EDS map with metadata header | Auto Loader | `X/Y` row index and one column per map column |
@@ -29,6 +33,7 @@ Try these:
 
 - **XRD baseline removal:** open `XRD/quick_scan.xrdml`, then apply
   `XRD: Baseline Remove` to `Intensity` in Simple Mode.
-- **Bulk run over spectra:** import `OES/spectrum_1.HRF`,
-  apply a transformation, then in **Advanced → Run Sequence** set the input
-  folder to `test_data/OES`. All three `.HRF` files are processed.
+- **Bulk run over a series:** import `XRD/anneal_series/tio2_400C.ras`, apply
+  `XRD: Baseline Remove`, then in **Advanced → Run Sequence** set the input folder
+  to `test_data/XRD/anneal_series`. All three `.ras` scans are processed (the
+  Sequence Walkthrough on the wiki does this step by step).
