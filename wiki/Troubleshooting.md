@@ -43,7 +43,7 @@ Auto Loader has no loader for this extension:
 
 | Message | Meaning and fix |
 | --- | --- |
-| `… is a binary file, not a text table` | The file isn't text (for example an AFM `.dat` scan). Export it as text or CSV from the instrument software. |
+| `… is a binary file, not a text table` | The file isn't text (for example a raw scan in a vendor's binary format). Export it as text or CSV from the instrument software. |
 | `… is empty.` | The file has no content. |
 | `… is not a readable Excel workbook` | The file is damaged or isn't really `.xls`/`.xlsx`. Re-save it from Excel. |
 | `Column '…' does not contain numeric values for transformation.` | The input column is text. Pick a numeric input column. |

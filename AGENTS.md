@@ -52,6 +52,13 @@ python -m build
 python -m twine check dist/*
 ```
 
+The UI Reference and Sequence Walkthrough are written as wiki pages in `wiki/`.
+After editing them, regenerate their Read the Docs copies in `docs/ui/`:
+
+```bash
+python scripts/sync_wiki_to_docs.py
+```
+
 Use the local ``.venv`` for direct PyQt smoke checks:
 
 ```bash

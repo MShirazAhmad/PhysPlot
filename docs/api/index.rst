@@ -10,6 +10,7 @@ functions, or curve-fitting models.
    :maxdepth: 2
 
    app
+   gui
    utilities
    functions
    curvefitting

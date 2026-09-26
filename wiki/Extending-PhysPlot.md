@@ -69,4 +69,6 @@ def load_data(file_path):
   Without it, choose the loader in **Data Loader** by hand.
 - A loader can also offer its own plotters with `PLOTTERS` (see `config/data_importers/README.md`).
 
-The bundled `oes_hrf_loader.py` is a complete example.
+The bundled `rigaku_ras_loader.py`, `ta_instruments_loader.py` and `jcamp_dx_loader.py` are complete
+examples. The [File-Loader Plugins](https://physplot.readthedocs.io/en/latest/extensions/fileloading.html)
+page walks through each one: the raw file, the loader code, and the result in the GUI.

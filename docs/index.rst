@@ -23,7 +23,8 @@ Main Features
 - Spreadsheet-first data entry and import with explicit column-role dropdowns.
 - Instrument exports load directly: Malvern Panalytical ``.xrdml`` and CSV,
   EDAX EDS maps and SmartQuant tables, EMSA ``.msa`` spectra, PHI XPS scans,
-  OES ``.HRF`` spectra, and plain CSV/TXT/Excel tables.
+  Rigaku ``.ras`` scans, TA Instruments TGA/DSC exports, JCAMP-DX spectra, and plain
+  CSV/TXT/Excel tables.
 - Replayable protocol sequences: every import, transformation (including plugin
   functions such as ``XRD: Baseline Remove``), role change, and plot is recorded
   and can be replayed, exported as Python, and run over whole folders.
@@ -54,8 +55,11 @@ File Loader plugins
 - Add ``.py`` files to ``config/data_importers/`` with ``title`` and
   ``load_data(file_path)``, and optionally ``COLUMN_NAMES``,
   ``DEFAULT_COLUMN_ROLES``, and ``FILE_EXTENSIONS``.
-- A plugin that declares ``FILE_EXTENSIONS`` (for example ``[".hrf"]``) is used
+- A plugin that declares ``FILE_EXTENSIONS`` (for example ``[".ras"]``) is used
   by **Auto Loader**, by replayed sequences, and by bulk runs for those files.
+- Worked examples with raw files, loader code and GUI results (Rigaku ``.ras`` XRD
+  scans, TA Instruments TGA/DSC exports, JCAMP-DX spectra) are in
+  :doc:`extensions/fileloading`.
 - Built-in loaders: ``auto``, ``csv``, ``txt``, ``excel``, ``nanoindentation``,
   ``xrdml``, and ``dataframe``.
 - Loaders appear in Simple Mode's **Data Importer** panel.
@@ -90,6 +94,8 @@ Project links
 
    installation
    getting_started
+   ui/sequence_walkthrough
+   ui/index
    user_guide/data_entry
    user_guide/data_import
    user_guide/data_manipulation

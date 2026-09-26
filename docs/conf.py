@@ -40,6 +40,8 @@ autodoc_mock_imports = ['PyQt6', 'PySide6', 'FigureForge', 'appdirs', 'matplotli
 autodoc_typehints = 'signature'
 autodoc_preserve_defaults = True
 add_module_names = False
+# Lets Markdown pages link to headings, e.g. ``page.md#status-column``.
+myst_heading_anchors = 3
 
 templates_path = ['_templates']
 # Internal planning notes are kept in the repo but not published.

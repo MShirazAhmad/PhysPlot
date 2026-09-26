@@ -12,7 +12,9 @@ below lists what it reads. Every example is in `test_data/`.
 | EDAX eZAF SmartQuant | `.csv` (quoted) | `EDS/smartquant_spot.csv` | `Element`, `Weight %`, `Atomic %`, … |
 | EMSA/MAS spectrum | `.msa` | `EDS/eds_spectrum.msa` | Energy, counts |
 | PHI XPS scan | `.csv` (spectrum stored as rows) | `XPS/phi_c1s_scan.csv` | Binding energy, counts |
-| OES spectrum | `.HRF` | `OES/spectrum_1.HRF` | `Wavelength` (X), `Intensity` (Y) |
+| Rigaku SmartLab XRD | `.ras` | `XRD/smartlab_si_powder.ras`, `XRD/anneal_series/` | `2Theta` (X), `Intensity` (Y), attenuator-corrected |
+| JCAMP-DX spectrum (FTIR, Raman, UV-Vis) | `.jdx`, `.dx` | `FTIR/polystyrene_film.jdx` | e.g. `Wavenumber (1/cm)` (X), `Transmittance` (Y) |
+| TA Instruments TGA/DSC export | `.txt` (choose **TA Instruments TGA/DSC Loader**) | `Thermal/tga_calcium_oxalate.txt` | Signals named from the file, plus `Weight (%)` |
 | Plain tables | `.csv`, `.txt`, `.dat`, `.tsv`, `.xls`, `.xlsx` | `sample_linear.csv` | As in the file |
 
 ## How PhysPlot finds the data in a text file
@@ -84,18 +86,26 @@ The XRDML loader stores the measurement details in the dataset metadata
 (`dataset.metadata["xrdml"]`): wavelengths (Kα1, Kα2, ratio), anode, tube voltage and
 current, sample name, 2θ start/end/step, counting time, scan count and start time.
 
-### OES `.HRF` spectrum
+### Rigaku `.ras` scan (loader plugin)
 
-![OES spectrum loaded with Auto Loader](images/instrument-data/data_06_oes_hrf.png)
+![Rigaku scan loaded with Auto Loader](images/instrument-data/data_06_rigaku_ras.png)
 
-1. **Columns.** Auto Loader uses the OES HRF Loader plugin because that plugin
-   declares `FILE_EXTENSIONS = [".hrf"]`. `Wavelength` becomes **X** and `Intensity`
-   becomes **Y**. `Intensity_norm` is a `normalize_max` transformation added afterwards.
-2. **Input.** Set to `Intensity`, the Y column, as soon as the file loads.
+1. **Auto Loader** uses the Rigaku RAS Loader plugin, because that plugin declares
+   `FILE_EXTENSIONS = [".ras"]`.
+2. **Import Data.**
+3. **Columns** `2Theta` and `Intensity`. Each intensity is the recorded counts times the
+   attenuator factor stored next to it, so strong peaks keep their true height.
+4. **Roles:** `2Theta` is **X**, `Intensity` is **Y**.
+
+The JCAMP-DX loader works the same way for `.jdx` files. TA Instruments exports are
+`.txt` files, which the built-in TXT loader also claims, so choose **TA Instruments
+TGA/DSC Loader** in **Data Loader** first. All three are explained step by step, from the
+raw file to the result in the table, on the
+[File-Loader Plugins](https://physplot.readthedocs.io/en/latest/extensions/fileloading.html) page.
 
 ## Files PhysPlot cannot read
 
-- **Binary files**, for example AFM `.dat`, `.pni` and `.lin` scans, are reported as
+- **Binary files**, for example raw instrument scans saved in a vendor's binary format, are reported as
   *"… is a binary file, not a text table"*.
 - **Unknown extensions** get a message listing the built-in formats and explaining how
   to add one with a loader plugin. See [Troubleshooting](Troubleshooting) and
