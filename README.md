@@ -74,11 +74,21 @@ PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** i
 
 ---
 
-## Option 2 — Windows installer
+## Option 2 — Windows: one command
 
-When a release on the [Releases page](https://github.com/MShirazAhmad/PhysPlot/releases)
-includes `PhysPlot-<version>-Windows-Setup.exe`, download and run it. To build the
-installer yourself, run `scripts/build_windows_installer.ps1` on Windows.
+Open **PowerShell** and paste:
+
+```powershell
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+```
+
+The script finds Python 3.11–3.13 (or installs Python 3.12 with `winget`), installs
+PhysPlot and its dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot**
+Start-menu shortcut. Close PhysPlot and run it again to update.
+
+A classic setup program can be built with `scripts/build_windows_installer.ps1`; when a
+release on the [Releases page](https://github.com/MShirazAhmad/PhysPlot/releases)
+includes `PhysPlot-<version>-Windows-Setup.exe`, you can download that instead.
 
 ---
 
