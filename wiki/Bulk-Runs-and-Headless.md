@@ -2,19 +2,23 @@
 
 A protocol built in the GUI can be applied to every file in a folder, from the
 command line, or from Python. All of these run the same steps as
-**Apply This Sequence**.
+**Apply This Sequence**. For a step-by-step version with screenshots, from recording
+to saving to a bulk run, see the [Sequence Walkthrough](Sequence-Walkthrough).
 
 ## Run Sequence (bulk run in the GUI)
 
-This example records a protocol on one OES spectrum, then runs it over the folder:
+This example runs the XRD protocol from the [Sequence Walkthrough](Sequence-Walkthrough)
+over a folder of three Rigaku `.ras` scans:
 
-1. Import `test_data/OES/spectrum_1.HRF` with **Auto Loader**.
-2. Apply `normalize_max` to `Intensity`, with output `Intensity_norm`.
-3. Open **Advanced → Run Sequence**.
+1. Import `test_data/XRD/anneal_series/tio2_400C.ras` with **Auto Loader**.
+2. Apply `XRD: Baseline Remove` to `Intensity` (output `Intensity_bg`), then
+   `normalize_max` to `Intensity_bg` (output `Intensity_norm`), and plot.
+3. Save it with **Export Sequence.py** as `xrd_normalized.py`.
+4. Open **Advanced → Run Sequence**.
 
 ![Run Sequence bulk run](images/bulk/bulk_01_run_sequence.png)
 
-1. **Input Folder.** The folder of files to process (`test_data/OES`).
+1. **Input Folder.** The folder of files to process (`test_data/XRD/anneal_series`).
 2. **Sequence File.** Optional. Leave it blank to use the current Build Protocol
    sequence, or choose an exported `Sequence.py`.
 3. **Output Folder.** Each input file gets its own subfolder here.
@@ -25,7 +29,7 @@ This example records a protocol on one OES spectrum, then runs it over the folde
 
 **Which files are processed**
 
-- If the protocol was recorded on a plugin format (for example `.HRF`), only files
+- If the protocol was recorded on a plugin format (for example `.ras`), only files
   with that extension are processed, using the same loader.
 - Otherwise, all table formats are processed: `.csv`, `.txt`, `.dat`, `.tsv`, `.msa`,
   `.xls`, `.xlsx` and `.xrdml`.
@@ -33,7 +37,7 @@ This example records a protocol on one OES spectrum, then runs it over the folde
 **What each output folder contains**
 
 - `data.csv`: the final table.
-- `columns.csv`: column metadata and provenance.
+- `columns.csv`: one row per column with its number, name, role, type and unit, and whether a transformation created it.
 - `workflow.py`: the protocol that produced it.
 - `plot.png` and `fit.json`, when the protocol plots or fits.
 
@@ -55,7 +59,7 @@ physplot run-bulk Sequence.py --input-folder scans/ --output-folder outputs/bulk
 
 Add `--allow-column-number-fallback` to use column numbers when a column name is
 missing, as the GUI does. A protocol recorded on a plugin format (for example
-`.HRF`) reuses that plugin for each file.
+`.ras`) reuses that plugin for each file.
 
 ## From Python or a notebook
 
@@ -66,7 +70,7 @@ An exported `Sequence.py` is ordinary Python. It contains `WORKFLOW_STEPS`,
 import runpy
 
 sequence = runpy.run_path("Sequence.py")
-pp = sequence["run"](input_path="test_data/OES/spectrum_2.HRF", output_dir="outputs/spectrum_2")
+pp = sequence["run"](input_path="test_data/XRD/anneal_series/tio2_600C.ras", output_dir="outputs/tio2_600C")
 print(pp.dataset.dataframe.head())
 ```
 

@@ -10,8 +10,10 @@ Supported formats
 - ``.xls``, ``.xlsx``
 - Malvern Panalytical ``.xrdml`` XRD scans
 - nanoindentation files through the built-in nanoindentation loader
-- OES ``.HRF`` spectra through the ``OES HRF Loader`` plugin (also picked by
-  **Auto Loader**)
+- Rigaku ``.ras`` XRD scans and JCAMP-DX ``.jdx``/``.dx`` spectra through bundled
+  loader plugins (also picked by **Auto Loader**)
+- TA Instruments TGA/DSC text exports through the **TA Instruments TGA/DSC Loader**
+  plugin (choose it in **Data Loader**)
 - any format a loader plugin declares in ``FILE_EXTENSIONS``
 - DataFrames through the backend API
 
@@ -30,11 +32,11 @@ give at least two numeric columns, PhysPlot finds the numeric table itself:
 - It turns spectra stored as rows, such as PHI XPS energy and count rows,
   into columns.
 
-Binary files (for example AFM ``.dat`` scans), empty files and damaged
+Binary files (for example raw scans in a vendor's binary format), empty files and damaged
 workbooks are reported by name instead of with a parser traceback.
 
 Sequences recorded on a file loaded through a loader plugin, such as
-``.HRF``, reuse that plugin for **Run Sequence** bulk runs,
+``.ras``, reuse that plugin for **Run Sequence** bulk runs,
 ``physplot run-workflow`` and an exported ``Sequence.py``'s ``run()``.
 Bulk runs then process the files in the folder that have the same extension.
 

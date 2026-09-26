@@ -23,9 +23,9 @@ specific one.
 
 - **Built-in loaders:** CSV, TXT, Excel, Nanoindentation, XRDML (Panalytical XRD).
   The DataFrame loader is disabled; it is used by the API only.
-- **Loader plugins** from `config/data_importers/`: Default Loader, ImageJ Pore Results Loader,
-  OES HRF Loader. Auto Loader also uses a plugin when the plugin declares the file's
-  extension (see [Instrument Data](Instrument-Data)).
+- **Loader plugins** from `config/data_importers/`, for example the Rigaku RAS (XRD),
+  TA Instruments TGA/DSC and JCAMP-DX Spectrum loaders. Auto Loader also uses a plugin
+  when the plugin declares the file's extension (see [Instrument Data](Instrument-Data)).
 
 Click **Import Data** and choose the file.
 
@@ -101,8 +101,9 @@ The **Figure Editor** (FigureForge) opens in its own window:
 - The **Figure Editor** menu has PhysPlot actions. **Save as Template** stores the
   current styling as a template you can pick in **Template** next time.
 
-> Edits made in the Figure Editor are not recorded in the protocol. To reuse a style
-> in replays and bulk runs, save it as a template and choose it in **Template**.
+> Edits made in the Figure Editor are not recorded in the protocol, and neither is the
+> Template choice. A template restyles plots you generate in the GUI. Replays and bulk
+> runs draw each plot with the plotter's own look plus any recorded LSQ fit.
 
 ## 5. See the recorded protocol
 
@@ -155,5 +156,7 @@ Switch to **Advanced**. **Build Protocol** shows every step PhysPlot recorded:
 ## Where next
 
 - Load other instruments' files: **[Instrument Data](Instrument-Data)**.
+- Save, reopen, edit and bulk-run a protocol step by step: **[Sequence Walkthrough](Sequence-Walkthrough)**.
 - Run this protocol over a folder of scans: **[Bulk Runs and Headless Use](Bulk-Runs-and-Headless)**.
+- Look up any control: **[UI Reference](UI-Reference)**.
 - Add your own functions or loaders: **[Extending PhysPlot](Extending-PhysPlot)**.

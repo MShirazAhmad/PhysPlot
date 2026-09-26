@@ -69,7 +69,7 @@ scrolls sideways, so PhysPlot fits laptop screens.
 
 1. In **1. Data Importer**, keep **Auto Loader** selected. It picks the loader
    from the file extension: CSV, TXT/DAT/TSV/MSA, Excel, XRDML, and any format
-   a loader plugin declares (for example OES ``.HRF``).
+   a loader plugin declares (for example Rigaku ``.ras`` or JCAMP-DX ``.jdx``).
 2. Click **Import Data** and choose the file.
 
 Instrument exports load directly, even when they have metadata above the data,
@@ -156,9 +156,10 @@ values sit near zero between the peaks.
 figure's parts. **Property Inspector** edits titles, labels, legends, axes,
 spines, markers, lines, and fonts. Save the styling with
 **Figure Editor > PhysPlot > Save as Template**, then choose it in Simple Mode's
-**Template** dropdown for the next plot. Edits made in the Figure Editor are not
-recorded in the protocol; templates are the way to reuse a style in replays and
-bulk runs.
+**Template** dropdown for the next plot. Neither Figure Editor edits nor the
+Template choice are recorded in the protocol: a template restyles plots you generate
+in the GUI, while replays and bulk runs draw each plot with the plotter's own look
+plus any recorded LSQ fit.
 
 .. _gui-curve-fitting-and-fit-labels:
 
@@ -235,16 +236,17 @@ See :doc:`user_guide/protocol_sequences` for details, and
 8. File Loaders for Instrument Formats
 --------------------------------------
 
-.. image:: _static/gui_walkthrough/data_06_oes_hrf.png
-   :alt: OES spectrum loaded through a loader plugin
-   :width: 900px
+.. image:: _static/loaders/loader_ras_gui.png
+   :alt: Rigaku XRD scan loaded through a loader plugin
+   :width: 700px
 
-**Figure 13. An OES ``.HRF`` spectrum opened with Auto Loader.**
+**Figure 13. A Rigaku SmartLab ``.ras`` scan opened with Auto Loader.**
 
-1. The **OES HRF Loader** plugin declares ``FILE_EXTENSIONS = [".hrf"]``, so
-   Auto Loader uses it. ``Wavelength`` becomes **X** and ``Intensity`` becomes **Y**.
-   ``Intensity_norm`` is a ``normalize_max`` transformation added afterwards.
-2. **Input** is set to ``Intensity``, the **Y** column.
+1. **Auto Loader** uses the **Rigaku RAS Loader (XRD)** plugin, because it declares
+   ``FILE_EXTENSIONS = [".ras"]``.
+2. **Import Data**.
+3. The loader's columns, ``2Theta`` and ``Intensity`` (attenuator-corrected).
+4. The loader's roles: ``2Theta`` is **X**, ``Intensity`` is **Y**.
 
 Loader plugins live in ``config/data_importers/``. Each defines ``title`` and
 ``load_data(file_path)``, and optionally ``COLUMN_NAMES``,
@@ -261,7 +263,8 @@ Click **Export Data** in **1. Data Importer** and choose a folder. PhysPlot
 writes:
 
 - ``data.csv``: the current table.
-- ``columns.csv``: column metadata and provenance.
+- ``columns.csv``: one row per column with its number, name, role, type and unit, and
+  whether a transformation created it.
 - ``workflow.py``: the protocol that produced the table.
 - ``plot.png`` and ``fit.json``: when a plot or fit exists.
 

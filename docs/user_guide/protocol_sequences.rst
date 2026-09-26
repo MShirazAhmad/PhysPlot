@@ -5,6 +5,11 @@ Advanced Mode's **Build Protocol** tab lists every recorded step of the
 current analysis. The same steps are exported by **Export Sequence.py** and
 replayed by **Run Sequence** and the ``physplot`` command line.
 
+For a step-by-step example with screenshots (record a protocol, save it, reopen and
+edit it, then bulk-process a folder), see :doc:`../ui/sequence_walkthrough`. Every
+control on these tabs is described in :doc:`../ui/build_protocol` and
+:doc:`../ui/run_sequence`.
+
 Step status
 -----------
 

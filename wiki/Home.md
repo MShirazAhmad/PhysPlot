@@ -31,11 +31,28 @@ Details and other options are in [Getting Started](Getting-Started#install).
 1. **[Getting Started](Getting-Started)**: install, launch, and a tour of the window.
 2. **[GUI Walkthrough](GUI-Walkthrough)**: one complete session with screenshots,
    from importing an XRD scan to a recorded, replayable protocol.
+3. **[Sequence Walkthrough](Sequence-Walkthrough)**: record a protocol on one file,
+   save it as `Sequence.py`, reopen and edit it, and bulk-process a whole folder.
+
+## UI Reference
+
+Every panel, control, menu, dialog and message, with annotated screenshots:
+[Overview](UI-Reference) ·
+[Main Window, Menus, Status Bar](UI-Main-Window) ·
+[Data Table](UI-Data-Table) ·
+[Data Importer](UI-Data-Importer) ·
+[Mathematical Transformation](UI-Mathematical-Transformation) ·
+[Plotter Module](UI-Plotter-Module) ·
+[Build Protocol](UI-Build-Protocol) ·
+[Run Sequence](UI-Run-Sequence) ·
+[Figure Editor and Plot Windows](UI-Figure-Editor) ·
+[Dialogs and Messages](UI-Dialogs-and-Messages)
 
 ## Guides
 
 - **[Instrument Data](Instrument-Data)**: loading XRDML, Panalytical CSV,
-  EDAX EDS, EMSA, PHI XPS and OES `.HRF` files, and what each becomes in the table.
+  EDAX EDS, EMSA, PHI XPS, Rigaku `.ras`, TA Instruments and JCAMP-DX files, and what each
+  becomes in the table.
 - **[Replayable Plugin Transformations](Replayable-Plugin-Transformations)**:
   `x^2`, `sin(x)`, `XRD: Baseline Remove` and your own functions, recorded and replayed.
 - **[Bulk Runs and Headless Use](Bulk-Runs-and-Headless)**: Run Sequence over a
