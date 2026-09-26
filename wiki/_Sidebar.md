@@ -4,6 +4,7 @@
 - [Getting Started](Getting-Started)
 - [GUI Walkthrough](GUI-Walkthrough)
 - [Sequence Walkthrough](Sequence-Walkthrough)
+- [Video Tutorials](Video-Tutorials)
 
 **UI Reference**
 
