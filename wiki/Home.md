@@ -1,20 +1,39 @@
 # PhysPlot Wiki
 
 PhysPlot is a table-first scientific plotting application. You load data into
-the central table, assign column roles, apply transformations that become
-replayable protocol steps, and generate plots through backend plotter modules.
-The same protocol sequence can be exported and run headlessly or in bulk.
+the central table, assign column roles, apply transformations that are
+recorded as a replayable protocol, and plot through backend plotter modules.
+The same protocol can be exported as ordinary Python and run headlessly or over
+whole folders of files.
 
-Full user and API documentation: <https://physplot.readthedocs.io/en/latest/>
+![PhysPlot main window](images/getting-started/start_01_window_tour.png)
+
+## Start here
+
+1. **[Getting Started](Getting-Started)**: install, launch, and a tour of the window.
+2. **[GUI Walkthrough](GUI-Walkthrough)**: one complete session with screenshots,
+   from importing an XRD scan to a recorded, replayable protocol.
 
 ## Guides
 
-- [Replayable Plugin Transformations](Replayable-Plugin-Transformations): use
-  `config/transformations/` functions (`x^2`, `sin(x)`, custom files) in Simple
-  Mode and replay them with Apply This Sequence, exported `Sequence.py`, the
-  `physplot` CLI, and bulk runs.
+- **[Instrument Data](Instrument-Data)**: loading XRDML, Panalytical CSV,
+  EDAX EDS, EMSA, PHI XPS and OES `.HRF` files, and what each becomes in the table.
+- **[Replayable Plugin Transformations](Replayable-Plugin-Transformations)**:
+  `x^2`, `sin(x)`, `XRD: Baseline Remove` and your own functions, recorded and replayed.
+- **[Bulk Runs and Headless Use](Bulk-Runs-and-Headless)**: Run Sequence over a
+  folder, the `physplot` command line, and exported `Sequence.py` files.
+- **[Extending PhysPlot](Extending-PhysPlot)**: writing transformation and file
+  loader plugins in `config/`.
+- **[Troubleshooting](Troubleshooting)**: every error dialog, what it means, and how to fix it.
+
+## Try it with the sample data
+
+The repository's `test_data/` folder has an example of every supported format,
+installed to `Documents\PhysPlot\test_data` on Windows. The files in its instrument
+folders keep the layout of real exports, with simulated values.
 
 ## Links
 
+- [Full documentation (Read the Docs)](https://physplot.readthedocs.io/en/latest/)
 - [Source code](https://github.com/MShirazAhmad/PhysPlot)
 - [Report an issue](https://github.com/MShirazAhmad/PhysPlot/issues)

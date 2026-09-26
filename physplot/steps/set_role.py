@@ -23,7 +23,7 @@ class SetRoleStep(WorkflowStep):
         self.roles = roles or {}
 
     def apply(self, physplot, allow_column_number_fallback: bool = False):
-        return physplot.set_roles(**self.roles)
+        return physplot.set_roles(record=False, **self.roles)
 
     def to_code(self) -> str:
         return "SetRoleStep(\n" f"    roles={self.roles!r},\n" ")"

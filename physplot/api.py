@@ -49,7 +49,8 @@ class PhysPlot:
         self.dataset = get_loader(loader).load(path, dataset_name=dataset_name)
         return self.dataset
 
-    def set_roles(self, **roles):
+    def set_roles(self, record=True, **roles):
+        """Assign column roles; recorded as a ``SetRoleStep`` so replays keep them."""
         self._require_dataset()
         role_names = {
             "x": "X",
@@ -66,6 +67,8 @@ class PhysPlot:
         for role, column_reference in roles.items():
             if column_reference is not None:
                 self.dataset.set_role(column_reference, role_names.get(role.lower(), role))
+        if record:
+            self.workflow.append(SetRoleStep({role: column for role, column in roles.items() if column is not None}))
         return self
 
     def transform(self, input_column, function_name, output=None, record=True, **params):
