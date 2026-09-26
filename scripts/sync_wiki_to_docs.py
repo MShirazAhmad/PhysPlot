@@ -1,4 +1,4 @@
-"""Copy the wiki's UI Reference and Sequence Walkthrough pages into the Sphinx docs.
+"""Copy the wiki's UI Reference, Sequence Walkthrough and Video Tutorials pages into the Sphinx docs.
 
 The GitHub wiki pages in ``wiki/`` are the source. After editing one of them, run::
 
@@ -34,6 +34,7 @@ PAGES = {
     "UI-Figure-Editor": "figure_editor",
     "UI-Dialogs-and-Messages": "dialogs_and_messages",
     "Sequence-Walkthrough": "sequence_walkthrough",
+    "Video-Tutorials": "videos",
 }
 # Wiki pages that are not mirrored -> the docs page that covers the same ground.
 OTHER_DOCS = {
@@ -45,8 +46,9 @@ OTHER_DOCS = {
     "Bulk-Runs-and-Headless": "../user_guide/protocol_sequences.rst",
     "Extending-PhysPlot": "../extensions/index.rst",
 }
-# Pages listed in the UI Reference table of contents (the walkthrough sits in the main one).
-UI_TOCTREE = [name for page, name in PAGES.items() if page not in {"UI-Reference", "Sequence-Walkthrough"}]
+# Pages listed in the UI Reference table of contents (the walkthrough and videos sit in the main one).
+UI_TOCTREE = [name for page, name in PAGES.items()
+              if page not in {"UI-Reference", "Sequence-Walkthrough", "Video-Tutorials"}]
 
 LINK = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)\s]+)\)")
 IMAGE = re.compile(r"!\[([^\]]*)\]\(images/([^)\s]+)\)")

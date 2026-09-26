@@ -17,6 +17,15 @@ Install on macOS with one command (details in :doc:`installation`):
 
    curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
 
+Video tutorials
+---------------
+
+Short live recordings, one per feature, are on YouTube in two playlists:
+`PhysPlot Basics <https://www.youtube.com/playlist?list=PLPkYnHekjU24>`_ (Simple Mode)
+and `PhysPlot Advanced <https://www.youtube.com/playlist?list=PLelbbYnCXEdU>`_
+(protocols, bulk runs, writing file loaders and plotter modules). Every video is
+listed in :doc:`ui/videos`.
+
 Main Features
 -------------
 
@@ -94,6 +103,7 @@ Project links
 
    installation
    getting_started
+   ui/videos
    ui/sequence_walkthrough
    ui/index
    user_guide/data_entry

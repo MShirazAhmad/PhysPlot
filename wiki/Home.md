@@ -33,6 +33,10 @@ Details and other options are in [Getting Started](Getting-Started#install).
    from importing an XRD scan to a recorded, replayable protocol.
 3. **[Sequence Walkthrough](Sequence-Walkthrough)**: record a protocol on one file,
    save it as `Sequence.py`, reopen and edit it, and bulk-process a whole folder.
+4. **[Video Tutorials](Video-Tutorials)**: short live recordings, one per feature, in
+   two YouTube playlists:
+   [PhysPlot Basics](https://www.youtube.com/playlist?list=PLPkYnHekjU24) and
+   [PhysPlot Advanced](https://www.youtube.com/playlist?list=PLelbbYnCXEdU).
 
 ## UI Reference
 
