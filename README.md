@@ -59,33 +59,26 @@ Reuse or Run in Bulk
 
 # Installation
 
-## Option 1 — Precompiled Application (Recommended)
+## Option 1 — macOS: one command (Recommended on Mac)
 
-Precompiled releases are available for both **macOS** and **Windows**.
+Open **Terminal** and paste:
 
-Download the latest release from:
+```bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+```
 
-https://github.com/MShirazAhmad/PhysPlot/releases
+The script finds Python 3.11–3.13 (or installs Python 3.12 with Homebrew), installs
+PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** in
+`~/Applications`. Run it again to update; uninstall with
+`rm -rf ~/.physplot ~/Applications/PhysPlot.app`.
 
 ---
 
-## Option 2 — Install from PyPI
+## Option 2 — Windows installer
 
-```bash
-python -m pip install python-physplot
-```
-
-Launch the graphical application:
-
-```bash
-physplot-gui
-```
-
-Launch the command-line interface:
-
-```bash
-physplot --version
-```
+When a release on the [Releases page](https://github.com/MShirazAhmad/PhysPlot/releases)
+includes `PhysPlot-<version>-Windows-Setup.exe`, download and run it. To build the
+installer yourself, run `scripts/build_windows_installer.ps1` on Windows.
 
 ---
 

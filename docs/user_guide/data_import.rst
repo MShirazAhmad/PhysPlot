@@ -91,6 +91,6 @@ Use the dropdown at row 0 for each column and choose one of:
 - Group
 - Label
 
-.. image:: ../_static/gui_walkthrough/02_import_file_selection_dialog.png
+.. image:: ../_static/gui_walkthrough/walk_02_data_loader_menu.png
    :alt: Data import and axis assignment
    :width: 700px
