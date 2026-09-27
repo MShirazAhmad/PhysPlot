@@ -23,8 +23,9 @@ _WINDOW = None
 def run_app() -> int:
     """Start the PhysPlot GUI, show the main window, and run the Qt event loop.
 
-    1. Reuses the running ``QApplication`` if there is one, otherwise creates it from
-       ``sys.argv``.
+    1. On Windows, gives the process its own taskbar identity (app ID ``PhysLab.PhysPlot``)
+       so the taskbar shows the PhysPlot logo rather than Python's. Then reuses the running
+       ``QApplication`` if there is one, otherwise creates it from ``sys.argv``.
     2. Sets the application name and display name to ``PhysPlot`` and the organization
        name to ``PhysLab``.
     3. If the PhysPlot logo (``physplot/inc/PhysPlot.png``) exists, sets it as the
@@ -37,6 +38,15 @@ def run_app() -> int:
     :returns: The event loop's exit code, suitable for ``SystemExit``.
     """
     global _WINDOW
+    if sys.platform == "win32":
+        # PhysPlot runs inside pythonw.exe; without an app ID of its own, Windows groups it
+        # with Python and shows Python's icon on the taskbar instead of PhysPlot's.
+        try:
+            import ctypes
+
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("PhysLab.PhysPlot")
+        except (AttributeError, OSError):
+            pass
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv)
     app.setApplicationName("PhysPlot")
     app.setApplicationDisplayName("PhysPlot")
