@@ -2,8 +2,10 @@
 #
 #   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 #
-# Creates %LOCALAPPDATA%\PhysPlot (Python environment and PhysPlot source) and a
-# Start menu shortcut. Close PhysPlot, then run the same command again to update.
+# Needs nothing installed first: without Python 3.11-3.13 it installs Python 3.12 for
+# this user (with winget, or from python.org). Creates %LOCALAPPDATA%\PhysPlot (Python
+# environment and PhysPlot source) and a Start menu shortcut. Close PhysPlot, then run
+# the same command again to update.
 # Uninstall: delete %LOCALAPPDATA%\PhysPlot and the PhysPlot Start menu shortcut.
 #
 # Optional environment variables:
@@ -73,6 +75,11 @@
         } finally { $ErrorActionPreference = $previous }
     }
 
+    function Update-Path {
+        $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
+    }
+
+    # Both ways install Python for this user only, so no administrator rights are needed.
     Say 'Looking for Python 3.11-3.13'
     $python = Find-Python
     if (-not $python) {
@@ -80,12 +87,33 @@
             Say 'Installing Python 3.12 with winget'
             # winget's exit code is not reliable here (an already installed Python gives
             # "no applicable upgrade"), so look for Python again instead of checking it.
+            # The agreement flags stop a fresh Windows from asking about the winget source.
             $previous = $ErrorActionPreference
             $ErrorActionPreference = 'Continue'
-            $wingetArgs = @('install', '--exact', '--id', 'Python.Python.3.12', '--scope', 'user')
+            $wingetArgs = @('install', '--exact', '--id', 'Python.Python.3.12', '--scope', 'user', '--source', 'winget',
+                '--accept-source-agreements', '--accept-package-agreements')
             if ($arm64) { $wingetArgs += @('--architecture', 'x64') }
             try { winget @wingetArgs } finally { $ErrorActionPreference = $previous }
-            $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
+            Update-Path
+            $python = Find-Python
+        }
+        if (-not $python) {
+            # No winget (or it failed): the python.org installer. The x64 build, also on
+            # Windows on ARM (see above).
+            Say 'Downloading Python 3.12 from python.org'
+            $setup = Join-Path ([IO.Path]::GetTempPath()) 'python-3.12.10-amd64.exe'
+            try {
+                Invoke-WebRequest -UseBasicParsing -Uri 'https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe' -OutFile $setup
+                Say 'Installing Python 3.12'
+                $setupArgs = @('/quiet', 'InstallAllUsers=0', 'InstallLauncherAllUsers=0', 'PrependPath=1', 'Include_test=0')
+                $process = Start-Process -FilePath $setup -ArgumentList $setupArgs -Wait -PassThru
+                if ($process.ExitCode -ne 0) { Write-Warning "The Python installer stopped with exit code $($process.ExitCode)." }
+            } catch {
+                Write-Warning "Could not install Python from python.org ($($_.Exception.Message))."
+            } finally {
+                Remove-Item -Force $setup -ErrorAction SilentlyContinue
+            }
+            Update-Path
             $python = Find-Python
         }
         if (-not $python) {
