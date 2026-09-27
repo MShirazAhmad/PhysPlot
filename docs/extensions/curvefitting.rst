@@ -1,15 +1,53 @@
-Curve-Fitting Plugins
-=====================
+Curve Fitting and Fit-Model Files
+=================================
 
-What Curve-Fitting Plugins Do
+Fitting Today: Type the Model
 -----------------------------
 
-Curve-fitting plugins define legacy mathematical models that can be fitted to
-the active plot's X and Y data. Modern Basic Plotter output opens in the Figure
-Editor, where users can also choose **Figure Editor > Fitting > Add Fit
-Function** and enter an expression such as ``a*x + b`` directly.
+Fitting in PhysPlot needs no file. Type the model instead:
 
-PhysPlot supports two plugin kinds:
+- **Simple Mode**, panel **3. Plotter Module**: choose **Basic Plotter**, tick **LSQ
+  fit**, type the model in **Fit Function** (for example ``a*x + b``) and the parameter
+  names and starting values in **Params / Initial**, then click **Generate Plot**. The
+  fit is saved in the protocol sequence, so it replays in bulk runs.
+- **Figure Editor → Fitting → Add Fit Function** takes the same entries for a figure
+  that is already open.
+
+Expression syntax: ``x`` is the X column; write powers with ``**`` (never ``^``); the
+names ``exp``, ``log`` (natural), ``log10``, ``sqrt``, ``abs``, ``sin``, ``cos``,
+``tan``, ``arcsin``, ``arccos``, ``arctan``, ``sinh``, ``cosh``, ``tanh`` and ``np``
+are available (write ``np.pi``, not ``pi``). **Params** and **Initial** are
+comma-separated lists of the same length, for example ``A,tau,C`` and ``5,2,0``.
+
+Let an AI Assistant Set Up a Fit
+--------------------------------
+
+If you know the physics but not the syntax, an AI assistant can turn your model into
+the entries above. Attach the guide file `config/fit_functions/AI_GUIDE.md
+<https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/fit_functions/AI_GUIDE.md>`_
+(click **Download raw file** on that page) to a new chat with ChatGPT, Claude, Gemini,
+Copilot or another assistant, add a few rows of your X and Y data if you can, and
+describe the model, for example:
+
+.. code-block:: text
+
+   I measure the voltage of a discharging capacitor against time in seconds. It decays
+   exponentially towards a small offset: V = A*exp(-t/tau) + C. Please make a curve-fit
+   model for it. Typical values are A about 5 V, tau about 2 s and C about 0.1 V.
+   Also tell me what to type in LSQ fit.
+
+The reply gives the **Fit Function**, **Params** and **Initial** entries, plus a
+legacy fit-model file (see below). If PhysPlot shows a *Plot failed* message, paste it
+into the chat for a corrected version. :doc:`ai_assistant` explains the method for
+every kind of module.
+
+Legacy Fit-Model Files
+----------------------
+
+Files in ``config/fit_functions/`` fill the curve-fit list of PhysPlot's older
+plot-configuration window (``physplot/app.py``). The current main window does not open
+that window, so these files are only needed by scripts that still use it. Each file
+defines one model of one of two kinds:
 
 ``poly``
    Polynomial fits using ``numpy.polyfit``.
@@ -17,19 +55,8 @@ PhysPlot supports two plugin kinds:
 ``callable``
    Custom model functions fitted using ``scipy.optimize.curve_fit``.
 
-Layman Example
---------------
-
-If your plotted data looks like a line, choose a linear fit. If your plotted
-data follows exponential decay, choose an exponential model. A curve-fitting
-plugin is simply a small file that tells PhysPlot what equation to use.
-
-Where Curve Fits Appear in the UI
----------------------------------
-
-Discovered legacy curve-fitting plugins are listed in the curve-fit
-configuration window. Expression-based Figure Editor fits do not require files
-under ``config/fit_functions/``. PhysPlot discovers file-based fit plugins at startup.
+The list is built once, when that module is first imported: restart PhysPlot after
+adding a file (**File → Reload Config Modules** does not re-read this folder).
 
 Required File Location
 ----------------------
@@ -102,12 +129,11 @@ Step-by-Step: Build a New Curve-Fit Plugin
 
 1. Create a new file in ``config/fit_functions/`` (for example
    ``config/fit_functions/12_gaussian.py``).
-2. Add ``DISPLAY_NAME``, ``DEFAULT_LABEL``, ``KIND``, and ``LABEL_MODES``.
+2. Add ``DISPLAY_NAME``, ``DEFAULT_LABEL`` and ``KIND``.
 3. For ``KIND = "poly"``, add ``DEGREE``.
 4. For ``KIND = "callable"``, implement ``function(x, ...)`` and optionally
    add ``INITIAL_GUESS``.
-5. Restart PhysPlot so the new fit appears in the curve-fit list.
-6. Select the fit in the configuration window and apply it to plotted data.
+5. Restart PhysPlot so the new fit appears in the legacy curve-fit list.
 
 Required Fields
 ---------------
@@ -122,8 +148,8 @@ Required Fields
    Either ``"poly"`` or ``"callable"``.
 
 ``LABEL_MODES``
-   Label choices shown in the configuration window, usually ``["Off",
-   "Equation", "Custom"]``.
+   Optional. Label choices shown in the configuration window; the default is
+   ``["Off", "Equation", "Custom"]``.
 
 ``DEGREE``
    Required only for ``KIND = "poly"``.

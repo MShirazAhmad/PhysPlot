@@ -9,3 +9,6 @@ Applying one records a replayable `TransformColumnStep` whose `function_name`
 is the file stem (for example `"02_square"`), so saved sequences, exported
 `Sequence.py` files and bulk runs resolve it from this folder headlessly.
 Renaming a file breaks sequences that reference the old name.
+
+To have an AI assistant write a transformation for you, attach `AI_GUIDE.md` from
+this folder to the chat and give the formula with two or three example values.

@@ -17,6 +17,11 @@ with the same name.
 | `sequences/` | Saved `Sequence.py` files |
 | `figureforge_plugins/`, `figureforge_fit_styles/` | Figure Editor actions and fit-line styles |
 
+**Not a programmer?** Every folder has an `AI_GUIDE.md` written for AI assistants.
+Attach it with an example of your data to ChatGPT, Claude, Gemini or Copilot, describe
+what you want, and save the reply in the folder: see
+[Build Modules with an AI Assistant](Build-Modules-with-AI).
+
 **Videos:** [How to Create a New File Loader](https://youtu.be/M_ypJWTtSnY) (1:52) · [How to Create a Plotter Module](https://youtu.be/AHWbQDqHvQ0) (2:01) · [all videos](Video-Tutorials)
 
 [![How to Create a New File Loader](https://i.ytimg.com/vi/M_ypJWTtSnY/mqdefault.jpg)](https://youtu.be/M_ypJWTtSnY) [![How to Create a Plotter Module](https://i.ytimg.com/vi/AHWbQDqHvQ0/mqdefault.jpg)](https://youtu.be/AHWbQDqHvQ0)

@@ -18,7 +18,9 @@ Plot-type presets live in ``config/plot_types/`` as JSON files such as::
     }
 
 They add a named entry to the plotter's plot-type list and merge their
-``config`` into the call when that plot type is selected.
+``config`` into the call when that plot type is selected. The options only matter
+to plotters that read them: the built-in plotters read none, so a preset for them
+only adds a name (the example above draws the same as ``scatter``).
 """
 
 from __future__ import annotations

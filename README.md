@@ -4,16 +4,6 @@
   <img src="physplot/inc/PhysPlotWide1.png" alt="PhysPlot logo" width="420">
 </p>
 
-> **⚠️ Experimental Development Branch**
->
-> This branch is under active development and may contain incomplete features, breaking changes, or significant bugs.
->
-> **Latest Stable Release**
->
-> https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
-
----
-
 ## Overview
 
 PhysPlot is a scientific plotting and workflow automation application for researchers, engineers, and students who require fast, reproducible, publication-quality figures without relying on large commercial software packages.

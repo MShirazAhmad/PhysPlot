@@ -1,0 +1,7 @@
+[
+  {"plotter_id": "example_xy", "plot_type": "iv_curve", "base_plot_type": "xy_line",
+   "description": "Current-voltage sweep as a line without grid",
+   "config": {"x_label": "Voltage (V)", "y_label": "Current (mA)", "label": "I-V sweep", "grid": false}},
+  {"plotter_id": "basic", "plot_type": "quick_look", "base_plot_type": "scatter_line",
+   "description": "Lab name for the Basic Plotter's scatter_line type"}
+]

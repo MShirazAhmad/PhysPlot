@@ -24,5 +24,7 @@
 - [Instrument Data](Instrument-Data)
 - [Replayable Plugin Transformations](Replayable-Plugin-Transformations)
 - [Bulk Runs and Headless Use](Bulk-Runs-and-Headless)
+- [Build Modules with AI](Build-Modules-with-AI)
+- [AI Module Examples](AI-Module-Examples)
 - [Extending PhysPlot](Extending-PhysPlot)
 - [Troubleshooting](Troubleshooting)

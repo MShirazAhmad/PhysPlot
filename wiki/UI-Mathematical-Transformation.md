@@ -77,6 +77,12 @@ add/subtract, a non-zero offset is recorded as a separate *add* step.
 Your own functions from `Documents/PhysPlot/config/transformations/` appear here after
 **File → Reload Config Modules**. See [Extending PhysPlot](Extending-PhysPlot).
 
+**Add a function with an AI assistant:** attach
+[transformations/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/transformations/AI_GUIDE.md) to ChatGPT, Claude, Gemini
+or Copilot, give the formula with units and two or three example values, and save the
+reply in `Documents/PhysPlot/config/transformations/`. Step by step:
+[Build Modules with an AI Assistant](Build-Modules-with-AI#transformations).
+
 ## Things to know
 
 - **Blank and text cells** in the Input are treated as missing values: the result has

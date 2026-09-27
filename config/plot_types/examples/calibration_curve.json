@@ -1,0 +1,13 @@
+{
+  "plotter_id": "example_xy",
+  "plot_type": "calibration_curve",
+  "base_plot_type": "xy_markers",
+  "description": "Absorbance standards against concentration, 5 x 4 inch figure",
+  "config": {
+    "x_label": "Concentration (mg/L)",
+    "y_label": "Absorbance (a.u.)",
+    "label": "Standards",
+    "grid": true,
+    "figsize": [5, 4]
+  }
+}

@@ -64,7 +64,7 @@ axes, over the full X range, and the fitted values are saved as the latest fit r
 
 | Plotter | Plot types | Needs | Shown for |
 | --- | --- | --- | --- |
-| **Basic Plotter** | `scatter` (markers), `line`, `scatter_line` (markers joined by lines), `scatter_publication` (scatter with a light grid) | X, Y | Any data |
+| **Basic Plotter** | `scatter` (markers), `line`, `scatter_line` (markers joined by lines), `scatter_publication` (a sample preset: draws the same as `scatter`) | X, Y | Any data |
 | **Histogram Plotter** | `histogram` (counts in 20 bins), `density_histogram` (normalised) | Y, or X if there is no Y | Any data |
 | **Scatter Plotter** | `scatter` | X, Y | Any data |
 | **Line Plotter** | `line` | X, Y | Any data |
@@ -78,12 +78,21 @@ axes, over the full X range, and the fitted values are saved as the latest fit r
 More entries can appear:
 
 - **Plot type presets** from `config/plot_types/*.json` add a named variant of an
-  existing plot type (`scatter_publication` is one).
+  existing plot type with fixed options (`scatter_publication` is one). The options
+  take effect only in plotters that read them: the built-in plotters read none, so a
+  preset for them only adds a name.
 - **Your own plotters** from `Documents/PhysPlot/config/plotter_modules/`.
 - **Loader plotters**, declared by the loader plugin that imported the current file.
 
 Loader plotters are shown only while that loader's data is loaded. After adding a
 file, choose **File → Reload Config Modules**. See [Extending PhysPlot](Extending-PhysPlot).
+
+**Add your own plotter with an AI assistant:** attach
+[plotter_modules/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/plotter_modules/AI_GUIDE.md)
+and a sample data file to ChatGPT, Claude, Gemini or Copilot, describe the figure you
+want, and save the reply in `Documents/PhysPlot/config/plotter_modules/`. For a preset,
+use [plot_types/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/plot_types/AI_GUIDE.md).
+Step by step: [Build Modules with an AI Assistant](Build-Modules-with-AI#plotter-modules).
 
 ## Where the figure opens
 
