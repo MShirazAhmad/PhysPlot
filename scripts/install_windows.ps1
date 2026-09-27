@@ -135,7 +135,10 @@
         try {
             $zip = Join-Path $tmp 'physplot.zip'
             Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/$repo/archive/$ref.zip" -OutFile $zip
-            Expand-Archive -Path $zip -DestinationPath $tmp
+            # Not Expand-Archive: in PowerShell 5.1 it is slow and shows a progress bar
+            # whatever $ProgressPreference says.
+            Add-Type -AssemblyName System.IO.Compression.FileSystem
+            [IO.Compression.ZipFile]::ExtractToDirectory($zip, $tmp)
             $extracted = Get-ChildItem -Path $tmp -Directory | Where-Object { $_.Name -like 'PhysPlot-*' } | Select-Object -First 1
             if (-not $extracted) { throw "The download from GitHub did not contain PhysPlot ($ref)." }
             if (Test-Path $source) {
