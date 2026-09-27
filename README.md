@@ -57,6 +57,49 @@ Reuse or Run in Bulk
 
 ---
 
+# Video Tutorials
+
+Short live recordings of PhysPlot, one per feature. Click a thumbnail to watch it on
+YouTube. The same videos play inside the matching pages of the
+[documentation](https://physplot.readthedocs.io/en/latest/ui/videos.html).
+
+**[PhysPlot Basics](https://www.youtube.com/playlist?list=PLPkYnHekjU24)**: Simple Mode,
+from typing data to curve fitting.
+
+<table>
+  <tr>
+    <td align="center" width="25%"><a href="https://youtu.be/JhQnXwG3moY"><img src="https://i.ytimg.com/vi/JhQnXwG3moY/mqdefault.jpg" alt="The PhysPlot Window" width="200"></a><br><sub><b>1. The PhysPlot Window</b> · 0:18</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/Is0FpUS9vv8"><img src="https://i.ytimg.com/vi/Is0FpUS9vv8/mqdefault.jpg" alt="Entering Values" width="200"></a><br><sub><b>2. Entering Values</b> · 0:21</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/PvGC_4iodYI"><img src="https://i.ytimg.com/vi/PvGC_4iodYI/mqdefault.jpg" alt="Column Roles" width="200"></a><br><sub><b>3. Column Roles</b> · 0:11</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/DbsN_NGNpCM"><img src="https://i.ytimg.com/vi/DbsN_NGNpCM/mqdefault.jpg" alt="Generating Plots" width="200"></a><br><sub><b>4. Generating Plots</b> · 0:19</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><a href="https://youtu.be/4KBA064UiQc"><img src="https://i.ytimg.com/vi/4KBA064UiQc/mqdefault.jpg" alt="Error Bars" width="200"></a><br><sub><b>5. Error Bars</b> · 0:24</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/SnhtG1Fdh4Y"><img src="https://i.ytimg.com/vi/SnhtG1Fdh4Y/mqdefault.jpg" alt="Curve Fitting" width="200"></a><br><sub><b>6. Curve Fitting</b> · 0:23</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/AzZ-AloPkW0"><img src="https://i.ytimg.com/vi/AzZ-AloPkW0/mqdefault.jpg" alt="Importing Data" width="200"></a><br><sub><b>7. Importing Data</b> · 0:16</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/8iVsJG8xUQ0"><img src="https://i.ytimg.com/vi/8iVsJG8xUQ0/mqdefault.jpg" alt="Transformations" width="200"></a><br><sub><b>8. Transformations</b> · 0:31</sub></td>
+  </tr>
+</table>
+
+**[PhysPlot Advanced](https://www.youtube.com/playlist?list=PLelbbYnCXEdU)**: recorded
+protocols, `Sequence.py` files, bulk runs, and writing your own file loaders and plotter
+modules.
+
+<table>
+  <tr>
+    <td align="center" width="25%"><a href="https://youtu.be/I5nPKIvLaWk"><img src="https://i.ytimg.com/vi/I5nPKIvLaWk/mqdefault.jpg" alt="Recorded Protocol" width="200"></a><br><sub><b>1. Recorded Protocol</b> · 0:17</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/l1zGnY109j4"><img src="https://i.ytimg.com/vi/l1zGnY109j4/mqdefault.jpg" alt="Saving a Sequence" width="200"></a><br><sub><b>2. Saving a Sequence</b> · 0:12</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/XzgZrVX2wkM"><img src="https://i.ytimg.com/vi/XzgZrVX2wkM/mqdefault.jpg" alt="Bulk Processing" width="200"></a><br><sub><b>3. Bulk Processing</b> · 0:21</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/M_ypJWTtSnY"><img src="https://i.ytimg.com/vi/M_ypJWTtSnY/mqdefault.jpg" alt="How to Create a New File Loader" width="200"></a><br><sub><b>4. New File Loader</b> · 1:52</sub></td>
+  </tr>
+  <tr>
+    <td align="center" width="25%"><a href="https://youtu.be/AHWbQDqHvQ0"><img src="https://i.ytimg.com/vi/AHWbQDqHvQ0/mqdefault.jpg" alt="How to Create a Plotter Module" width="200"></a><br><sub><b>5. New Plotter Module</b> · 2:01</sub></td>
+    <td align="center" width="25%"><a href="https://youtu.be/9Waw3iNOO1s"><img src="https://i.ytimg.com/vi/9Waw3iNOO1s/mqdefault.jpg" alt="Bulk Processing OES Spectra" width="200"></a><br><sub><b>6. Bulk OES Spectra</b> · 1:21</sub></td>
+  </tr>
+</table>
+
+---
+
 # Installation
 
 ## Option 1 — macOS: one command (Recommended on Mac)
@@ -163,6 +206,10 @@ Complete project documentation is available online.
 
 - Documentation
   https://physplot.readthedocs.io/
+
+- Video tutorials (YouTube playlists)
+  [PhysPlot Basics](https://www.youtube.com/playlist?list=PLPkYnHekjU24) ·
+  [PhysPlot Advanced](https://www.youtube.com/playlist?list=PLelbbYnCXEdU)
 
 - GitHub Repository
   https://github.com/MShirazAhmad/PhysPlot
