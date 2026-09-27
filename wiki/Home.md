@@ -17,8 +17,8 @@ whole folders of files.
 curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
 ```
 
-**Windows**: paste this into **PowerShell**. It installs PhysPlot and adds it to
-the Start menu:
+**Windows**: paste this into **PowerShell**. It installs PhysPlot, and Python if
+needed, and adds it to the Start menu ([video, 2:10](https://youtu.be/fVADS4sBwEs)):
 
 ```powershell
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex

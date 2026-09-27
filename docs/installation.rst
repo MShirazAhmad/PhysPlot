@@ -38,14 +38,17 @@ or tag (``curl … | PHYSPLOT_REF=<ref> bash``).
 Windows: one command
 --------------------
 
-Open **PowerShell** and paste:
+.. youtube:: fVADS4sBwEs
+   :title: Install PhysPlot on Windows
+
+Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 .. code-block:: powershell
 
    irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 
 The script finds Python 3.11–3.13 through the ``py`` launcher or ``PATH`` (or
-installs Python 3.12 with ``winget``), downloads PhysPlot and installs it with its
+installs Python 3.12 for your user, with ``winget`` or from python.org), downloads PhysPlot and installs it with its
 dependencies into ``%LOCALAPPDATA%\PhysPlot``, and adds a **PhysPlot** shortcut
 to the Start menu. Close PhysPlot and run the same command again to update.
 Uninstall by deleting ``%LOCALAPPDATA%\PhysPlot`` and the Start-menu shortcut;

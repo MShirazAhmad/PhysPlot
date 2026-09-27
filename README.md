@@ -54,7 +54,9 @@ YouTube. The same videos play inside the matching pages of the
 [documentation](https://physplot.readthedocs.io/en/latest/ui/videos.html).
 
 **[PhysPlot Basics](https://www.youtube.com/playlist?list=PLPkYnHekjU24)**: Simple Mode,
-from typing data to curve fitting.
+from typing data to curve fitting. It starts with
+**[0. Install PhysPlot on Windows](https://youtu.be/fVADS4sBwEs)** (2:10), from a fresh Windows 11 to PhysPlot
+in the Start menu.
 
 <table>
   <tr>
@@ -109,15 +111,19 @@ PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** i
 
 ## Option 2 — Windows: one command
 
-Open **PowerShell** and paste:
+Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 ```
 
-The script finds Python 3.11–3.13 (or installs Python 3.12 with `winget`), installs
-PhysPlot and its dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot**
-Start-menu shortcut. Close PhysPlot and run it again to update.
+Nothing needs to be installed first. The script finds Python 3.11–3.13, or installs
+Python 3.12 for you (with `winget`, or from python.org), installs PhysPlot and its
+dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot** Start-menu
+shortcut. Close PhysPlot and run it again to update.
+
+<a href="https://youtu.be/fVADS4sBwEs"><img src="https://i.ytimg.com/vi/fVADS4sBwEs/mqdefault.jpg" alt="Install PhysPlot on Windows" width="320"></a><br>
+<sub><b>Video:</b> <a href="https://youtu.be/fVADS4sBwEs">Install PhysPlot on Windows</a> (2:10), on a fresh Windows 11 with no Python.</sub>
 
 A classic setup program can be built with `scripts/build_windows_installer.ps1`; when a
 release on the [Releases page](https://github.com/MShirazAhmad/PhysPlot/releases)
