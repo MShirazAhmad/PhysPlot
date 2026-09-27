@@ -25,8 +25,10 @@
     $venv = Join-Path $installDir 'venv'
     $venvPython = Join-Path $venv 'Scripts\python.exe'
     $venvPythonw = Join-Path $venv 'Scripts\pythonw.exe'
-    # PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13.
-    $versionCheck = 'import sys; print(sys.executable if (3, 11) <= sys.version_info[:2] <= (3, 13) else "")'
+    # PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13. The check has no
+    # double quotes: Windows PowerShell 5.1 drops them from native-command arguments.
+    $versionCheck = 'import sys; print(sys.executable) if (3, 11) <= sys.version_info[:2] <= (3, 13) else sys.exit(1)'
+    $arm64 = $env:PROCESSOR_ARCHITECTURE -eq 'ARM64'
 
     function Say([string]$message) { Write-Host "==> $message" -ForegroundColor Cyan }
 
@@ -45,7 +47,10 @@
         $ErrorActionPreference = 'Continue'
         try {
             if (Get-Command py -ErrorAction SilentlyContinue) {
-                foreach ($version in '3.12', '3.13', '3.11') {
+                # On Windows on ARM, prefer a native ARM64 Python over an emulated x64 one.
+                $versions = @('3.12', '3.13', '3.11')
+                if ($arm64) { $versions = @('3.12-arm64', '3.13-arm64', '3.11-arm64') + $versions }
+                foreach ($version in $versions) {
                     $path = & py "-$version" -c $versionCheck 2>$null
                     if ($LASTEXITCODE -eq 0 -and $path) { return ([string]$path).Trim() }
                 }
@@ -58,8 +63,10 @@
                     if ($LASTEXITCODE -eq 0 -and $path) { return ([string]$path).Trim() }
                 }
             }
-            $candidate = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
-            if (Test-Path $candidate) { return $candidate }
+            foreach ($folder in 'Python312-arm64', 'Python312') {
+                $candidate = Join-Path $env:LOCALAPPDATA "Programs\Python\$folder\python.exe"
+                if (Test-Path $candidate) { return $candidate }
+            }
             return $null
         } finally { $ErrorActionPreference = $previous }
     }
@@ -69,7 +76,11 @@
     if (-not $python) {
         if (Get-Command winget -ErrorAction SilentlyContinue) {
             Say 'Installing Python 3.12 with winget'
-            Invoke-Checked 'Installing Python' { winget install --exact --id Python.Python.3.12 --scope user }
+            # winget's exit code is not reliable here (an already installed Python gives
+            # "no applicable upgrade"), so look for Python again instead of checking it.
+            $previous = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            try { winget install --exact --id Python.Python.3.12 --scope user } finally { $ErrorActionPreference = $previous }
             $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
             $python = Find-Python
         }
