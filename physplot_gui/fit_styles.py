@@ -202,9 +202,7 @@ def list_fit_style_presets() -> list[dict]:
     directly inside each folder (sub-folders are not searched), in file-name order.
     Missing folders are ignored. A file is skipped when a file with the same *file name*
     was already taken from an earlier folder, and it is skipped silently when it cannot
-    be read or parsed as JSON. The top-level JSON value must be an object and its
-    ``"name"``, if present, a string; otherwise listing fails with an exception instead
-    of skipping the file.
+    be read or parsed as JSON, or when its top-level value is not an object.
 
     The main window (``MainWindow.fit_style_entries``) puts a ``{"name": "Default",
     "path": None, "style": None}`` entry in front of this list. Simple Mode stores each
@@ -213,8 +211,8 @@ def list_fit_style_presets() -> list[dict]:
     is created, by **Reload**, and by **File > Reload Config Modules**.
 
     :returns: One ``{"name": str, "path": str, "style": dict}`` dict per preset, sorted
-        case-insensitively by name. ``"name"`` is the file's ``"name"`` value, or the
-        file stem when that is missing or empty; ``"style"`` is the whole decoded file,
+        case-insensitively by name. ``"name"`` is the file's ``"name"`` value as text,
+        or the file stem when that is missing or empty; ``"style"`` is the whole decoded file,
         not normalised.
     """
     presets = []
@@ -229,8 +227,11 @@ def list_fit_style_presets() -> list[dict]:
                 payload = json.loads(path.read_text(encoding="utf-8"))
             except Exception:
                 continue
+            if not isinstance(payload, dict):
+                continue
             seen.add(path.name)
-            presets.append({"name": payload.get("name") or path.stem, "path": str(path), "style": payload})
+            name = str(payload.get("name") or "").strip() or path.stem
+            presets.append({"name": name, "path": str(path), "style": payload})
     return sorted(presets, key=lambda preset: preset["name"].lower())
 
 

@@ -59,9 +59,8 @@ def discover_fileloaders() -> list[dict]:
 
     The legacy ``fileloader/`` folders are searched too (see the module documentation for
     the order). Each candidate file is imported as module ``physplot_user_loader_<stem>``.
-    A file that fails to import with ``ImportError``, ``OSError``, ``SyntaxError`` or
-    ``ValueError`` is reported on standard error and skipped, as is a module without a
-    ``load_data`` attribute. The name shown in the loader list is the module's ``title``
+    A file that raises any error while it is imported is reported on standard error and
+    skipped, as is a module without a ``load_data`` attribute. The name shown in the loader list is the module's ``title``
     attribute, or else a module-level ``title = "..."`` string found in the source, or else
     the file stem with underscores replaced by spaces, in title case.
 
@@ -149,10 +148,10 @@ def _plugin_files(folders: list[Path]) -> list[Path]:
 def _load_module(path: Path, module_name: str):
     """Import a plugin file as a fresh module under ``module_name``.
 
-    The module is executed but not added to ``sys.modules``. If running it raises
-    ``ImportError``, ``OSError``, ``SyntaxError`` or ``ValueError``, a ``Skipping plugin``
-    message is printed to standard error and ``None`` is returned; other exceptions
-    propagate.
+    The module is executed but not added to ``sys.modules``. Plugins are user code, often
+    written by hand or by an AI assistant, so any error while running it (including
+    ``SystemExit`` from a script-style file) prints a ``Skipping plugin`` message to
+    standard error and returns ``None`` instead of stopping PhysPlot.
 
     :param path: The plugin file.
     :param module_name: Name to give the module.
@@ -165,8 +164,8 @@ def _load_module(path: Path, module_name: str):
     module = importlib.util.module_from_spec(spec)
     try:
         spec.loader.exec_module(module)
-    except (ImportError, OSError, SyntaxError, ValueError) as exc:
-        print(f"Skipping plugin {path}: {exc}", file=sys.stderr)
+    except (Exception, SystemExit) as exc:  # user code: never crash startup or reload
+        print(f"Skipping plugin {path}: {type(exc).__name__}: {exc}", file=sys.stderr)
         return None
     return module
 

@@ -313,12 +313,11 @@ def list_style_modules() -> list[dict]:
     directly inside each folder (sub-folders are not searched), in file-name order.
     Missing folders are ignored. A file is skipped when a file with the same *file name*
     was already taken from an earlier folder, and it is skipped silently when it cannot
-    be read or parsed as JSON, so a broken file simply does not appear. The top-level
-    JSON value must be an object and its ``"name"``, if present, a string; otherwise
-    listing fails with an exception instead of skipping the file.
+    be read or parsed as JSON, or when its top-level value is not an object, so a broken
+    file simply does not appear.
 
-    The display name is the file's ``"name"`` value, or the file stem when that is
-    missing or empty. Display names are not de-duplicated, so two files with the same
+    The display name is the file's ``"name"`` value as text, or the file stem when that
+    is missing or empty. Display names are not de-duplicated, so two files with the same
     ``"name"`` both appear.
 
     The main window (``MainWindow.style_module_entries``) puts a ``{"name": "None",
@@ -341,10 +340,12 @@ def list_style_modules() -> list[dict]:
                 payload = json.loads(path.read_text(encoding="utf-8"))
             except Exception:
                 continue
+            if not isinstance(payload, dict):
+                continue
             seen.add(path.name)
             entries.append(
                 {
-                    "name": payload.get("name") or path.stem,
+                    "name": str(payload.get("name") or "").strip() or path.stem,
                     "path": str(path),
                 }
             )
