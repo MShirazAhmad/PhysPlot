@@ -6,6 +6,11 @@
 - [Sequence Walkthrough](Sequence-Walkthrough)
 - [Video Tutorials](Video-Tutorials)
 
+**Build Modules with AI**
+
+- [How it works](Build-Modules-with-AI)
+- [AI Module Examples](AI-Module-Examples)
+
 **UI Reference**
 
 - [Overview](UI-Reference)
@@ -24,7 +29,5 @@
 - [Instrument Data](Instrument-Data)
 - [Replayable Plugin Transformations](Replayable-Plugin-Transformations)
 - [Bulk Runs and Headless Use](Bulk-Runs-and-Headless)
-- [Build Modules with AI](Build-Modules-with-AI)
-- [AI Module Examples](AI-Module-Examples)
 - [Extending PhysPlot](Extending-PhysPlot)
 - [Troubleshooting](Troubleshooting)

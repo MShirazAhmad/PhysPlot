@@ -44,8 +44,6 @@ restarting. :doc:`modularity` maps every folder to the code that loads it.
 .. toctree::
    :maxdepth: 2
 
-   ai_assistant
-   ai_examples
    modularity
    fileloading
    functions
