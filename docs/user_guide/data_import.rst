@@ -43,6 +43,9 @@ Bulk runs then process the files in the folder that have the same extension.
 Loader selection
 ----------------
 
+.. youtube:: AzZ-AloPkW0
+   :title: Importing Data
+
 PhysPlot uses built-in and plugin-based file loaders. Choose the active loader
 from Simple Mode's **Data Importer** panel before clicking **Import Data**.
 
@@ -82,6 +85,9 @@ Import steps
 
 Column assignment
 -----------------
+
+.. youtube:: PvGC_4iodYI
+   :title: Column Roles
 
 Use the dropdown at row 0 for each column and choose one of:
 

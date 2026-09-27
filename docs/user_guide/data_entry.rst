@@ -6,6 +6,9 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Main Window Overview
 Manual table entry
 ------------------
 
+.. youtube:: Is0FpUS9vv8
+   :title: Entering Values
+
 You can type values directly into the table cells (rows below the header row).
 Use the dropdown above each column to mark it as **X**, **Y**, **X Error**,
 **Y Error**, **Group**, **Label**, or **Ignore**.

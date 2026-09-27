@@ -110,6 +110,9 @@ the app is open:
 Creating a New File Loader
 --------------------------
 
+.. youtube:: M_ypJWTtSnY
+   :title: How to Create a New File Loader
+
 Create a file such as:
 
 .. code-block:: text
@@ -215,6 +218,9 @@ Workflow:
 Creating and Reusing Sequences
 ------------------------------
 
+.. youtube:: l1zGnY109j4
+   :title: Saving a Sequence
+
 Complete protocol sequences are normal Python files saved under:
 
 .. code-block:: text
@@ -246,6 +252,9 @@ load, role, plotting, fitting, or bulk-run workflow steps.
 
 Creating a New Backend Plotter Module
 -------------------------------------
+
+.. youtube:: AHWbQDqHvQ0
+   :title: How to Create a Plotter Module
 
 Backend plotters live under:
 

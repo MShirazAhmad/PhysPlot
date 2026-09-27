@@ -6,6 +6,9 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Custom Mathematical 
 Transformation panel
 --------------------
 
+.. youtube:: 8iVsJG8xUQ0
+   :title: Transformations
+
 Use Simple Mode's **2. Mathematical Transformation** panel to compute values
 from one column and write them to another. Every transformation, whether built
 in or a plugin, is recorded as a protocol step. It replays with

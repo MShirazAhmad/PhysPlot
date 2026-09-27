@@ -8,7 +8,10 @@ This rewrites ``docs/ui/*.md`` (MyST Markdown for Read the Docs):
 
 - links between mirrored wiki pages become links between the docs pages;
 - links to other wiki pages point at the closest docs page, or at the GitHub wiki;
-- images are referenced from ``wiki/images/`` so they are not stored twice.
+- images are referenced from ``wiki/images/`` so they are not stored twice;
+- a line of YouTube thumbnail links (``[![Title](https://i.ytimg.com/vi/<id>/...)](https://youtu.be/<id>)``,
+  which is how the wiki shows videos) becomes embedded players (the ``youtube``
+  directive in ``docs/_ext/youtube.py``).
 """
 
 from __future__ import annotations
@@ -52,6 +55,18 @@ UI_TOCTREE = [name for page, name in PAGES.items()
 
 LINK = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)\s]+)\)")
 IMAGE = re.compile(r"!\[([^\]]*)\]\(images/([^)\s]+)\)")
+VIDEO = re.compile(r"\[!\[([^\]]*)\]\(https://i\.ytimg\.com/vi/([\w-]+)/\w+\.jpg\)\]\(https://youtu\.be/[\w-]+\)")
+
+
+def video_embeds(line: str) -> list[str] | None:
+    """Embedded players for a line that holds only YouTube thumbnail links, else None."""
+    if not line.strip() or VIDEO.sub("", line).strip():
+        return None
+    indent = line[: len(line) - len(line.lstrip())]
+    lines = []
+    for title, video in VIDEO.findall(line):
+        lines += [f"{indent}```{{youtube}} {video}", f"{indent}:title: {title}", f"{indent}```", ""]
+    return lines[:-1]
 
 
 def rewrite_link(match: re.Match) -> str:
@@ -75,6 +90,9 @@ def convert(page: str) -> str:
     for line in source.splitlines():
         if line.lstrip().startswith("```"):
             in_code = not in_code
+        if not in_code and (embeds := video_embeds(line)) is not None:
+            lines.extend(embeds)
+            continue
         if not in_code:
             line = IMAGE.sub(r"![\1](../../wiki/images/\2)", line)
             line = LINK.sub(rewrite_link, line)

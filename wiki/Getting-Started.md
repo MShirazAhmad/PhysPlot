@@ -86,6 +86,10 @@ the bundled copy with the same file name.
 
 ## A tour of the window
 
+**Video:** [The PhysPlot Window](https://youtu.be/JhQnXwG3moY) (0:18) · [all videos](Video-Tutorials)
+
+[![The PhysPlot Window](https://i.ytimg.com/vi/JhQnXwG3moY/mqdefault.jpg)](https://youtu.be/JhQnXwG3moY)
+
 The window below has an XRD scan loaded (`test_data/XRD/schema1.5_scan.XRDML`).
 
 ![PhysPlot window with numbered regions](images/getting-started/start_01_window_tour.png)

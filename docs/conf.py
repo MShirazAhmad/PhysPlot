@@ -18,6 +18,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('_ext'))  # local extensions: youtube
 
 
 def _package_version() -> str:
@@ -35,6 +36,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'myst_parser',
+    'youtube',
 ]
 autodoc_mock_imports = ['PyQt6', 'PySide6', 'FigureForge', 'appdirs', 'matplotlib', 'numpy', 'scipy', 'pandas']
 autodoc_typehints = 'signature'

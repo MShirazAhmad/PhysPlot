@@ -13,6 +13,12 @@ column. Some specialized plotter modules also use optional roles such as
 Generate plot flow
 ------------------
 
+.. youtube:: DbsN_NGNpCM
+   :title: Generating Plots
+
+.. youtube:: 4KBA064UiQc
+   :title: Error Bars
+
 1. Choose a plotter and plot type in Simple Mode.
 2. Optionally choose a saved **Template**.
 3. Optionally enable **LSQ fit** and enter a fit function, parameter names,
@@ -22,6 +28,9 @@ Generate plot flow
 
 Least-squares fitted line
 -------------------------
+
+.. youtube:: SnhtG1Fdh4Y
+   :title: Curve Fitting
 
 The **Plotter Module** panel can overlay a least-squares fitted line while the
 plot is generated. Enable **LSQ fit** and provide:

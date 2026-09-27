@@ -23,6 +23,10 @@ one.
 
 ---
 
+**Videos:** [Recorded Protocol](https://youtu.be/I5nPKIvLaWk) (0:17) · [Saving a Sequence](https://youtu.be/l1zGnY109j4) (0:12) · [Bulk Processing](https://youtu.be/XzgZrVX2wkM) (0:21) · [all videos](Video-Tutorials)
+
+[![Recorded Protocol](https://i.ytimg.com/vi/I5nPKIvLaWk/mqdefault.jpg)](https://youtu.be/I5nPKIvLaWk) [![Saving a Sequence](https://i.ytimg.com/vi/l1zGnY109j4/mqdefault.jpg)](https://youtu.be/l1zGnY109j4) [![Bulk Processing](https://i.ytimg.com/vi/XzgZrVX2wkM/mqdefault.jpg)](https://youtu.be/XzgZrVX2wkM)
+
 ## 1. Import the first scan
 
 In **1. Data Importer**, keep **Auto Loader**, click **Import Data** and choose

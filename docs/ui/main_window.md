@@ -4,6 +4,12 @@
 
 [UI Reference](index.md) › Main Window
 
+**Video:** [The PhysPlot Window](https://youtu.be/JhQnXwG3moY) (0:18) · [all videos](videos.md)
+
+```{youtube} JhQnXwG3moY
+:title: The PhysPlot Window
+```
+
 ## Header
 
 ![Header with logos and mode switcher](../../wiki/images/ui/ui_header.png)

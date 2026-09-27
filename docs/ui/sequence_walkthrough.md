@@ -25,6 +25,20 @@ one.
 
 ---
 
+**Videos:** [Recorded Protocol](https://youtu.be/I5nPKIvLaWk) (0:17) · [Saving a Sequence](https://youtu.be/l1zGnY109j4) (0:12) · [Bulk Processing](https://youtu.be/XzgZrVX2wkM) (0:21) · [all videos](videos.md)
+
+```{youtube} I5nPKIvLaWk
+:title: Recorded Protocol
+```
+
+```{youtube} l1zGnY109j4
+:title: Saving a Sequence
+```
+
+```{youtube} XzgZrVX2wkM
+:title: Bulk Processing
+```
+
 ## 1. Import the first scan
 
 In **1. Data Importer**, keep **Auto Loader**, click **Import Data** and choose

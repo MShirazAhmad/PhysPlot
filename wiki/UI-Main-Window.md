@@ -2,6 +2,10 @@
 
 [UI Reference](UI-Reference) › Main Window
 
+**Video:** [The PhysPlot Window](https://youtu.be/JhQnXwG3moY) (0:18) · [all videos](Video-Tutorials)
+
+[![The PhysPlot Window](https://i.ytimg.com/vi/JhQnXwG3moY/mqdefault.jpg)](https://youtu.be/JhQnXwG3moY)
+
 ## Header
 
 ![Header with logos and mode switcher](images/ui/ui_header.png)

@@ -33,6 +33,10 @@ The Input menu lists every column, including empty default columns:
 
 ![Input column menu](images/ui/ui_input_menu.png)
 
+**Video:** [Transformations](https://youtu.be/8iVsJG8xUQ0) (0:31) · [all videos](Video-Tutorials)
+
+[![Transformations](https://i.ytimg.com/vi/8iVsJG8xUQ0/mqdefault.jpg)](https://youtu.be/8iVsJG8xUQ0)
+
 ## Functions
 
 ![Function menu](images/walkthrough/walk_03_function_menu.png)

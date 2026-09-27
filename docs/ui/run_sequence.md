@@ -29,6 +29,16 @@ The note under **Bulk Run** is a reminder: *"Plot modules and formatting are rea
 the sequence."* The plotter, plot type and LSQ fit come from the protocol's
 *Generate Plot* steps, not from the Simple Mode panel's current settings.
 
+**Videos:** [Bulk Processing](https://youtu.be/XzgZrVX2wkM) (0:21) · [Bulk Processing OES Spectra](https://youtu.be/9Waw3iNOO1s) (1:21) · [all videos](videos.md)
+
+```{youtube} XzgZrVX2wkM
+:title: Bulk Processing
+```
+
+```{youtube} 9Waw3iNOO1s
+:title: Bulk Processing OES Spectra
+```
+
 ## Which files are processed
 
 Only files directly inside the input folder are processed (not subfolders), in

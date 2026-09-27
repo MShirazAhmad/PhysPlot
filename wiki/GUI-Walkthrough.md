@@ -13,6 +13,10 @@ Numbered red markers in the screenshots match the numbered notes under each one.
 
 ---
 
+**Videos:** [Importing Data](https://youtu.be/AzZ-AloPkW0) (0:16) · [Transformations](https://youtu.be/8iVsJG8xUQ0) (0:31) · [Recorded Protocol](https://youtu.be/I5nPKIvLaWk) (0:17) · [all videos](Video-Tutorials)
+
+[![Importing Data](https://i.ytimg.com/vi/AzZ-AloPkW0/mqdefault.jpg)](https://youtu.be/AzZ-AloPkW0) [![Transformations](https://i.ytimg.com/vi/8iVsJG8xUQ0/mqdefault.jpg)](https://youtu.be/8iVsJG8xUQ0) [![Recorded Protocol](https://i.ytimg.com/vi/I5nPKIvLaWk/mqdefault.jpg)](https://youtu.be/I5nPKIvLaWk)
+
 ## 1. Choose a loader
 
 In **1. Data Importer**, open **Data Loader**. **Auto Loader** picks a loader from the

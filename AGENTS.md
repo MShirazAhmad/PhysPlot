@@ -52,8 +52,10 @@ python -m build
 python -m twine check dist/*
 ```
 
-The UI Reference and Sequence Walkthrough are written as wiki pages in `wiki/`.
-After editing them, regenerate their Read the Docs copies in `docs/ui/`:
+The UI Reference, Sequence Walkthrough and Video Tutorials are written as wiki pages
+in `wiki/`. After editing them, regenerate their Read the Docs copies in `docs/ui/`.
+A line of YouTube thumbnail links in a wiki page becomes embedded players in the docs
+(the `youtube` directive in `docs/_ext/youtube.py`, also usable in `.rst` pages):
 
 ```bash
 python scripts/sync_wiki_to_docs.py

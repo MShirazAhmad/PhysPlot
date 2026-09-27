@@ -10,6 +10,15 @@ edit it, then bulk-process a folder), see :doc:`../ui/sequence_walkthrough`. Eve
 control on these tabs is described in :doc:`../ui/build_protocol` and
 :doc:`../ui/run_sequence`.
 
+.. youtube:: I5nPKIvLaWk
+   :title: Recorded Protocol
+
+.. youtube:: l1zGnY109j4
+   :title: Saving a Sequence
+
+.. youtube:: XzgZrVX2wkM
+   :title: Bulk Processing
+
 Step status
 -----------
 
@@ -50,6 +59,9 @@ first.
 
 Headless use
 ------------
+
+.. youtube:: 9Waw3iNOO1s
+   :title: Bulk Processing OES Spectra
 
 The same behavior is available in Python:
 

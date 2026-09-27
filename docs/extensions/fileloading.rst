@@ -17,6 +17,9 @@ simulated, but each file keeps the layout of a real export.
    :local:
    :depth: 1
 
+.. youtube:: M_ypJWTtSnY
+   :title: How to Create a New File Loader
+
 How a loader works
 ------------------
 

@@ -17,6 +17,10 @@ below lists what it reads. Every example is in `test_data/`.
 | TA Instruments TGA/DSC export | `.txt` (choose **TA Instruments TGA/DSC Loader**) | `Thermal/tga_calcium_oxalate.txt` | Signals named from the file, plus `Weight (%)` |
 | Plain tables | `.csv`, `.txt`, `.dat`, `.tsv`, `.xls`, `.xlsx` | `sample_linear.csv` | As in the file |
 
+**Video:** [Importing Data](https://youtu.be/AzZ-AloPkW0) (0:16) · [all videos](Video-Tutorials)
+
+[![Importing Data](https://i.ytimg.com/vi/AzZ-AloPkW0/mqdefault.jpg)](https://youtu.be/AzZ-AloPkW0)
+
 ## How PhysPlot finds the data in a text file
 
 Many exports put metadata above the numbers, use tabs in a `.csv`, or quote every

@@ -21,6 +21,12 @@ The first Simple Mode panel brings data into the table and saves it out again.
 4. **Export Data.** Asks for a folder and writes the current data there (see
    [Export Data](#export-data)).
 
+**Video:** [Importing Data](https://youtu.be/AzZ-AloPkW0) (0:16) · [all videos](videos.md)
+
+```{youtube} AzZ-AloPkW0
+:title: Importing Data
+```
+
 ## Loaders
 
 ![Data Loader menu](../../wiki/images/walkthrough/walk_02_data_loader_menu.png)

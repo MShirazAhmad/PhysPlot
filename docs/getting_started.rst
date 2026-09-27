@@ -25,6 +25,9 @@ match the numbered notes under each figure.
 1. Main Window Overview
 -----------------------
 
+.. youtube:: JhQnXwG3moY
+   :title: The PhysPlot Window
+
 .. image:: _static/gui_walkthrough/walk_01_overview.png
    :alt: PhysPlot main window with numbered regions
    :width: 900px
@@ -61,6 +64,9 @@ scrolls sideways, so PhysPlot fits laptop screens.
 2. Importing Data
 -----------------
 
+.. youtube:: AzZ-AloPkW0
+   :title: Importing Data
+
 .. image:: _static/gui_walkthrough/walk_02_data_loader_menu.png
    :alt: Data Loader menu
    :width: 900px
@@ -81,6 +87,9 @@ tab-separated values in a ``.csv``, or spectra stored as rows. See
 3. Choosing Column Roles
 ------------------------
 
+.. youtube:: PvGC_4iodYI
+   :title: Column Roles
+
 .. image:: _static/gui_walkthrough/data_04_panalytical_csv.png
    :alt: Column headers and role dropdowns
    :width: 900px
@@ -97,6 +106,9 @@ tab-separated values in a ``.csv``, or spectra stored as rows. See
 
 4. Transforming a Column
 ------------------------
+
+.. youtube:: 8iVsJG8xUQ0
+   :title: Transformations
 
 .. image:: _static/gui_walkthrough/walk_03_function_menu.png
    :alt: Function menu
@@ -130,6 +142,9 @@ values sit near zero between the peaks.
 
 5. Generating, Editing, and Templating a Plot
 ---------------------------------------------
+
+.. youtube:: DbsN_NGNpCM
+   :title: Generating Plots
 
 .. image:: _static/gui_walkthrough/walk_06_plotter_module.png
    :alt: Plotter Module controls
@@ -166,6 +181,9 @@ plus any recorded LSQ fit.
 6. Adding Fit Functions
 -----------------------
 
+.. youtube:: SnhtG1Fdh4Y
+   :title: Curve Fitting
+
 For a quick fit, tick **LSQ fit** in the Plotter Module (Figure 7, marker 4).
 The fit is stored in the protocol's plot step and replayed with it.
 
@@ -180,6 +198,12 @@ template. See :doc:`user_guide/curve_fitting`.
 
 7. Building and Replaying the Protocol Sequence
 -----------------------------------------------
+
+.. youtube:: I5nPKIvLaWk
+   :title: Recorded Protocol
+
+.. youtube:: l1zGnY109j4
+   :title: Saving a Sequence
 
 .. image:: _static/gui_walkthrough/walk_07_build_protocol.png
    :alt: Build Protocol table
@@ -235,6 +259,9 @@ See :doc:`user_guide/protocol_sequences` for details, and
 
 8. File Loaders for Instrument Formats
 --------------------------------------
+
+.. youtube:: M_ypJWTtSnY
+   :title: How to Create a New File Loader
 
 .. image:: _static/loaders/loader_ras_gui.png
    :alt: Rigaku XRD scan loaded through a loader plugin

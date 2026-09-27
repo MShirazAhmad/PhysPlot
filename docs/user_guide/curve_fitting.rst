@@ -3,6 +3,9 @@ Curve Fitting
 
 For a full step-by-step flow, see :ref:`GUI Walkthrough — Adding Fit Functions in the Figure Editor <gui-curve-fitting-and-fit-labels>`.
 
+.. youtube:: SnhtG1Fdh4Y
+   :title: Curve Fitting
+
 Modern Figure Editor fitting
 ----------------------------
 

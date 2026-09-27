@@ -55,6 +55,20 @@ Blank fit fields fall back to the defaults shown above. The fit uses the **X** a
 axes, over the full X range, and the fitted values are saved as the latest fit result
 (**Export Data** writes them to `fit.json`).
 
+**Videos:** [Generating Plots](https://youtu.be/DbsN_NGNpCM) (0:19) · [Error Bars](https://youtu.be/4KBA064UiQc) (0:24) · [Curve Fitting](https://youtu.be/SnhtG1Fdh4Y) (0:23) · [all videos](videos.md)
+
+```{youtube} DbsN_NGNpCM
+:title: Generating Plots
+```
+
+```{youtube} 4KBA064UiQc
+:title: Error Bars
+```
+
+```{youtube} SnhtG1Fdh4Y
+:title: Curve Fitting
+```
+
 ## Plotters and plot types
 
 ![Plotter Module menu](../../wiki/images/ui/ui_plotter_menu.png)

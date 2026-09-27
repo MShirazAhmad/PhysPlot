@@ -26,6 +26,10 @@ and `PhysPlot Advanced <https://www.youtube.com/playlist?list=PLelbbYnCXEdU>`_
 (protocols, bulk runs, writing file loaders and plotter modules). Every video is
 listed in :doc:`ui/videos`.
 
+.. youtube:: PLPkYnHekjU24
+   :playlist:
+   :title: PhysPlot Basics playlist
+
 Main Features
 -------------
 

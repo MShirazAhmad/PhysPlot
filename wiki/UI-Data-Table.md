@@ -24,6 +24,10 @@ from it and writes to it. Every edit you make here is also recorded in the proto
 
 ## Column roles
 
+**Video:** [Column Roles](https://youtu.be/PvGC_4iodYI) (0:11) · [all videos](Video-Tutorials)
+
+[![Column Roles](https://i.ytimg.com/vi/PvGC_4iodYI/mqdefault.jpg)](https://youtu.be/PvGC_4iodYI)
+
 ![Role dropdown open](images/ui/ui_role_menu.png)
 
 | Role | Meaning |
@@ -44,6 +48,10 @@ from it and writes to it. Every edit you make here is also recorded in the proto
   step.
 
 ## Editing values
+
+**Video:** [Entering Values](https://youtu.be/Is0FpUS9vv8) (0:21) · [all videos](Video-Tutorials)
+
+[![Entering Values](https://i.ytimg.com/vi/Is0FpUS9vv8/mqdefault.jpg)](https://youtu.be/Is0FpUS9vv8)
 
 | Action | How | What is recorded |
 | --- | --- | --- |

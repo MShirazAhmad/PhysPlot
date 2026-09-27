@@ -26,6 +26,12 @@ from it and writes to it. Every edit you make here is also recorded in the proto
 
 ## Column roles
 
+**Video:** [Column Roles](https://youtu.be/PvGC_4iodYI) (0:11) · [all videos](videos.md)
+
+```{youtube} PvGC_4iodYI
+:title: Column Roles
+```
+
 ![Role dropdown open](../../wiki/images/ui/ui_role_menu.png)
 
 | Role | Meaning |
@@ -46,6 +52,12 @@ from it and writes to it. Every edit you make here is also recorded in the proto
   step.
 
 ## Editing values
+
+**Video:** [Entering Values](https://youtu.be/Is0FpUS9vv8) (0:21) · [all videos](videos.md)
+
+```{youtube} Is0FpUS9vv8
+:title: Entering Values
+```
 
 | Action | How | What is recorded |
 | --- | --- | --- |

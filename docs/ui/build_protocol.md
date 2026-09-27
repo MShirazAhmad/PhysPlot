@@ -31,6 +31,12 @@ bulk runs. You can review, delete, rerun and edit its steps here.
 14. **Copy as Script.** Copies the Python code to the clipboard.
 15. **Clear Sequence.** Empties the protocol. The table is not changed.
 
+**Video:** [Recorded Protocol](https://youtu.be/I5nPKIvLaWk) (0:17) · [all videos](videos.md)
+
+```{youtube} I5nPKIvLaWk
+:title: Recorded Protocol
+```
+
 ## Row types
 
 | Operation | Recorded when you… | Details / Target |
@@ -138,6 +144,12 @@ runs unchanged in a notebook or from the command line. See
 [Bulk Runs and Headless Use](../user_guide/protocol_sequences.rst).
 
 ## Import and export
+
+**Video:** [Saving a Sequence](https://youtu.be/l1zGnY109j4) (0:12) · [all videos](videos.md)
+
+```{youtube} l1zGnY109j4
+:title: Saving a Sequence
+```
 
 | Button | Dialog | Default location | Result |
 | --- | --- | --- | --- |

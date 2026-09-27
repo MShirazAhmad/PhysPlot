@@ -7,6 +7,10 @@ to saving to a bulk run, see the [Sequence Walkthrough](Sequence-Walkthrough).
 
 ## Run Sequence (bulk run in the GUI)
 
+**Videos:** [Bulk Processing](https://youtu.be/XzgZrVX2wkM) (0:21) · [Bulk Processing OES Spectra](https://youtu.be/9Waw3iNOO1s) (1:21) · [all videos](Video-Tutorials)
+
+[![Bulk Processing](https://i.ytimg.com/vi/XzgZrVX2wkM/mqdefault.jpg)](https://youtu.be/XzgZrVX2wkM) [![Bulk Processing OES Spectra](https://i.ytimg.com/vi/9Waw3iNOO1s/mqdefault.jpg)](https://youtu.be/9Waw3iNOO1s)
+
 This example runs the XRD protocol from the [Sequence Walkthrough](Sequence-Walkthrough)
 over a folder of three Rigaku `.ras` scans:
 
