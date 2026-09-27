@@ -119,8 +119,23 @@ calculations. The changes stay in that editor window: save them with the editor'
 
 PhysPlot copies the ``.py`` files from ``Documents/PhysPlot/config/figureforge_plugins/``
 into the Figure Editor each time a new Figure Editor opens, so to try a new or changed
-plugin, generate a new Basic Plotter plot. The bundled ``physplot_fit_function.py`` and
+plugin, generate a new Basic Plotter plot. A plugin you rename or delete there is removed
+from the next Figure Editor as well. The bundled ``physplot_fit_function.py`` and
 ``physplot_save_style_module.py`` are working examples.
+
+Two messages can appear when a plugin has a problem:
+
+- **Figure Editor failed** appears a few seconds after **Generate Plot** when a plugin
+  stops the Figure Editor from opening, for example because of a syntax error or a
+  missing package. The message names the plugin file and the error; **Show Details...**
+  holds the full error output. No plot opens in the Figure Editor until you fix or remove
+  that file.
+- **Figure Editor plugin skipped** means a plugin file has the name of one of the Figure
+  Editor's own files (``__init__.py``, ``add_annotation.py``, ``add_legend.py``,
+  ``add_minor_data_ticks.py``, ``reduce_tick_limits.py``, ``set_spine_bounds.py``,
+  ``toggle_spines.py`` or ``utils.py``). PhysPlot does not copy it, because it would
+  overwrite part of the Figure Editor. Rename the file; the Figure Editor opens without it
+  until then.
 
 Let an AI Assistant Write a Plugin
 ----------------------------------
@@ -137,6 +152,6 @@ menu name you want. For example:
    dashed horizontal line there.
 
 Save the reply in ``Documents/PhysPlot/config/figureforge_plugins/`` and generate a new
-Basic Plotter plot to open a fresh Figure Editor. If the Figure Editor does not open,
-the guide shows the one-line command that prints the plugin's error; paste that error
-into the chat for a corrected file.
+Basic Plotter plot to open a fresh Figure Editor. If PhysPlot shows **Figure Editor
+failed** instead, click **Show Details...**, copy the error output and paste it into the
+chat for a corrected file.

@@ -24,10 +24,11 @@ def test_app_icon_is_set_for_every_window(monkeypatch):
     runner._WINDOW.close()
 
 
-def test_figure_editor_process_gets_the_physplot_icon(monkeypatch):
+def test_figure_editor_process_gets_the_physplot_icon(monkeypatch, tmp_path):
     import importlib.util
     import subprocess
 
+    from physplot_gui.app.figure_editor import PluginInstall
     from physplot_gui.app.main_window import MainWindow
 
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
@@ -43,7 +44,7 @@ def test_figure_editor_process_gets_the_physplot_icon(monkeypatch):
         return FakeProcess()
 
     monkeypatch.setattr(importlib.util, "find_spec", lambda name, *a: object() if name == "FigureForge" else None)
-    monkeypatch.setattr(MainWindow, "_install_figureforge_plugins", staticmethod(lambda: None))
+    monkeypatch.setattr(MainWindow, "_install_figureforge_plugins", staticmethod(lambda: PluginInstall(tmp_path)))
     monkeypatch.setattr(subprocess, "Popen", fake_popen)
     from matplotlib.figure import Figure
 
@@ -51,8 +52,8 @@ def test_figure_editor_process_gets_the_physplot_icon(monkeypatch):
 
     assert launched["env"]["PHYSPLOT_APP_ICON"] == str(LOGO_ICON)
     assert "setWindowIcon" in launched["args"][2]
-    for _, temp_path in window._figureforge_processes:
-        temp_path.unlink(missing_ok=True)
+    for editor in window._figureforge_processes:
+        editor.remove_files()
     window.close()
 
 

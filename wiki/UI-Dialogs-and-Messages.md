@@ -58,7 +58,8 @@ Config Folder** opens it.
 | **Column rename failed** | Renaming a column | The backend rejected the new name. |
 | **Rename Column** *(warning)* | Rename dialog | *Column name cannot be empty.* or *Column '…' already exists.* → choose another name. |
 | **Plot failed** | Generate Plot | *No column has role 'X'.* → set roles. *Column '…' does not contain numeric data.* → choose numeric columns. LSQ messages → see [Plotter Module](UI-Plotter-Module#when-plotting-fails). *Figure Editor is not installed…* → install FigureForge or use another plotter. |
-| **Figure Editor failed** | Shortly after Generate Plot with the Basic Plotter | The editor process exited with an error; the text is its error output. See [Troubleshooting](Troubleshooting). |
+| **Figure Editor failed** | A few seconds after Generate Plot with the Basic Plotter | The Figure Editor closed before its window opened, usually because a Figure Editor plugin has an error. The message names the plugin file and the error; **Show Details...** has the full error output. Fix or remove that file in `Documents/PhysPlot/config/figureforge_plugins/`. |
+| **Figure Editor plugin skipped** | Generate Plot with the Basic Plotter | A Figure Editor plugin file has the name of one of the Figure Editor's own files (such as `add_legend.py`), so it was not loaded. Rename the file. The Figure Editor opens without it. |
 | **Export plot failed** | Export Plot | *Generate a plot before exporting.* → press Generate Plot first. |
 | **Apply sequence failed** | Apply This Sequence | *Build or import a protocol sequence first.*, or *Row N failed (StepName): error* → fix or delete that row and apply again. |
 | **Apply revised sequence failed** | Deleting a protocol row | The shortened protocol could not even start. Usually a failing row is shown in the Status column instead, with no dialog. |

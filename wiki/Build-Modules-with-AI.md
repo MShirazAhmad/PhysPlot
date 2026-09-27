@@ -294,7 +294,8 @@ Guide: [figureforge_plugins/AI_GUIDE.md][g-plugins].
 
 - **Then:** save the reply in `Documents/PhysPlot/config/figureforge_plugins/` and
   generate a new Basic Plotter plot: PhysPlot copies plugins into each new Figure Editor.
-  If the Figure Editor does not open, the guide shows how to print the plugin's error.
+  If PhysPlot shows *Figure Editor failed* instead, click **Show Details...** and paste
+  the error into the chat.
 
 More: [Figure Templates, Fit Styles and Figure Editor Plugins](https://physplot.readthedocs.io/en/latest/extensions/figure_extensions.html).
 

@@ -255,17 +255,24 @@ Figures from the Basic Plotter open in FigureForge, which the UI calls the "Figu
    ``RuntimeError`` that tells the user to run ``python -m pip install FigureForge``.
 2. Copies PhysPlot's Figure Editor plugins (the bundled ``config/figureforge_plugins`` folder,
    then the per-user copy, whose files win) into FigureForge's own ``plugins`` package folder
-   and points FigureForge's ``preferences.json`` at that folder.
+   and points FigureForge's ``preferences.json`` at that folder
+   (:mod:`physplot_gui.app.figure_editor`). A manifest in that folder lists the copies, so
+   the copy of a renamed or deleted plugin is deleted too. A plugin file named like one of
+   FigureForge's own files (``__init__.py``, ``add_legend.py``, ...) is not copied and
+   "Figure Editor plugin skipped" asks the user to rename it.
 3. Adds hidden placeholder artists (line, scatter, legend, annotation) to every axes.
-4. Pickles the figure to a temporary file and starts ``sys.executable -c <launcher> <file>``
-   with :class:`subprocess.Popen`. The launcher script imports PySide6 and FigureForge in that
-   new Python process, shows the FigureForge window with its plugin menu renamed "Figure
-   Editor", and deletes the temporary file when it exits. The child process gets
-   ``PHYSPLOT_STYLE_DIR`` (the folder new templates are written to) and ``PHYSPLOT_APP_ICON``.
-5. Returns at once, so PhysPlot stays usable and several editors can be open. About 1.2 s
-   later :meth:`MainWindow._check_figureforge_process` checks the process once and reports
-   "Figure Editor failed" with the captured error output if it has already exited with a
-   non-zero code.
+4. Pickles the figure to a temporary file and starts ``sys.executable -c <launcher> <file>
+   <ready file> <log file>`` with :class:`subprocess.Popen`; the editor's standard error goes
+   to the log file. The launcher script imports PySide6 and FigureForge in that new Python
+   process, shows the FigureForge window with its plugin menu renamed "Figure Editor",
+   creates the ready file, and deletes its temporary files when it exits. The child process
+   gets ``PHYSPLOT_STYLE_DIR`` (the folder new templates are written to) and
+   ``PHYSPLOT_APP_ICON``.
+5. Returns at once, so PhysPlot stays usable and several editors can be open.
+   :meth:`MainWindow._check_figureforge_processes` then checks the process every 250 ms
+   until its window opens (up to 60 s). If it exits with a non-zero code first, for example
+   because a plugin fails to import, "Figure Editor failed" names the plugin file at fault
+   and shows the error output.
 
 Edits made in the Figure Editor stay in that process: they are not sent back to PhysPlot and
 are not recorded in the protocol.
@@ -330,6 +337,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import time
 from pathlib import Path
 
 from appdirs import user_config_dir
@@ -362,6 +370,14 @@ from physplot.steps import (
     TransformColumnStep,
 )
 
+from physplot_gui.app.figure_editor import (
+    EditorProcess,
+    PluginInstall,
+    describe_start_failure,
+    install_plugins,
+    read_log,
+    skipped_plugins_message,
+)
 from physplot_gui.app.gui_state import GuiState
 from physplot_gui.app.mode_manager import ModeManager
 from physplot_gui.app.plugin_discovery import discover_fileloaders, discover_functions, discover_loader_plotters
@@ -378,6 +394,10 @@ LOGO_ICON = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot
 LSF_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "lsf.jpeg"
 PHYSLAB_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "physlab.png"
 FIGUREFORGE_PLUGIN_DIR = bundled_plugin_dir("figureforge_plugins")
+#: How often, in milliseconds, a starting Figure Editor is checked for an early exit.
+FIGURE_EDITOR_CHECK_INTERVAL_MS = 250
+#: How long, in seconds, a Figure Editor whose window has not opened keeps being checked.
+FIGURE_EDITOR_START_TIMEOUT_S = 60.0
 
 
 # Menu labels and descriptions for built-in transformations; sequences keep the
@@ -555,8 +575,9 @@ class MainWindow(QtWidgets.QMainWindow):
         Loader-declared callable plotters by their ``"loader:<id>"`` identifier, rebuilt by
         :meth:`plotter_entries`.
 
-    Attributes created on first use: ``_figureforge_processes`` (running Figure Editor
-    processes and their temporary files), ``_module_plot_dialogs`` (open plot dialogs) and, for
+    Attributes created on first use: ``_figureforge_processes`` (Figure Editor processes and
+    their temporary files), ``_figureforge_timer`` (checks starting Figure Editors),
+    ``_module_plot_dialogs`` (open plot dialogs) and, for
     the legacy plot windows, ``plot_config_window``, ``plot_config_ui``, ``plot_window`` and
     ``_main_window``.
 
@@ -1559,26 +1580,31 @@ class MainWindow(QtWidgets.QMainWindow):
 
         1. When the ``FigureForge`` package cannot be found, raise a ``RuntimeError`` saying
            the Figure Editor is not installed and giving ``python -m pip install FigureForge``.
-        2. Copy PhysPlot's Figure Editor plugins into FigureForge and point its preferences at
-           them (:meth:`_install_figureforge_plugins`).
+        2. Copy PhysPlot's Figure Editor plugins into FigureForge, delete stale copies and
+           point its preferences at them (:meth:`_install_figureforge_plugins`). Plugin files
+           named like one of FigureForge's own files are not copied; "Figure Editor plugin
+           skipped" is reported for them (:meth:`_error`) and the editor still opens.
         3. Add hidden placeholder artists to the figure (:meth:`_prepare_figureforge_figure`).
         4. Clean up editors that have already closed (:meth:`_reap_figureforge_processes`).
         5. Pickle the figure into a temporary ``physplot_figureforge_*.pkl`` file and start
-           ``sys.executable -c <launcher> <file>`` with :class:`subprocess.Popen` in the
-           current working directory. Standard output is discarded and standard error is
-           captured. The environment adds ``PHYSPLOT_STYLE_DIR`` (from
-           :func:`physplot_gui.plot_styles.style_directory`, where templates saved in the
-           editor go) and ``PHYSPLOT_APP_ICON`` (the PhysPlot icon path).
-        6. Remember ``(process, temp file)`` in ``self._figureforge_processes`` and schedule
-           :meth:`_check_figureforge_process` to run once after 1200 ms.
+           ``sys.executable -c <launcher> <pickle> <ready file> <log file>`` with
+           :class:`subprocess.Popen` in the current working directory. Standard output is
+           discarded; standard error goes to the ``.log`` file next to the pickle, so the
+           editor never blocks on a full pipe. The environment adds ``PHYSPLOT_STYLE_DIR``
+           (from :func:`physplot_gui.plot_styles.style_directory`, where templates saved in
+           the editor go) and ``PHYSPLOT_APP_ICON`` (the PhysPlot icon path).
+        6. Remember the editor as an :class:`~physplot_gui.app.figure_editor.EditorProcess`
+           in ``self._figureforge_processes`` and start checking it every
+           ``FIGURE_EDITOR_CHECK_INTERVAL_MS`` (:meth:`_check_figureforge_processes`).
 
         The launcher script, run in the new Python process, unpickles the figure, creates a
         PySide6 ``QApplication`` with the PhysPlot icon, shows the FigureForge splash screen and
-        main window with the figure, renames FigureForge's plugin menu to "Figure Editor", runs
-        the event loop and deletes the temporary file when it ends.
+        main window with the figure, renames FigureForge's plugin menu to "Figure Editor",
+        creates the ready file, runs the event loop and deletes the pickle and ready file when
+        it ends (and the log too after a normal exit).
 
         The method returns without waiting for the editor, so PhysPlot stays usable and several
-        editors can be open at once. If starting the process fails, the temporary file is
+        editors can be open at once. If starting the process fails, the temporary files are
         deleted and the exception is re-raised; callers report it as "Plot failed".
 
         :param figure: The Matplotlib figure to edit. Changes made in the editor are not sent
@@ -1588,7 +1614,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if importlib.util.find_spec("FigureForge") is None:
             raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
 
-        self._install_figureforge_plugins()
+        install = self._install_figureforge_plugins()
+        if install.skipped:
+            self._error("Figure Editor plugin skipped", RuntimeError(skipped_plugins_message(install.skipped)))
         self._prepare_figureforge_figure(figure)
         self._reap_figureforge_processes()
         temp_file = tempfile.NamedTemporaryFile(
@@ -1597,6 +1625,8 @@ class MainWindow(QtWidgets.QMainWindow):
             delete=False,
         )
         temp_path = Path(temp_file.name)
+        log_path = temp_path.with_suffix(".log")
+        ready_path = temp_path.with_suffix(".ready")
         try:
             with temp_file:
                 pickle.dump(figure, temp_file)
@@ -1606,7 +1636,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 import pickle
                 import sys
 
-                temp_path = sys.argv[1]
+                temp_path, ready_path, log_path = sys.argv[1:4]
                 try:
                     with open(temp_path, "rb") as handle:
                         figure = pickle.load(handle)
@@ -1625,93 +1655,116 @@ class MainWindow(QtWidgets.QMainWindow):
                     window.plugin_menu.setTitle("Figure Editor")
                     window.show()
                     splash.finish(window)
-                    app.exec()
-                finally:
                     try:
-                        os.remove(temp_path)
+                        # Tells PhysPlot the window is open: every plugin has been imported.
+                        open(ready_path, "w").close()
                     except OSError:
                         pass
+                    app.exec()
+                finally:
+                    for path in (temp_path, ready_path):
+                        try:
+                            os.remove(path)
+                        except OSError:
+                            pass
+                # Only reached after a normal exit; PhysPlot reads the log only after a failure.
+                try:
+                    os.remove(log_path)
+                except OSError:
+                    pass
                 """
             )
-            process = subprocess.Popen(
-                [sys.executable, "-c", launcher, str(temp_path)],
-                cwd=str(Path.cwd()),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                text=True,
-                env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory()), "PHYSPLOT_APP_ICON": str(LOGO_ICON)},
-            )
+            with open(log_path, "wb") as log_file:
+                process = subprocess.Popen(
+                    [sys.executable, "-c", launcher, str(temp_path), str(ready_path), str(log_path)],
+                    cwd=str(Path.cwd()),
+                    stdout=subprocess.DEVNULL,
+                    stderr=log_file,
+                    env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory()), "PHYSPLOT_APP_ICON": str(LOGO_ICON)},
+                )
         except Exception:
-            try:
-                temp_path.unlink()
-            except OSError:
-                pass
+            for path in (temp_path, log_path):
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
             raise
 
         self._figureforge_processes = getattr(self, "_figureforge_processes", [])
-        self._figureforge_processes.append((process, temp_path))
-        QtCore.QTimer.singleShot(1200, lambda: self._check_figureforge_process(process, temp_path))
+        self._figureforge_processes.append(EditorProcess(process, temp_path, log_path, ready_path, install))
+        timer = getattr(self, "_figureforge_timer", None)
+        if timer is None:
+            timer = QtCore.QTimer(self)
+            timer.setInterval(FIGURE_EDITOR_CHECK_INTERVAL_MS)
+            timer.timeout.connect(self._check_figureforge_processes)
+            self._figureforge_timer = timer
+        timer.start()
 
-    def _check_figureforge_process(self, process, temp_path: Path) -> None:
-        """Report a Figure Editor process that failed right after starting.
+    def _check_figureforge_processes(self) -> None:
+        """Report Figure Editors that exited before their window opened.
 
-        Runs once, about 1.2 s after :meth:`_open_figureforge_editor` started the process. If
-        the process is still running, nothing happens (it is not checked again). Otherwise its
-        captured standard error is read, finished editors are cleaned up
-        (:meth:`_reap_figureforge_processes`) and, for a non-zero exit code, "Figure Editor
-        failed" is reported through :meth:`_error` with the error output (or "Figure Editor
-        exited with code N." when there is none). The temporary figure file is deleted if it
-        still exists.
-
-        :param process: The ``subprocess.Popen`` object of the editor.
-        :param temp_path: The temporary pickle file passed to the editor.
+        Runs every ``FIGURE_EDITOR_CHECK_INTERVAL_MS`` (250 ms) while an editor started by
+        :meth:`_open_figureforge_editor` is being watched. An editor stops being watched when
+        its window has opened (its ready file exists), when it exits, or after
+        ``FIGURE_EDITOR_START_TIMEOUT_S`` (60 s) without either; the timer stops when no
+        editor is watched. For an editor that exited with a non-zero code before its window
+        opened, its error output is read from the log, finished editors are cleaned up
+        (:meth:`_reap_figureforge_processes`) and "Figure Editor failed" is reported through
+        :meth:`_error`: the message comes from
+        :func:`~physplot_gui.app.figure_editor.describe_start_failure` (it names the plugin
+        file at fault when the traceback shows one) and the full error output is shown as
+        the dialog's details.
         """
-        if process.poll() is None:
-            return
-        try:
-            _, stderr = process.communicate(timeout=0.1)
-        except Exception:
-            stderr = ""
+        editors = getattr(self, "_figureforge_processes", [])
+        failed = []
+        for editor in editors:
+            if not editor.watching:
+                continue
+            if editor.process.poll() is not None:
+                editor.watching = False
+                if editor.process.returncode and not editor.ready_path.exists():
+                    failed.append((editor, read_log(editor.log_path)))
+            elif editor.ready_path.exists() or time.monotonic() - editor.started > FIGURE_EDITOR_START_TIMEOUT_S:
+                editor.watching = False
+        timer = getattr(self, "_figureforge_timer", None)
+        if timer is not None and not any(editor.watching for editor in editors):
+            timer.stop()
         self._reap_figureforge_processes()
-        if process.returncode:
-            detail = stderr.strip() or f"Figure Editor exited with code {process.returncode}."
-            self._error("Figure Editor failed", RuntimeError(detail))
-        try:
-            temp_path.unlink()
-        except OSError:
-            pass
+        for editor, output in failed:
+            message = describe_start_failure(output, editor.process.returncode, editor.install)
+            self._error("Figure Editor failed", RuntimeError(message), details=output.strip())
 
     def _reap_figureforge_processes(self) -> None:
         """Forget Figure Editor processes that have exited and delete their temporary files.
 
-        Keeps only the still-running entries of ``self._figureforge_processes``. Called before
-        each new editor is opened and after a finished process is checked; errors while
-        deleting a file are ignored.
+        Keeps the entries of ``self._figureforge_processes`` that are still running or still
+        watched by :meth:`_check_figureforge_processes` (which reads the log of an editor that
+        failed to start before its files are deleted). Called before each new editor is opened
+        and by each check; errors while deleting a file are ignored.
         """
         active = []
-        for process, temp_path in getattr(self, "_figureforge_processes", []):
-            if process.poll() is None:
-                active.append((process, temp_path))
-                continue
-            try:
-                temp_path.unlink()
-            except OSError:
-                pass
+        for editor in getattr(self, "_figureforge_processes", []):
+            if editor.watching or editor.process.poll() is None:
+                active.append(editor)
+            else:
+                editor.remove_files()
         self._figureforge_processes = active
 
     @staticmethod
-    def _install_figureforge_plugins() -> None:
+    def _install_figureforge_plugins() -> PluginInstall:
         """Copy PhysPlot's Figure Editor plugins into the installed FigureForge package.
 
-        Every ``*.py`` file from the existing folders returned by
+        The ``*.py`` files from the existing folders returned by
         :func:`figureforge_plugin_dirs` (bundled ``config/figureforge_plugins`` first, then the
-        per-user copy, so a per-user file replaces a bundled file of the same name) is copied
-        into the ``plugins`` folder inside the FigureForge package, which is created when
-        missing. Existing files there with the same names are overwritten. FigureForge's
-        preferences are then pointed at that folder
-        (:meth:`_point_figureforge_at_plugin_dir`). Runs each time a figure is opened in the
-        editor.
+        per-user copy, so a per-user file replaces a bundled file of the same name) are copied
+        into the ``plugins`` folder inside the FigureForge package by
+        :func:`physplot_gui.app.figure_editor.install_plugins`. It overwrites files of the same
+        names, deletes the copies it made earlier of files that are gone, and does not copy a
+        file named like one of FigureForge's own files. FigureForge's preferences are then
+        pointed at that folder (:meth:`_point_figureforge_at_plugin_dir`). Runs each time a
+        figure is opened in the editor.
 
+        :returns: What was copied, skipped and deleted.
         :raises RuntimeError: When FigureForge is not installed, or when none of the plugin
             folders exists (the message names ``FIGUREFORGE_PLUGIN_DIR``).
         """
@@ -1722,11 +1775,9 @@ class MainWindow(QtWidgets.QMainWindow):
         if not source_dirs:
             raise RuntimeError(f"PhysPlot Figure Editor plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
         plugin_dir = Path(next(iter(spec.submodule_search_locations))) / "plugins"
-        plugin_dir.mkdir(parents=True, exist_ok=True)
-        for source_dir in source_dirs:
-            for plugin_source in source_dir.glob("*.py"):
-                shutil.copy2(plugin_source, plugin_dir / plugin_source.name)
+        install = install_plugins(source_dirs, plugin_dir)
         MainWindow._point_figureforge_at_plugin_dir(plugin_dir)
+        return install
 
     @staticmethod
     def _point_figureforge_at_plugin_dir(plugin_dir: Path) -> None:
@@ -3221,24 +3272,35 @@ class MainWindow(QtWidgets.QMainWindow):
             return "-"
         return ", ".join(f"{key}={value:g}" if isinstance(value, float) else f"{key}={value}" for key, value in params.items())
 
-    def _error(self, title: str, exc: Exception) -> None:
+    def _error(self, title: str, exc: Exception, details: str = "") -> None:
         """Report an error in the status bar and in a warning dialog (stderr when headless).
 
         Action methods catch their exceptions and call this, so a failed action leaves the
         window open and usable. The status bar shows ``title`` and ``self.last_error`` is set
         to ``(title, exc)``.
         When the Qt platform is ``offscreen`` (headless smoke tests and CI, where no one can
-        dismiss a modal dialog), ``<title>: <exc>`` is printed to stderr instead of showing a
-        dialog. Otherwise a modal warning box with ``title`` as its title and the exception
-        text as its message is shown until the user closes it. Nothing is logged to a file.
+        dismiss a modal dialog), ``<title>: <exc>`` and then ``details`` are printed to stderr
+        instead of showing a dialog. Otherwise a modal warning box with ``title`` as its title
+        and the exception text as its message is shown until the user closes it; ``details``,
+        when given, is behind its *Show Details...* button. Nothing is logged to a file.
 
         :param title: A short description of what failed, for example ``"Import failed"``.
         :param exc: The exception; its text is shown to the user.
+        :param details: Longer text for the dialog's details, such as a process's error output.
         """
         self.status.set_message(title)
         self.last_error = (title, exc)
         if QtGui.QGuiApplication.platformName() == "offscreen":
             # Headless smoke tests and CI cannot dismiss a modal dialog.
             print(f"{title}: {exc}", file=sys.stderr)
+            if details:
+                print(details, file=sys.stderr)
             return
-        QtWidgets.QMessageBox.warning(self, title, str(exc))
+        if not details:
+            QtWidgets.QMessageBox.warning(self, title, str(exc))
+            return
+        box = QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Icon.Warning, title, str(exc), QtWidgets.QMessageBox.StandardButton.Ok, self
+        )
+        box.setDetailedText(details)
+        box.exec()

@@ -61,6 +61,12 @@ Application
    :private-members:
    :show-inheritance:
 
+.. automodule:: physplot_gui.app.figure_editor
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
+
 Panels
 ------
 

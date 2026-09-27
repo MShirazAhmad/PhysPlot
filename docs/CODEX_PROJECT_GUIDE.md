@@ -56,6 +56,7 @@ PhysPlot/
       mode_manager.py           Simple/Advanced stacked panel switcher
       gui_state.py              Shared GUI state across modes
       plugin_discovery.py       config/data_importers and config/transformations discovery
+      figure_editor.py          Figure Editor plugin install (manifest) and start-up errors
     fit_styles.py               config/figureforge_fit_styles presets (user folder first)
     plot_styles.py              config/templates figure templates (user folder first)
     panels/
