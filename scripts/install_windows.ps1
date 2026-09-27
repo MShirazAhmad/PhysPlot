@@ -25,10 +25,14 @@
     $venv = Join-Path $installDir 'venv'
     $venvPython = Join-Path $venv 'Scripts\python.exe'
     $venvPythonw = Join-Path $venv 'Scripts\pythonw.exe'
-    # PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13. The check has no
-    # double quotes: Windows PowerShell 5.1 drops them from native-command arguments.
-    $versionCheck = 'import sys; print(sys.executable) if (3, 11) <= sys.version_info[:2] <= (3, 13) else sys.exit(1)'
-    $arm64 = $env:PROCESSOR_ARCHITECTURE -eq 'ARM64'
+    # PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13. On Windows on ARM
+    # it also needs the x64 build of Python (run by Windows' built-in emulation):
+    # FigureForge requires numpy<2, which has no ARM64 wheels, so a native ARM64 Python
+    # would try to compile numpy. sysconfig names the build (platform.machine() gives the
+    # CPU, ARM64, even in x64 Python 3.12). The check has no double quotes: Windows PowerShell 5.1
+    # drops them from native-command arguments.
+    $arm64 = ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') -or ($env:PROCESSOR_ARCHITEW6432 -eq 'ARM64')
+    $versionCheck = 'import sys, sysconfig; print(sys.executable) if (3, 11) <= sys.version_info[:2] <= (3, 13) and sysconfig.get_platform() != ''win-arm64'' else sys.exit(1)'
 
     function Say([string]$message) { Write-Host "==> $message" -ForegroundColor Cyan }
 
@@ -47,10 +51,8 @@
         $ErrorActionPreference = 'Continue'
         try {
             if (Get-Command py -ErrorAction SilentlyContinue) {
-                # On Windows on ARM, prefer a native ARM64 Python over an emulated x64 one.
-                $versions = @('3.12', '3.13', '3.11')
-                if ($arm64) { $versions = @('3.12-arm64', '3.13-arm64', '3.11-arm64') + $versions }
-                foreach ($version in $versions) {
+                # "-3.12" selects the x64 or x86-64 build; ARM64 builds are tagged "-3.12-arm64".
+                foreach ($version in '3.12', '3.13', '3.11') {
                     $path = & py "-$version" -c $versionCheck 2>$null
                     if ($LASTEXITCODE -eq 0 -and $path) { return ([string]$path).Trim() }
                 }
@@ -63,7 +65,7 @@
                     if ($LASTEXITCODE -eq 0 -and $path) { return ([string]$path).Trim() }
                 }
             }
-            foreach ($folder in 'Python312-arm64', 'Python312') {
+            foreach ($folder in 'Python312', 'Python312-x64') {
                 $candidate = Join-Path $env:LOCALAPPDATA "Programs\Python\$folder\python.exe"
                 if (Test-Path $candidate) { return $candidate }
             }
@@ -80,12 +82,15 @@
             # "no applicable upgrade"), so look for Python again instead of checking it.
             $previous = $ErrorActionPreference
             $ErrorActionPreference = 'Continue'
-            try { winget install --exact --id Python.Python.3.12 --scope user } finally { $ErrorActionPreference = $previous }
+            $wingetArgs = @('install', '--exact', '--id', 'Python.Python.3.12', '--scope', 'user')
+            if ($arm64) { $wingetArgs += @('--architecture', 'x64') }
+            try { winget @wingetArgs } finally { $ErrorActionPreference = $previous }
             $env:Path = [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine')
             $python = Find-Python
         }
         if (-not $python) {
-            throw 'Python 3.11-3.13 is required. Install Python 3.12 from https://www.python.org/downloads/windows/ (tick "Add python.exe to PATH"), then run this command again.'
+            $build = if ($arm64) { 'the "Windows installer (64-bit)" (x64, not ARM64) of Python 3.12' } else { 'Python 3.12' }
+            throw "Python 3.11-3.13 is required. Install $build from https://www.python.org/downloads/windows/ (tick `"Add python.exe to PATH`"), then run this command again."
         }
     }
     Say "Using $python"
