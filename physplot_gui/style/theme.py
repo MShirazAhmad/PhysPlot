@@ -32,7 +32,9 @@ Input fields
     dropdowns (``QComboBox`` named ``RoleCombo``) are more compact: minimum height 22 px
     and less padding, so they fit in the table's role row.
 Check boxes
-    ``QCheckBox`` gets 7 px between the box and its text.
+    ``QCheckBox`` has a transparent background, so the box sits cleanly on white panels.
+    Its spacing is left to the platform style: a stylesheet ``spacing`` is not counted in
+    the size hint and clipped the label ("LSQ fi").
 Tables
     ``QTableWidget`` is white with very light alternating rows, light grey grid lines and
     border, and a pale blue selection with dark text. Table headers
@@ -110,7 +112,7 @@ QComboBox#RoleCombo {
     padding: 1px 4px;
 }
 QCheckBox {
-    spacing: 7px;
+    background: transparent;
 }
 QTableWidget {
     background: #ffffff;
