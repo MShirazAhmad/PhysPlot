@@ -34,10 +34,23 @@ playlists:
 
    [![Generating Plots](https://i.ytimg.com/vi/DbsN_NGNpCM/mqdefault.jpg)](https://youtu.be/DbsN_NGNpCM)
 
-5. **Error Bars** (coming soon): a Y Error column and the Error Bar Plotter.
-6. **Curve Fitting** (coming soon): least-squares fit, legend and PNG export.
-7. **Importing Data** (coming soon): Auto Loader picks the loader from the file type.
-8. **Transformations** (coming soon): XRD baseline removal and normalisation.
+5. **[Error Bars](https://youtu.be/4KBA064UiQc)** (0:24): a Y Error column and the Error Bar Plotter.
+
+   [![Error Bars](https://i.ytimg.com/vi/4KBA064UiQc/mqdefault.jpg)](https://youtu.be/4KBA064UiQc)
+
+6. **[Curve Fitting](https://youtu.be/SnhtG1Fdh4Y)** (0:23): least-squares fit, legend label and PNG export.
+
+   [![Curve Fitting](https://i.ytimg.com/vi/SnhtG1Fdh4Y/mqdefault.jpg)](https://youtu.be/SnhtG1Fdh4Y)
+
+7. **[Importing Data](https://youtu.be/AzZ-AloPkW0)** (0:16): Auto Loader picks the loader from the file type
+   (here a Rigaku `.ras` XRD scan).
+
+   [![Importing Data](https://i.ytimg.com/vi/AzZ-AloPkW0/mqdefault.jpg)](https://youtu.be/AzZ-AloPkW0)
+
+8. **[Transformations](https://youtu.be/8iVsJG8xUQ0)** (0:31): remove the XRD baseline, normalise to the strongest
+   peak and plot the result.
+
+   [![Transformations](https://i.ytimg.com/vi/8iVsJG8xUQ0/mqdefault.jpg)](https://youtu.be/8iVsJG8xUQ0)
 
 ## Advanced
 
