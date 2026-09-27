@@ -26,6 +26,14 @@ def test_basic_plotter_returns_matplotlib_figure():
     assert isinstance(fig, Figure)
 
 
+def test_plotters_default_to_their_own_plot_type():
+    # plot_with_module("line") without a plot type must draw a line, not the Basic Plotter's scatter.
+    pp = _loaded_pp()
+    for plotter_id in ("basic", "scatter", "line"):
+        assert isinstance(pp.plot_with_module(plotter_id), Figure)
+    assert pp.plot_with_module("line").axes[0].get_lines()
+
+
 def test_histogram_plotter_returns_matplotlib_figure():
     fig = _loaded_pp().plot_with_module("histogram", "histogram")
     assert isinstance(fig, Figure)

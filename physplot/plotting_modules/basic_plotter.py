@@ -23,7 +23,7 @@ class BasicPlotter(BasePlotter):
     supported_plot_types = ("scatter", "line", "scatter_line")
 
     def plot(self, dataset, plot_type=None, config=None):
-        plot_type = plot_type or "scatter"
+        plot_type = plot_type or self.supported_plot_types[0]  # "line" for the Line Plotter subclass
         if plot_type not in self.supported_plot_types:
             raise ValueError(f"Basic Plotter does not support plot type '{plot_type}'.")
         x_col = role_column(dataset, "X")
