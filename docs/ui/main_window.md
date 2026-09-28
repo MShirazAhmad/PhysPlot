@@ -72,6 +72,9 @@ of the window on Windows and Linux.
 | **Documentation** | Opens <https://physplot.readthedocs.io/en/latest/>. |
 | **GitHub Repository** | Opens <https://github.com/MShirazAhmad/PhysPlot>. |
 | **Report Issues or Bugs** | Opens the GitHub issue tracker. |
+| **Check for Updates…** | Asks GitHub whether the branch you follow has a newer version. If it has, a dialog shows the newest change and offers **Install Update** (closes PhysPlot, runs the installer for your branch in a new Terminal or PowerShell window, and reopens PhysPlot), **Skip This Update** or **Later**. A copy run from a git checkout is told to update with `git pull` instead. |
+| **Check for Updates Automatically** | On by default. PhysPlot checks in the background a few seconds after it starts, at most once a day, and only speaks up when there is an update you have not skipped. |
+| **Update Channel** | Which branch to follow: **Stable (main)** (tested releases, recommended), **Development (indevelopment)** (the next release) or **Bleeding edge (bleedingedge)** (newest features first, may break). It starts as the branch you installed from; choosing another one checks it straight away, and installing its update switches PhysPlot to that branch. |
 | **About PhysPlot** | Shows the About dialog (below). On macOS, Qt moves this item into the application menu (the first menu after the Apple menu). |
 
 ![About PhysPlot dialog](../../wiki/images/ui/ui_about_dialog.png)

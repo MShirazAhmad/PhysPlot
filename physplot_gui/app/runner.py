@@ -130,4 +130,5 @@ def run_app() -> int:
         file_open_filter.attach(_WINDOW)
 
     QtCore.QTimer.singleShot(0, open_pending)
+    _WINDOW.schedule_update_check()
     return app.exec_()

@@ -12,6 +12,7 @@
 #   PHYSPLOT_HOME     install folder (default: ~/.physplot)
 #   PHYSPLOT_APP_DIR  where to put PhysPlot.app (default: ~/Applications)
 #   PHYSPLOT_SOURCE   install from this local checkout instead of downloading
+#   PHYSPLOT_RELAUNCH set to 1 to open PhysPlot when done (used by Help > Check for Updates)
 
 set -euo pipefail
 
@@ -141,6 +142,22 @@ touch "$APP"
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
 [[ -x "$LSREGISTER" ]] && "$LSREGISTER" -f "$APP" >/dev/null 2>&1 || true
 
+# Record what was installed, for Help > Check for Updates.
+"$VENV/bin/python" - "$INSTALL_DIR/install.json" "$REF" "${LOCAL_SOURCE:+local}" <<'PY' || true
+import json, sys, time, urllib.request
+path, ref, local = sys.argv[1], sys.argv[2], sys.argv[3]
+commit = None
+if not local:
+    try:
+        req = urllib.request.Request(f"https://api.github.com/repos/MShirazAhmad/PhysPlot/commits/{ref}",
+                                     headers={"User-Agent": "PhysPlot-installer"})
+        commit = json.load(urllib.request.urlopen(req, timeout=15)).get("sha")
+    except Exception:
+        pass
+json.dump({"ref": ref, "commit": commit, "local_source": bool(local),
+           "installed_at": time.strftime("%Y-%m-%dT%H:%M:%S")}, open(path, "w"), indent=2)
+PY
+
 say "PhysPlot is installed."
 cat <<DONE
 
@@ -153,3 +170,8 @@ cat <<DONE
   Uninstall:      rm -rf "$INSTALL_DIR" "$APP"
 
 DONE
+
+if [[ "${PHYSPLOT_RELAUNCH:-}" == "1" ]]; then
+    say "Reopening PhysPlot"
+    open "$APP"
+fi

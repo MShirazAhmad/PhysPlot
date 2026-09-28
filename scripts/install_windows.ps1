@@ -12,6 +12,7 @@
 #   PHYSPLOT_REF      branch or tag to install (default: indevelopment)
 #   PHYSPLOT_HOME     install folder (default: %LOCALAPPDATA%\PhysPlot)
 #   PHYSPLOT_SOURCE   install from this local checkout instead of downloading
+#   PHYSPLOT_RELAUNCH set to 1 to open PhysPlot when done (used by Help > Check for Updates)
 #
 # Works in Windows PowerShell 5.1 and PowerShell 7. Everything runs inside a
 # script block so `irm | iex` never closes the caller's window on an error.
@@ -217,6 +218,18 @@
         Write-Warning "Could not register PhysPlot for data files ($($_.Exception.Message))."
     }
 
+    # Record what was installed, for Help > Check for Updates.
+    try {
+        $commit = $null
+        if (-not $env:PHYSPLOT_SOURCE) {
+            $commit = (Invoke-RestMethod -UseBasicParsing -Uri "https://api.github.com/repos/$repo/commits/$ref" -Headers @{ 'User-Agent' = 'PhysPlot-installer' }).sha
+        }
+        [ordered]@{ ref = $ref; commit = $commit; local_source = [bool]$env:PHYSPLOT_SOURCE; installed_at = (Get-Date -Format s) } |
+            ConvertTo-Json | Set-Content -Encoding UTF8 -Path (Join-Path $installDir 'install.json')
+    } catch {
+        Write-Warning "Could not record the installed version ($($_.Exception.Message))."
+    }
+
     Say 'PhysPlot is installed.'
     Write-Host ''
     Write-Host "  Open it:        Start menu > PhysPlot"
@@ -230,4 +243,8 @@
     $uninstall += "; Remove-Item -Recurse 'HKCU:\Software\Classes\$progId'"
     Write-Host "  Uninstall:      $uninstall"
     Write-Host ''
+    if ($env:PHYSPLOT_RELAUNCH -eq '1') {
+        Say 'Reopening PhysPlot'
+        Start-Process -FilePath $venvPythonw -ArgumentList '-m', 'physplot_gui' -WorkingDirectory ([Environment]::GetFolderPath('MyDocuments'))
+    }
 }

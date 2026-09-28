@@ -324,6 +324,8 @@ import importlib.util
 import json
 import os
 import re
+import threading
+import time
 import sys
 from pathlib import Path
 
@@ -336,6 +338,8 @@ from physplot.loaders import list_loaders
 from physplot.loaders.plugins import plugin_extensions
 from physplot.plotting_modules.gallery import plot_type_info as gallery_plot_type_info
 from physplot.plotting_modules import PlotterRegistry
+
+from . import updates
 from physplot.user_paths import (
     bundled_plugin_dir,
     ensure_user_physplot_dirs,
@@ -522,6 +526,26 @@ def figureforge_plugin_dirs() -> list[Path]:
     :returns: The plugin folders, bundled folder first.
     """
     return list(reversed(plugin_search_dirs("figureforge_plugins")))
+
+
+class _UpdateChecker(QtCore.QObject):
+    """Runs :func:`physplot_gui.app.updates.check_for_update` in a background thread."""
+
+    finished = QtCore.pyqtSignal(object)
+    failed = QtCore.pyqtSignal(str)
+
+    def __init__(self, channel: str):
+        super().__init__()
+        self.channel = channel
+
+    def start(self) -> None:
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def _run(self) -> None:
+        try:
+            self.finished.emit(updates.check_for_update(self.channel))
+        except Exception as exc:  # network errors, GitHub rate limits
+            self.failed.emit(str(exc))
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -715,7 +739,131 @@ class MainWindow(QtWidgets.QMainWindow):
         self._add_menu_action(help_menu, "GitHub Repository", lambda: self._open_url("https://github.com/MShirazAhmad/PhysPlot"))
         self._add_menu_action(help_menu, "Report Issues or Bugs", lambda: self._open_url("https://github.com/MShirazAhmad/PhysPlot/issues"))
         help_menu.addSeparator()
+        self._add_menu_action(help_menu, "Check for Updates…", lambda: self.check_for_updates(manual=True))
+        settings = QtCore.QSettings("PhysLab", "PhysPlot")
+        self.auto_update_action = self._add_menu_action(
+            help_menu, "Check for Updates Automatically", lambda: settings.setValue(
+                "updates/auto_check", self.auto_update_action.isChecked()
+            )
+        )
+        self.auto_update_action.setCheckable(True)
+        self.auto_update_action.setChecked(str(settings.value("updates/auto_check", True)).lower() in ("true", "1"))
+        channel_menu = help_menu.addMenu("Update Channel")
+        channel_group = QtGui.QActionGroup(self)
+        current_channel = self.update_channel()
+        for ref, label, description in updates.CHANNELS:
+            action = channel_menu.addAction(f"{label} ({ref})")
+            action.setToolTip(description)
+            action.setCheckable(True)
+            action.setChecked(ref == current_channel)
+            action.triggered.connect(lambda checked=False, ref=ref: self.set_update_channel(ref))
+            channel_group.addAction(action)
+        channel_menu.setToolTipsVisible(True)
+        help_menu.addSeparator()
         self._add_menu_action(help_menu, "About PhysPlot", self.show_about_dialog, menu_role=QtGui.QAction.AboutRole)
+
+    # --- updates ------------------------------------------------------------------------
+
+    def update_channel(self) -> str:
+        """The branch PhysPlot updates from: the saved choice, else the installed branch."""
+        saved = QtCore.QSettings("PhysLab", "PhysPlot").value("updates/channel", "")
+        return saved if saved in updates.CHANNEL_LABELS else updates.installed_channel()
+
+    def set_update_channel(self, channel: str) -> None:
+        """Follow ``channel`` (main, indevelopment or bleedingedge) and check it now."""
+        QtCore.QSettings("PhysLab", "PhysPlot").setValue("updates/channel", channel)
+        self.status.set_message(f"Update channel: {updates.CHANNEL_LABELS[channel]} ({channel})")
+        self.check_for_updates(manual=True)
+
+    def schedule_update_check(self, delay_ms: int = 5000) -> None:
+        """Check for updates in the background after start-up (at most once a day).
+
+        Called by ``run_app``. Skipped when *Check for Updates Automatically* is off, when
+        the last check was less than a day ago, and for off-screen runs (tests).
+        """
+        settings = QtCore.QSettings("PhysLab", "PhysPlot")
+        if os.environ.get("QT_QPA_PLATFORM") == "offscreen" or not self.auto_update_action.isChecked():
+            return
+        if not updates.check_due(settings.value("updates/last_check", 0)):
+            return
+        QtCore.QTimer.singleShot(delay_ms, lambda: self.check_for_updates(manual=False))
+
+    def check_for_updates(self, manual: bool = True) -> None:
+        """Ask GitHub for the newest commit on the update channel, without blocking the UI.
+
+        *Help > Check for Updates…* (``manual``) always reports the result; the automatic
+        check only speaks up when an update is available that was not skipped.
+        """
+        channel = self.update_channel()
+        if manual:
+            self.status.set_message(f"Checking for updates ({updates.CHANNEL_LABELS[channel]})…")
+        checker = _UpdateChecker(channel)
+        checker.finished.connect(lambda info: self._update_check_finished(info, manual))
+        checker.failed.connect(lambda message: self._update_check_failed(message, manual))
+        self._update_checker = checker  # keep a reference until it reports back
+        checker.start()
+
+    def _update_check_failed(self, message: str, manual: bool) -> None:
+        if manual:
+            self.status.set_message("Update check failed")
+            QtWidgets.QMessageBox.warning(
+                self, "Check for Updates", f"Could not reach GitHub to check for updates.\n\n{message}"
+            )
+
+    def _update_check_finished(self, info, manual: bool) -> None:
+        settings = QtCore.QSettings("PhysLab", "PhysPlot")
+        settings.setValue("updates/last_check", time.time())
+        label = f"{updates.CHANNEL_LABELS[info.channel]} ({info.channel})"
+        if not info.available:
+            self.status.set_message(f"PhysPlot is up to date ({label})")
+            if manual:
+                QtWidgets.QMessageBox.information(
+                    self, "Check for Updates", f"PhysPlot is up to date on the {label} channel."
+                )
+            return
+        if not manual and settings.value("updates/skipped", "") == info.latest_commit:
+            return
+        self.status.set_message(f"Update available ({label})")
+        first_line = info.latest_message.splitlines()[0] if info.latest_message else ""
+        box = QtWidgets.QMessageBox(self)
+        box.setWindowTitle("PhysPlot Update")
+        box.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        box.setText(f"A PhysPlot update is available on the {label} channel.")
+        details = (
+            f"Latest: {first_line}\n"
+            f"Commit {info.latest_commit[:7]}, {info.latest_date[:10]}\n"
+            f"Installed: {info.installed_commit[:7] if info.installed_commit else 'another channel or unknown'}"
+        )
+        if info.installed_by_installer:
+            box.setInformativeText(
+                details + "\n\nInstall Update closes PhysPlot, updates it in a new window and "
+                "reopens it (a few minutes). Save your work first."
+            )
+            install = box.addButton("Install Update", QtWidgets.QMessageBox.ButtonRole.AcceptRole)
+            skip = box.addButton("Skip This Update", QtWidgets.QMessageBox.ButtonRole.RejectRole)
+            box.addButton("Later", QtWidgets.QMessageBox.ButtonRole.RejectRole)
+            box.setDefaultButton(install)
+            box.exec()
+            if box.clickedButton() is install:
+                self.install_update(info.channel)
+            elif box.clickedButton() is skip:
+                settings.setValue("updates/skipped", info.latest_commit)
+        else:
+            box.setInformativeText(
+                details + "\n\nPhysPlot runs from a source checkout, so update it with git:\n"
+                f"git pull origin {info.channel}"
+            )
+            box.exec()
+
+    def install_update(self, channel: str) -> None:
+        """Start the installer for ``channel`` in its own window, then quit PhysPlot."""
+        try:
+            updates.launch_installer(channel)
+        except Exception as exc:
+            self._error("Install update failed", exc)
+            return
+        self.status.set_message("Installing update…")
+        QtCore.QTimer.singleShot(500, QtWidgets.QApplication.instance().quit)
 
     def _add_menu_action(self, menu, text: str, callback, shortcut: str | None = None, menu_role=None):
         action = QtWidgets.QAction(text, self)
