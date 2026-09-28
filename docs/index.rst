@@ -15,7 +15,7 @@ Install on macOS with one command (details in :doc:`installation`):
 
 .. code-block:: bash
 
-   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 
 Video tutorials
 ---------------

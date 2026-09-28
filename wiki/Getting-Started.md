@@ -7,7 +7,7 @@
 Open **Terminal** and paste:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 ```
 
 This does three things:
@@ -28,8 +28,9 @@ Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
   `Documents/PhysPlot/` are kept.
 - **Command line:** the install also provides `~/.physplot/venv/bin/physplot` (see
   [Bulk Runs and Headless Use](Bulk-Runs-and-Headless)).
-- **A specific version:** put `PHYSPLOT_REF=<branch or tag>` before `bash`, for
-  example `… | PHYSPLOT_REF=indevelopment bash`.
+- **A specific version:** the command installs `main` (Stable). For another branch
+  or tag put `PHYSPLOT_REF=<branch or tag>` before `bash`, for example
+  `… | PHYSPLOT_REF=indevelopment bash` (Development) or `PHYSPLOT_REF=bleedingedge`.
 
 ### Windows: one command
 
@@ -40,7 +41,7 @@ Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
 Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 ```powershell
-irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 ```
 
 This does the same three things as on macOS:

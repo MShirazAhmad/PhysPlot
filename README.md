@@ -107,20 +107,20 @@ want:
 
 Changes flow `bleedingedge` → `indevelopment` → `main`.
 
-**Install a particular branch.** The one-command installers below accept the branch in
-`PHYSPLOT_REF`, for example on macOS:
+**Install a particular branch.** The one-command installers below install `main`
+(Stable). For another branch, set `PHYSPLOT_REF`, for example on macOS:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | PHYSPLOT_REF=main bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | PHYSPLOT_REF=bleedingedge bash
 ```
 
 and on Windows (PowerShell):
 
 ```powershell
-$env:PHYSPLOT_REF='main'; irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
+$env:PHYSPLOT_REF='bleedingedge'; irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 ```
 
-Replace `main` with `indevelopment` or `bleedingedge` in both places. From source, check
+Use `indevelopment` for the Development branch. From source, check
 out the branch with `git clone -b <branch> https://github.com/MShirazAhmad/PhysPlot.git`.
 
 ---
@@ -132,7 +132,7 @@ out the branch with `git clone -b <branch> https://github.com/MShirazAhmad/PhysP
 Open **Terminal** and paste:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 ```
 
 The script finds Python 3.12–3.14 (or installs Python 3.12 with Homebrew), installs
@@ -147,7 +147,7 @@ PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** i
 Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 ```powershell
-irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 ```
 
 Nothing needs to be installed first. The script finds Python 3.12–3.14, or installs

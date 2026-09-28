@@ -20,7 +20,7 @@ Open **Terminal** and paste:
 
 .. code-block:: bash
 
-   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 
 The script:
 
@@ -45,7 +45,7 @@ Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 .. code-block:: powershell
 
-   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 
 The script finds Python 3.12–3.14 through the ``py`` launcher or ``PATH`` (or
 installs Python 3.12 for your user, with ``winget`` or from python.org), downloads PhysPlot and installs it with its

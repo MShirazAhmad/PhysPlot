@@ -14,14 +14,14 @@ whole folders of files.
 **PhysPlot.app** in `~/Applications`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 ```
 
 **Windows**: paste this into **PowerShell**. It installs PhysPlot, and Python if
 needed, and adds it to the Start menu ([video, 2:10](https://youtu.be/fVADS4sBwEs)):
 
 ```powershell
-irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 ```
 
 Details and other options are in [Getting Started](Getting-Started#install).
