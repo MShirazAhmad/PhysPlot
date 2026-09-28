@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Install or update PhysPlot on macOS.
 #
-#   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | bash
 #
 # Creates ~/.physplot (Python environment and PhysPlot source) and
 # ~/Applications/PhysPlot.app. Run the same command again to update.
 # Uninstall: rm -rf ~/.physplot ~/Applications/PhysPlot.app
 #
 # Optional environment variables:
-#   PHYSPLOT_REF      branch or tag to install (default: indevelopment)
+#   PHYSPLOT_REF      branch or tag to install (default: main, the stable branch)
 #   PHYSPLOT_HOME     install folder (default: ~/.physplot)
 #   PHYSPLOT_APP_DIR  where to put PhysPlot.app (default: ~/Applications)
 #   PHYSPLOT_SOURCE   install from this local checkout instead of downloading
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 REPO="MShirazAhmad/PhysPlot"
-REF="${PHYSPLOT_REF:-indevelopment}"
+REF="${PHYSPLOT_REF:-main}"
 INSTALL_DIR="${PHYSPLOT_HOME:-$HOME/.physplot}"
 APP_DIR="${PHYSPLOT_APP_DIR:-$HOME/Applications}"
 LOCAL_SOURCE="${PHYSPLOT_SOURCE:-}"

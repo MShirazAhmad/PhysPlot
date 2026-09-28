@@ -1,6 +1,6 @@
 # Install or update PhysPlot on Windows.
 #
-#   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
+#   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
 #
 # Needs nothing installed first: without Python 3.11-3.13 it installs Python 3.12 for
 # this user (with winget, or from python.org). Creates %LOCALAPPDATA%\PhysPlot (Python
@@ -9,7 +9,7 @@
 # Uninstall: delete %LOCALAPPDATA%\PhysPlot and the PhysPlot Start menu shortcut.
 #
 # Optional environment variables:
-#   PHYSPLOT_REF      branch or tag to install (default: indevelopment)
+#   PHYSPLOT_REF      branch or tag to install (default: main, the stable branch)
 #   PHYSPLOT_HOME     install folder (default: %LOCALAPPDATA%\PhysPlot)
 #   PHYSPLOT_SOURCE   install from this local checkout instead of downloading
 #
@@ -22,7 +22,7 @@
     [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
     $repo = 'MShirazAhmad/PhysPlot'
-    $ref = if ($env:PHYSPLOT_REF) { $env:PHYSPLOT_REF } else { 'indevelopment' }
+    $ref = if ($env:PHYSPLOT_REF) { $env:PHYSPLOT_REF } else { 'main' }
     $installDir = if ($env:PHYSPLOT_HOME) { $env:PHYSPLOT_HOME } else { Join-Path $env:LOCALAPPDATA 'PhysPlot' }
     $venv = Join-Path $installDir 'venv'
     $venvPython = Join-Path $venv 'Scripts\python.exe'
