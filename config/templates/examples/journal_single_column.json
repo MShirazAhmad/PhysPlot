@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "name": "Journal Single Column",
+  "figure": {
+    "facecolor": "#ffffffff",
+    "edgecolor": "#ffffffff",
+    "dpi": 200,
+    "size_inches": [3.35, 2.6],
+    "suptitle": ""
+  },
+  "axes": [
+    {
+      "facecolor": "#ffffffff",
+      "title": {"color": "#000000ff", "fontsize": 9, "fontfamily": ["sans-serif"], "fontstyle": "normal", "fontweight": "normal"},
+      "x_label": {"color": "#000000ff", "fontsize": 9, "fontfamily": ["sans-serif"], "fontstyle": "normal", "fontweight": "normal"},
+      "y_label": {"color": "#000000ff", "fontsize": 9, "fontfamily": ["sans-serif"], "fontstyle": "normal", "fontweight": "normal"},
+      "grid": {"visible": false},
+      "spines": {
+        "left": {"visible": true, "color": "#000000ff", "linewidth": 0.6, "linestyle": "solid"},
+        "right": {"visible": true, "color": "#000000ff", "linewidth": 0.6, "linestyle": "solid"},
+        "bottom": {"visible": true, "color": "#000000ff", "linewidth": 0.6, "linestyle": "solid"},
+        "top": {"visible": true, "color": "#000000ff", "linewidth": 0.6, "linestyle": "solid"}
+      },
+      "ticks": {
+        "x": {"labelsize": 8, "labelcolor": "#000000ff"},
+        "y": {"labelsize": 8, "labelcolor": "#000000ff"}
+      },
+      "lines": [
+        {"color": "#d62728ff"}
+      ],
+      "collections": [
+        {"facecolor": "none", "edgecolor": "#000000ff", "linewidth": 0.8, "alpha": null}
+      ],
+      "legend": {
+        "visible": true,
+        "frame_on": false,
+        "fontsize": 7,
+        "loc": "best",
+        "title": "",
+        "title_style": {}
+      }
+    }
+  ]
+}

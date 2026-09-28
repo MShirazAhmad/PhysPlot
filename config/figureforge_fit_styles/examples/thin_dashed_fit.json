@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "name": "Thin Dashed Fit",
+  "line_style": "--",
+  "line_width": 1.0,
+  "label": "Linear fit",
+  "show_legend": true
+}

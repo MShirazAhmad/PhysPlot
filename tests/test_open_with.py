@@ -323,3 +323,34 @@ def test_click_guide_explains_cycling(monkeypatch):
     assert "next part" in editor.click_guide.text()
     editor.close()
     plt.close(figure)
+
+
+def test_plugin_errors_never_escape_the_editor(tmp_path, monkeypatch):
+    import matplotlib.pyplot as plt
+
+    from physplot.qt_compat import QtWidgets as W
+
+    plugins = tmp_path / "plugins"
+    plugins.mkdir()
+    (plugins / "broken_import.py").write_text("raise RuntimeError('cannot import me')\n")
+    (plugins / "failing_command.py").write_text(
+        "class Failing:\n    name = 'Failing Command'\n    def run(self, obj):\n        raise ValueError('boom')\n"
+    )
+    window, _ = _window(monkeypatch)
+    monkeypatch.undo()
+    monkeypatch.setattr("physplot_gui.app.main_window.figureforge_plugin_dirs", lambda: [plugins])
+    shown = []
+    monkeypatch.setattr(W.QMessageBox, "exec", lambda box: shown.append((box.text(), box.informativeText())))
+    figure, axes = plt.subplots()
+    editor = window._open_figure_editor(figure)
+    assert any("broken_import.py" in error for error in editor.plugin_errors)
+    assert "could not be loaded" in editor.statusBar().currentMessage()
+
+    failing = next(
+        a for m in [editor.plugin_menu] for a in m.actions() if a.text() == "Failing Command"
+    )
+    editor.fm.select_artist(axes)
+    failing.trigger()  # must not raise
+    assert shown and "Failing Command" in shown[-1][0] and "boom" in shown[-1][1]
+    editor.close()
+    plt.close(figure)

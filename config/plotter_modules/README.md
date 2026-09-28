@@ -21,3 +21,6 @@ The function receives the active `Dataset` (`dataset.dataframe`,
 
 Core built-in plotters remain in `physplot/plotting_modules` so backend imports
 stay stable.
+
+To have an AI assistant write a plotter for you, attach `AI_GUIDE.md` from this
+folder and a sample data file to the chat.

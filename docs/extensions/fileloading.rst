@@ -48,7 +48,7 @@ A loader is one Python file that defines:
      - The label in the **Data Loader** menu.
    * - ``load_data(file_path)``
      - yes
-     - Receives the chosen file's path as a string. Returns a ``pandas.DataFrame``,
+     - Receives the chosen file's path (a string or a ``pathlib.Path``). Returns a ``pandas.DataFrame``,
        whose column names are kept, or a 2-D array or list of rows.
    * - ``COLUMN_NAMES``
      - no
@@ -57,7 +57,8 @@ A loader is one Python file that defines:
    * - ``DEFAULT_COLUMN_ROLES``
      - no
      - One role per column, in order: ``"X"``, ``"Y"``, ``"X Error"``, ``"Y Error"``,
-       ``"Group"``, ``"Label"`` or ``"Ignore"``. Columns without a role stay *Ignore*.
+       ``"Group"``, ``"Label"``, ``"Batch Key"``, ``"Fit Weight"`` or ``"Ignore"``.
+       Columns without a role stay *Ignore*.
    * - ``FILE_EXTENSIONS``
      - no
      - File types this loader reads, for example ``[".ras"]``. **Auto Loader** then
@@ -468,6 +469,45 @@ Load it the way PhysPlot does, with names and roles applied:
        "test_data/Thermal/tga_calcium_oxalate.txt"
    )
    print(dataset.dataframe.head())
+
+Let an AI assistant write it
+----------------------------
+
+You can get a finished loader without writing code. The guide file
+`config/data_importers/AI_GUIDE.md
+<https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/data_importers/AI_GUIDE.md>`_
+tells an AI assistant exactly what PhysPlot expects and includes a complete, tested
+loader. :doc:`ai_assistant` explains the method for every kind of module.
+
+1. **Download the guide.** Open the link above and click **Download raw file** (the ↓
+   button).
+2. **Start a new chat** with ChatGPT, Claude, Gemini, Copilot or another assistant, and
+   attach:
+
+   - ``AI_GUIDE.md``;
+   - one real, unedited file from your instrument. If it cannot be attached, paste its
+     first 30–50 lines and its last few lines as text;
+   - optionally a second file that differs (another scan range, a single scan), so the
+     loader handles both.
+
+3. **Say what you want**, for example:
+
+   .. code-block:: text
+
+      I attached AI_GUIDE.md and an export from our Acme UV-1900 spectrophotometer
+      (methylene_blue.uvs). Please write a PhysPlot data importer for these .uvs files.
+      Wavelength (nm) should be X, absorbance Y, and the SD column Y Error.
+      Our lab PC writes decimal commas, and single-scan exports have no SD column.
+
+4. **Save the reply** in ``Documents/PhysPlot/config/data_importers/`` under the file
+   name the assistant gives (**File → Open Config Folder** opens the ``config`` folder).
+   Choose **File → Reload Config Modules**, pick the loader in **Data Loader**, import a
+   file and compare the table with the file.
+5. **If PhysPlot shows an error**, paste the whole message into the chat. The assistant
+   sends a corrected complete file; save it over the old one and reload.
+
+Anything you attach is sent to the AI service. For confidential data, keep the layout
+of the file and replace the numbers.
 
 Write your own
 --------------

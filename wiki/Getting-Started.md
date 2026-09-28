@@ -33,7 +33,11 @@ Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
 
 ### Windows: one command
 
-Open **PowerShell** (Start menu → type *PowerShell*) and paste:
+**Video:** [Install PhysPlot on Windows](https://youtu.be/fVADS4sBwEs) (2:10) · [all videos](Video-Tutorials)
+
+[![Install PhysPlot on Windows](https://i.ytimg.com/vi/fVADS4sBwEs/mqdefault.jpg)](https://youtu.be/fVADS4sBwEs)
+
+Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
@@ -42,10 +46,10 @@ irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/script
 This does the same three things as on macOS:
 
 1. **Python.** Finds Python 3.12–3.14 (through the `py` launcher or `PATH`). If there
-   is none, it installs Python 3.12 with `winget`; accept its prompts. Without
-   `winget`, it asks you to install Python 3.12 from
-   [python.org](https://www.python.org/downloads/windows/) (tick *Add python.exe to
-   PATH*) and run the command again.
+   is none, it installs Python 3.12 for your user only, with `winget` or, without
+   `winget`, from [python.org](https://www.python.org/downloads/windows/). No
+   administrator rights or prompts are needed. On Windows on ARM it uses the x64
+   build of Python.
 2. **PhysPlot.** Downloads PhysPlot and installs it with its dependencies into
    `%LOCALAPPDATA%\PhysPlot`. The first install takes a few minutes.
 3. **Shortcut.** Adds **PhysPlot** to the Start menu, with the PhysPlot icon.

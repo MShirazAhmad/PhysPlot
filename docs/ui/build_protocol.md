@@ -158,3 +158,10 @@ runs unchanged in a notebook or from the command line. See
 
 **Apply This Sequence** with an empty protocol shows *Apply sequence failed: Build or
 import a protocol sequence first.*
+
+**Change a sequence with an AI assistant:** export it with **Export Sequence.py**, attach
+it with [sequences/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/sequences/AI_GUIDE.md) to ChatGPT, Claude, Gemini or
+Copilot, describe the change, then **Import Sequence.py** the reply. For a reusable
+block of steps under **Protocol → Insert Protocol Module**, use
+[protocol_modules/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/protocol_modules/AI_GUIDE.md). Step by step:
+[Build Modules with an AI Assistant](../extensions/ai_assistant.md#protocol-sequences).

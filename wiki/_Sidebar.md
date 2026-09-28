@@ -6,6 +6,11 @@
 - [Sequence Walkthrough](Sequence-Walkthrough)
 - [Video Tutorials](Video-Tutorials)
 
+**Build Modules with AI**
+
+- [How it works](Build-Modules-with-AI)
+- [AI Module Examples](AI-Module-Examples)
+
 **UI Reference**
 
 - [Overview](UI-Reference)

@@ -29,6 +29,13 @@ projects, dates) is replaced with placeholders.
 | `XPS/phi_c1s_scan.csv` | PHI XPS C 1s scan stored as rows | Auto Loader | Binding energy, counts |
 | `OES/spectrum_1.HRF`–`spectrum_3.HRF` | Optical emission spectra (N₂, CN, Hβ, Hα lines) | Auto Loader or OES HRF Loader; bulk run a sequence recorded on one of them | `Wavelength`, `Intensity` |
 
+`AI_Examples/` holds the sample data for the tested examples of the AI guides
+(`config/<folder>/examples/`): a UV-Vis export for the example loader (`.uvs`), an FTIR
+wavenumber column, a capacitor discharge for curve fitting, a heating ramp for the
+derivative plotter, a folder of UV-Vis spectra for the example sequence, resistance
+against temperature for the protocol module, and a voltage ramp for the figure template.
+See the AI Module Examples page on the wiki.
+
 Try these:
 
 - **XRD baseline removal:** open `XRD/quick_scan.xrdml`, then apply

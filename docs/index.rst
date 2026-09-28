@@ -53,46 +53,22 @@ Main Features
 - Native **Help** menu links for documentation, GitHub, issue reporting, and
   the About dialog.
 
-Plugin System
--------------
+Build Modules with an AI Assistant
+----------------------------------
 
-PhysPlot supports plugin-based extension points for importing, transforming, fitting, and editing figures without editing core GUI files.
-Put your own files in ``Documents/PhysPlot/config/<folder>/`` (**File > Open Config
-Folder**); they override bundled files with the same name. For a complete map of
-file locations, auto-loading behavior, and how to create new loaders, functions,
-plotters, templates, and workflow files, see :doc:`extensions/modularity`.
+PhysPlot is extended with small files: a loader for a new instrument, a
+transformation, a plotter, a sequence, a figure template and more. You do not need
+to write them yourself. Every kind of module has a guide file written for AI
+assistants: attach it with a sample of your data to ChatGPT, Claude, Gemini or
+Copilot, describe what you need, and save the finished file in
+``Documents/PhysPlot/config/<folder>/`` (**File → Open Config Folder**), then choose
+**File → Reload Config Modules**.
 
-File Loader plugins
-~~~~~~~~~~~~~~~~~~~
-
-- Add ``.py`` files to ``config/data_importers/`` with ``title`` and
-  ``load_data(file_path)``, and optionally ``COLUMN_NAMES``,
-  ``DEFAULT_COLUMN_ROLES``, and ``FILE_EXTENSIONS``.
-- A plugin that declares ``FILE_EXTENSIONS`` (for example ``[".ras"]``) is used
-  by **Auto Loader**, by replayed sequences, and by bulk runs for those files.
-- Worked examples with raw files, loader code and GUI results (Rigaku ``.ras`` XRD
-  scans, TA Instruments TGA/DSC exports, JCAMP-DX spectra) are in
-  :doc:`extensions/fileloading`.
-- Built-in loaders: ``auto``, ``csv``, ``txt``, ``excel``, ``nanoindentation``,
-  ``xrdml``, and ``dataframe``.
-- Loaders appear in Simple Mode's **Data Importer** panel.
-
-Transform Function plugins
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-- Add ``.py`` files to ``config/transformations/`` with ``transform(values)`` and
-  an optional ``DISPLAY_NAME`` (the menu label).
-- Bundled functions include identity, powers, reciprocal, logarithmic,
-  exponential, trigonometric, and XRD baseline removal.
-- Functions appear in Simple Mode's **2. Mathematical Transformation** panel and
-  are recorded as replayable protocol steps.
-
-Curve-Fitting plugins
-~~~~~~~~~~~~~~~~~~~~~
-
-- Add ``.py`` files to ``config/fit_functions/`` for polynomial or callable models.
-- Files are discovered at startup and shown in the curve-fit configuration list.
-- Use this for custom equations and domain-specific fitting workflows.
+- :doc:`extensions/ai_assistant`: the steps, which guide to use, and an example
+  request for every kind of module.
+- :doc:`extensions/ai_examples`: the tested example of every kind, with sample data
+  and the resulting plots.
+- :doc:`extensions/index`: each kind of module explained, for writing one by hand.
 
 Project links
 -------------
@@ -118,6 +94,18 @@ Project links
    user_guide/curve_fitting
    user_guide/plot_customization
    user_guide/data_export
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Build Modules with AI
+
+   extensions/ai_assistant
+   extensions/ai_examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Extend and Reference
+
    extensions/index
    api/index
    reference/classes

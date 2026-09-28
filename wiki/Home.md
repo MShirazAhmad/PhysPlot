@@ -17,8 +17,8 @@ whole folders of files.
 curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
 ```
 
-**Windows**: paste this into **PowerShell**. It installs PhysPlot and adds it to
-the Start menu:
+**Windows**: paste this into **PowerShell**. It installs PhysPlot, and Python if
+needed, and adds it to the Start menu ([video, 2:10](https://youtu.be/fVADS4sBwEs)):
 
 ```powershell
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
@@ -61,6 +61,10 @@ Every panel, control, menu, dialog and message, with annotated screenshots:
   `x^2`, `sin(x)`, `XRD: Baseline Remove` and your own functions, recorded and replayed.
 - **[Bulk Runs and Headless Use](Bulk-Runs-and-Headless)**: Run Sequence over a
   folder, the `physplot` command line, and exported `Sequence.py` files.
+- **[Build Modules with an AI Assistant](Build-Modules-with-AI)**: get a file loader,
+  transformation, plotter or any other module from ChatGPT, Claude, Gemini or Copilot,
+  without writing code yourself. [AI Module Examples](AI-Module-Examples) shows a tested
+  example of each kind.
 - **[Extending PhysPlot](Extending-PhysPlot)**: writing transformation and file
   loader plugins in `config/`.
 - **[Troubleshooting](Troubleshooting)**: every error dialog, what it means, and how to fix it.

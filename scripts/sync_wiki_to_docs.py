@@ -1,10 +1,11 @@
-"""Copy the wiki's UI Reference, Sequence Walkthrough and Video Tutorials pages into the Sphinx docs.
+"""Copy the wiki's UI Reference, Sequence Walkthrough, Video Tutorials and AI-module pages into the Sphinx docs.
 
 The GitHub wiki pages in ``wiki/`` are the source. After editing one of them, run::
 
     python scripts/sync_wiki_to_docs.py
 
-This rewrites ``docs/ui/*.md`` (MyST Markdown for Read the Docs):
+This rewrites ``docs/ui/*.md`` and ``docs/extensions/ai_assistant.md`` (MyST Markdown for
+Read the Docs):
 
 - links between mirrored wiki pages become links between the docs pages;
 - links to other wiki pages point at the closest docs page, or at the GitHub wiki;
@@ -16,7 +17,9 @@ This rewrites ``docs/ui/*.md`` (MyST Markdown for Read the Docs):
 
 from __future__ import annotations
 
+import os
 import re
+from functools import partial
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +28,7 @@ OUT = ROOT / "docs" / "ui"
 WIKI_URL = "https://github.com/MShirazAhmad/PhysPlot/wiki/"
 
 # Mirrored wiki page -> docs/ui file name (without .md), in table-of-contents order.
+# A name with a folder ("../extensions/...") is written there instead.
 PAGES = {
     "UI-Reference": "index",
     "UI-Main-Window": "main_window",
@@ -38,6 +42,8 @@ PAGES = {
     "UI-Dialogs-and-Messages": "dialogs_and_messages",
     "Sequence-Walkthrough": "sequence_walkthrough",
     "Video-Tutorials": "videos",
+    "Build-Modules-with-AI": "../extensions/ai_assistant",
+    "AI-Module-Examples": "../extensions/ai_examples",
 }
 # Wiki pages that are not mirrored -> the docs page that covers the same ground.
 OTHER_DOCS = {
@@ -49,9 +55,11 @@ OTHER_DOCS = {
     "Bulk-Runs-and-Headless": "../user_guide/protocol_sequences.rst",
     "Extending-PhysPlot": "../extensions/index.rst",
 }
-# Pages listed in the UI Reference table of contents (the walkthrough and videos sit in the main one).
+# Pages listed in the UI Reference table of contents (the walkthrough and videos sit in the main
+# one, the AI-module page in the Extension Guides).
 UI_TOCTREE = [name for page, name in PAGES.items()
-              if page not in {"UI-Reference", "Sequence-Walkthrough", "Video-Tutorials"}]
+              if page not in {"UI-Reference", "Sequence-Walkthrough", "Video-Tutorials", "Build-Modules-with-AI",
+                               "AI-Module-Examples"}]
 
 LINK = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)\s]+)\)")
 IMAGE = re.compile(r"!\[([^\]]*)\]\(images/([^)\s]+)\)")
@@ -69,15 +77,24 @@ def video_embeds(line: str) -> list[str] | None:
     return lines[:-1]
 
 
-def rewrite_link(match: re.Match) -> str:
+def output_path(page: str) -> Path:
+    return (OUT / f"{PAGES[page]}.md").resolve()
+
+
+def relative(target: Path, folder: Path) -> str:
+    return Path(os.path.relpath(target, folder)).as_posix()
+
+
+def rewrite_link(match: re.Match, folder: Path) -> str:
+    """Point a wiki link at the docs page written in ``folder``'s terms."""
     text, target = match.groups()
     if target.startswith(("http://", "https://", "mailto:", "#")):
         return match.group(0)
     page, _, anchor = target.partition("#")
     if page in PAGES:
-        new = f"{PAGES[page]}.md" + (f"#{anchor}" if anchor else "")
+        new = relative(output_path(page), folder) + (f"#{anchor}" if anchor else "")
     elif page in OTHER_DOCS:
-        new = OTHER_DOCS[page]
+        new = relative((OUT / OTHER_DOCS[page]).resolve(), folder)
     else:
         new = WIKI_URL + target
     return f"[{text}]({new})"
@@ -85,6 +102,8 @@ def rewrite_link(match: re.Match) -> str:
 
 def convert(page: str) -> str:
     source = (WIKI / f"{page}.md").read_text(encoding="utf-8")
+    folder = output_path(page).parent
+    images = relative(WIKI / "images", folder)
     lines = []
     in_code = False
     for line in source.splitlines():
@@ -94,8 +113,8 @@ def convert(page: str) -> str:
             lines.extend(embeds)
             continue
         if not in_code:
-            line = IMAGE.sub(r"![\1](../../wiki/images/\2)", line)
-            line = LINK.sub(rewrite_link, line)
+            line = IMAGE.sub(rf"![\1]({images}/\2)", line)
+            line = LINK.sub(partial(rewrite_link, folder=folder), line)
         lines.append(line)
     text = "\n".join(lines).rstrip() + "\n"
     header = f"<!-- Generated from wiki/{page}.md by scripts/sync_wiki_to_docs.py. Edit the wiki page. -->\n\n"
@@ -107,9 +126,10 @@ def convert(page: str) -> str:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for page, name in PAGES.items():
-        (OUT / f"{name}.md").write_text(convert(page), encoding="utf-8")
-        print(f"docs/ui/{name}.md  <-  wiki/{page}.md")
+    for page in PAGES:
+        path = output_path(page)
+        path.write_text(convert(page), encoding="utf-8")
+        print(f"{relative(path, ROOT)}  <-  wiki/{page}.md")
 
 
 if __name__ == "__main__":

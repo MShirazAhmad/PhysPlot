@@ -1,0 +1,17 @@
+Acme Photonics UV-1900 ASCII Export
+Instrument:	UV-1900 (S/N 41A2207)
+Sample:	Methylene blue 5 uM in water
+Date:	14.03.2026 10:42
+Scan range:	700 - 600 nm
+Interval:	20 nm
+Path length:	10 mm
+Replicates:	3
+[Data]
+Wavelength (nm)	Abs
+700,0	0,0412
+680,0	0,2195
+660,0	0,3561
+640,0	0,2248
+620,0	0,1752
+600,0	0,1124
+[End]

@@ -42,6 +42,29 @@ def test_user_plugin_directory_overrides_bundled_fileloader(monkeypatch, tmp_pat
     assert default_entries[0]["path"] == fileloader_dir / "default_loader.py"
 
 
+def test_broken_fileloader_is_skipped_instead_of_crashing(monkeypatch, tmp_path, capsys):
+    """A loader that fails at import (any error, not only ImportError) must not stop discovery."""
+    user_root = tmp_path / "PhysPlot"
+    fileloader_dir = user_root / "config" / "data_importers"
+    fileloader_dir.mkdir(parents=True)
+    (fileloader_dir / "broken_loader.py").write_text(
+        "title = 'Broken'\n"
+        "UNITS = undefined_name\n"
+        "def load_data(file_path):\n"
+        "    return [[1, 2]]\n",
+        encoding="utf-8",
+    )
+    (fileloader_dir / "exits_loader.py").write_text("import sys\nsys.exit(2)\n", encoding="utf-8")
+    monkeypatch.setenv("PHYSPLOT_USER_DIR", str(user_root))
+
+    names = {entry["path"].name for entry in discover_fileloaders()}
+
+    assert "broken_loader.py" not in names
+    assert "exits_loader.py" not in names
+    assert "default_loader.py" in names
+    assert "NameError" in capsys.readouterr().err
+
+
 def test_ensure_user_physplot_dirs_creates_editable_tree(monkeypatch, tmp_path):
     user_root = tmp_path / "PhysPlot"
     monkeypatch.setenv("PHYSPLOT_USER_DIR", str(user_root))

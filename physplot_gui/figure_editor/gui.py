@@ -70,6 +70,10 @@ class MainWindow(QMainWindow):
         self.init_ui(figure)
 
         self.show()
+        if getattr(self, "plugin_errors", None):
+            self.statusBar().showMessage(
+                "Plugins that could not be loaded (left out of the menu): " + "; ".join(self.plugin_errors)
+            )
 
     def create_menus(self):
         """Creates the menubar at the top of the main window."""
@@ -359,6 +363,7 @@ class MainWindow(QMainWindow):
             for action in actions_to_remove:
                 self.plugin_menu.removeAction(action)
 
+        self.plugin_errors = []
         plugin_dir = self.preferences.get("plugin_directory")
         plugin_requirements_filepath = self.preferences.get("plugin_requirements")
         if os.path.exists(plugin_requirements_filepath):
@@ -464,7 +469,8 @@ class MainWindow(QMainWindow):
                                 else:
                                     self.plugin_menu.addAction(action)
                 except Exception as e:
-                    print(f"Failed to load plugin {module_name}: {e}")
+                    # PhysPlot: the editor still opens; the status bar names the plugin.
+                    self.plugin_errors.append(f"{file_name}: {e}")
 
         if reload:
             self.plugin_menu.insertSeparator(
@@ -473,9 +479,26 @@ class MainWindow(QMainWindow):
 
     def run_plugin(self, plugin_class):
         selected_obj = self.fm.selected_obj
+        if not selected_obj:
+            self.statusBar().showMessage("Select a part of the figure first, then choose the command.")
+            return
         if selected_obj:
             plugin = plugin_class()
-            plugin.run(selected_obj)
+            # PhysPlot: the editor runs inside PhysPlot, so an error in a plugin must not
+            # escape (PyQt6 can abort the whole application on an unhandled exception).
+            try:
+                plugin.run(selected_obj)
+            except Exception as exc:
+                import traceback
+
+                box = QMessageBox(self)
+                box.setIcon(QMessageBox.Icon.Warning)
+                box.setWindowTitle("Plugin Error")
+                box.setText(f"The command \u201c{getattr(plugin_class, 'name', plugin_class.__name__)}\u201d failed.")
+                box.setInformativeText(str(exc))
+                box.setDetailedText(traceback.format_exc())
+                box.exec()
+                return
             self.fm.canvas.draw()
             self.fm.unsaved_changes = True
             self.fm.fe.build_tree(self.fm.figure, selected_obj)

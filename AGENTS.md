@@ -53,8 +53,9 @@ python -m build
 python -m twine check dist/*
 ```
 
-The UI Reference, Sequence Walkthrough and Video Tutorials are written as wiki pages
-in `wiki/`. After editing them, regenerate their Read the Docs copies in `docs/ui/`.
+The UI Reference, Sequence Walkthrough, Video Tutorials, Build Modules with AI and AI
+Module Examples are written as wiki pages in `wiki/`. After editing them, regenerate
+their Read the Docs copies in `docs/ui/` (the two AI pages go to `docs/extensions/`).
 A line of YouTube thumbnail links in a wiki page becomes embedded players in the docs
 (the `youtube` directive in `docs/_ext/youtube.py`, also usable in `.rst` pages):
 
@@ -87,6 +88,11 @@ Discovery lives in `physplot/user_paths.py`, `physplot/plotting_modules/user_mod
 
 - Preserve the table-first layout.
 - Reusable modules belong under `config/`, never in new root-level folders.
+- Every `config/` folder has an `AI_GUIDE.md` (the file users give an AI assistant) and
+  an `examples/` subfolder holding that guide's tested example, switched off because
+  discovery does not scan subfolders. When a module format changes, update the guide
+  and its example together; `tests/test_ai_guide_examples.py` checks that they match and
+  still work on the sample data in `test_data/AI_Examples/`.
   New module kinds must be discovered through `plugin_search_dirs()` so the
   Documents copy keeps working without a reinstall.
 - Do not duplicate backend logic in the GUI.

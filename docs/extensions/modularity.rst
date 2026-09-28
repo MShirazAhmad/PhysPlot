@@ -12,6 +12,9 @@ Windows installer; relocate it with ``PHYSPLOT_USER_DIR``). The user copy is
 searched first and a file with the same name there overrides the bundled one,
 so modules can be added, edited, or removed without reinstalling.
 
+You can have any of these files written for you: every folder has an
+``AI_GUIDE.md`` to give to an AI assistant, as described in :doc:`ai_assistant`.
+
 Where Files Live
 ----------------
 
@@ -80,9 +83,9 @@ Where Files Live
      - Discovered by ``physplot.workflow.discover_protocol_modules()``
      - **Protocol > Insert Protocol Module** appends their steps
    * - Transformation pipelines
-     - ``config/pipelines/*.json`` by default
-     - Imported/exported by Advanced pipeline actions
-     - Reusable transformation-only pipelines
+     - ``config/pipelines/*.json``
+     - Applied by a short Python script (no menu item in PhysPlot 1.0)
+     - Reusable transformation-only pipelines (see :doc:`protocol_files`)
 
 Startup Versus Reload
 ---------------------
@@ -132,7 +135,8 @@ Minimum structure:
    def load_data(file_path):
        return pd.read_csv(file_path)
 
-Restart PhysPlot. The loader appears in Simple Mode's **Data Importer** panel.
+Choose **File → Reload Config Modules**. The loader appears in Simple Mode's **Data
+Importer** panel. :doc:`fileloading` explains every option with worked examples.
 
 Creating a Loader-Owned Plotter
 -------------------------------
@@ -161,8 +165,11 @@ data format.
        }
    ]
 
-Restart PhysPlot. The plotter appears in Simple Mode's **Plotter Module** list
-when the loader plugin is discovered.
+Choose **File → Reload Config Modules**, pick the loader by name in **Data Loader**
+and import a file: its plotters appear in Simple Mode's **Plotter Module** list while
+that data is loaded (not after an **Auto Loader** import). Loader plotters are not
+replayed in sequences or bulk runs and cannot use **LSQ fit**; for a plotter that does
+both, write a plotter module (:doc:`plotter_modules`).
 
 Creating a New Transform Function
 ---------------------------------
@@ -180,14 +187,14 @@ Minimum structure:
    import numpy as np
 
    DISPLAY_NAME = "Normalize"
-   DEFAULT_LABEL = "Normalized"
 
 
    def transform(values):
        values = np.asarray(values, dtype=float)
        return values / np.nanmax(values)
 
-Restart PhysPlot. The function appears in the transformation dropdown.
+Choose **File → Reload Config Modules**. The function appears in the transformation
+dropdown. See :doc:`functions`.
 
 Creating and Reusing Figure Templates
 -------------------------------------
@@ -246,33 +253,34 @@ Transformation pipelines are JSON files saved under:
 
    config/pipelines/*.json
 
-Use the Advanced pipeline import/export actions for reusable transformation-only
-pipelines. Use ``config/sequences/`` when the reusable file should also include
-load, role, plotting, fitting, or bulk-run workflow steps.
+PhysPlot 1.0 has no menu item for pipelines; the pipeline guide in
+``config/pipelines/AI_GUIDE.md`` gives a short script that applies one and saves it as
+a sequence. Use ``config/protocol_modules/`` for reusable steps you want in the menus,
+and ``config/sequences/`` when the file should also set roles and plot. See
+:doc:`protocol_files`.
 
-Creating a New Backend Plotter Module
--------------------------------------
+Creating a Plotter Module
+-------------------------
 
 .. youtube:: AHWbQDqHvQ0
    :title: How to Create a Plotter Module
 
-Backend plotters live under:
+Your own plotters go in:
 
 .. code-block:: text
 
-   physplot/plotting_modules/
+   config/plotter_modules/*.py
 
-They should subclass or follow ``BasePlotter`` and define:
+The simplest file defines ``PLOTTER_ID``, ``NAME``, ``PLOT_TYPES`` and a function
+``plot(dataset, plot_type=None, config=None)`` that returns a Matplotlib figure. Choose
+**File → Reload Config Modules**; the plotter appears in **Plotter Module**, and saved
+sequences, notebooks, command-line workflows and bulk runs replay it through
+``PlotModuleStep(plotter_id=...)``. :doc:`plotter_modules` explains the file and
+plot-type presets.
 
-- ``plotter_id``
-- ``name``
-- ``category``
-- ``supported_plot_types``
-- ``plot(dataset, plot_type=None, config=None)``
-
-Built-in plotters are registered in the plotting-module registry. A backend
-plotter is the right place for reusable scientific plotting logic that must run
-in notebooks, command-line workflows, and bulk folder runs.
+PhysPlot's own plotters live in ``physplot/plotting_modules/``, subclass
+``BasePlotter`` and are registered by ``PlotterRegistry.default()``; that is the place
+for plotters contributed to PhysPlot itself.
 
 Generated Workflow File Format
 ------------------------------

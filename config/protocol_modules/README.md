@@ -16,3 +16,6 @@ steps = load_workflow("config/protocol_modules/normalize_and_plot.py")
 Use `config/sequences/` for complete runnable sequences and this folder for
 smaller reusable fragments. The per-user copy in
 `Documents/PhysPlot/config/protocol_modules/` is searched first.
+
+To have an AI assistant write a protocol module, attach `AI_GUIDE.md` from this
+folder and the first lines of a data file to the chat.

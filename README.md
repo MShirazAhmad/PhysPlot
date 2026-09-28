@@ -4,16 +4,6 @@
   <img src="physplot/inc/PhysPlotWide1.png" alt="PhysPlot logo" width="420">
 </p>
 
-> **⚠️ Experimental Development Branch**
->
-> This branch is under active development and may contain incomplete features, breaking changes, or significant bugs.
->
-> **Latest Stable Release**
->
-> https://github.com/MShirazAhmad/PhysPlot/tree/PhysPlot-v2.0.0
-
----
-
 ## Overview
 
 PhysPlot is a scientific plotting and workflow automation application for researchers, engineers, and students who require fast, reproducible, publication-quality figures without relying on large commercial software packages.
@@ -66,7 +56,9 @@ YouTube. The same videos play inside the matching pages of the
 [documentation](https://physplot.readthedocs.io/en/latest/ui/videos.html).
 
 **[PhysPlot Basics](https://www.youtube.com/playlist?list=PLPkYnHekjU24)**: Simple Mode,
-from typing data to curve fitting.
+from typing data to curve fitting. It starts with
+**[0. Install PhysPlot on Windows](https://youtu.be/fVADS4sBwEs)** (2:10), from a fresh Windows 11 to PhysPlot
+in the Start menu.
 
 <table>
   <tr>
@@ -102,6 +94,37 @@ modules.
 
 ---
 
+# Branches
+
+PhysPlot is developed on three branches. Pick the one that matches how much change you
+want:
+
+| Branch | Channel | Purpose | Who it is for | Documentation |
+| --- | --- | --- | --- | --- |
+| [`main`](https://github.com/MShirazAhmad/PhysPlot/tree/main) | **Stable** | Tested releases. Changes arrive here only after they have been used on `indevelopment`. | Everyday use, teaching, lab work. | [main](https://physplot.readthedocs.io/en/main/) |
+| [`indevelopment`](https://github.com/MShirazAhmad/PhysPlot/tree/indevelopment) | **Development** | The next release. New work is finished and reviewed here; it is the repository's default branch and builds the default documentation. | Trying new features before a release; contributors. | [latest](https://physplot.readthedocs.io/en/latest/) (default) |
+| [`bleedingedge`](https://github.com/MShirazAhmad/PhysPlot/tree/bleedingedge) | **Bleeding edge** | Experiments and the newest features first (for example new plot types and editor tools). It may break; what works well moves on to `indevelopment`. | Early testers who want the newest features and can report problems. | [bleedingedge](https://physplot.readthedocs.io/en/bleedingedge/) |
+
+Changes flow `bleedingedge` → `indevelopment` → `main`.
+
+**Install a particular branch.** The one-command installers below accept the branch in
+`PHYSPLOT_REF`, for example on macOS:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | PHYSPLOT_REF=main bash
+```
+
+and on Windows (PowerShell):
+
+```powershell
+$env:PHYSPLOT_REF='main'; irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
+```
+
+Replace `main` with `indevelopment` or `bleedingedge` in both places. From source, check
+out the branch with `git clone -b <branch> https://github.com/MShirazAhmad/PhysPlot.git`.
+
+---
+
 # Installation
 
 ## Option 1 — macOS: one command (Recommended on Mac)
@@ -121,15 +144,19 @@ PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** i
 
 ## Option 2 — Windows: one command
 
-Open **PowerShell** and paste:
+Open **PowerShell** (right-click the Start button → **Terminal**) and paste:
 
 ```powershell
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 ```
 
-The script finds Python 3.12–3.14 (or installs Python 3.12 with `winget`), installs
-PhysPlot and its dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot**
-Start-menu shortcut. Close PhysPlot and run it again to update.
+Nothing needs to be installed first. The script finds Python 3.12–3.14, or installs
+Python 3.12 for you (with `winget`, or from python.org), installs PhysPlot and its
+dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot** Start-menu
+shortcut. Close PhysPlot and run it again to update.
+
+<a href="https://youtu.be/fVADS4sBwEs"><img src="https://i.ytimg.com/vi/fVADS4sBwEs/mqdefault.jpg" alt="Install PhysPlot on Windows" width="320"></a><br>
+<sub><b>Video:</b> <a href="https://youtu.be/fVADS4sBwEs">Install PhysPlot on Windows</a> (2:10), on a fresh Windows 11 with no Python.</sub>
 
 A classic setup program can be built with `scripts/build_windows_installer.ps1`; when a
 release on the [Releases page](https://github.com/MShirazAhmad/PhysPlot/releases)

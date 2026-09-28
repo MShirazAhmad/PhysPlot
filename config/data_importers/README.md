@@ -10,3 +10,6 @@ Worked examples: `rigaku_ras_loader.py` (XRD `.ras`), `ta_instruments_loader.py`
 (TGA/DSC text exports) and `jcamp_dx_loader.py` (JCAMP-DX spectra), explained step by
 step in `docs/extensions/fileloading.rst`. See also `default_loader.py` and
 `docs/CODEX_PROJECT_GUIDE.md` (Draft 4).
+
+To have an AI assistant write a loader for you, attach `AI_GUIDE.md` from this
+folder and one real data file to the chat.

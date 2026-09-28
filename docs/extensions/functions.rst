@@ -24,7 +24,8 @@ Discovered function plugins are available in:
 - Simple Mode's **2. Mathematical Transformation** panel.
 - The transform dropdown used when building replayable workflow steps.
 
-PhysPlot discovers function files at startup.
+PhysPlot discovers function files at startup and again on **File → Reload Config
+Modules**.
 
 Layman Example
 --------------
@@ -54,8 +55,8 @@ Required Structure
 Every function plugin must define:
 
 ``transform(values)``
-   Function that receives a one-dimensional numeric sequence and returns a
-   sequence of the same length.
+   Function that receives the input column as a one-dimensional ``float`` NumPy
+   array (a copy; blank or text cells are ``NaN``) and returns one value per row.
 
 Optional:
 
@@ -63,7 +64,8 @@ Optional:
    Text shown in the Function dropdown (default: the file name).
 
 ``DEFAULT_LABEL``
-   Default label used by the app when a label is needed.
+   Read only by the legacy plot window. It does not name the output column; leave
+   **Output** empty and PhysPlot names it ``<input>_<DISPLAY_NAME>``.
 
 The first line of the module docstring is shown as the menu tooltip.
 
@@ -77,7 +79,6 @@ Minimal Template
    import numpy as np
 
    DISPLAY_NAME = "Normalize"
-   DEFAULT_LABEL = "Normalized"
 
 
    def transform(values):
@@ -104,9 +105,47 @@ Step-by-Step: Build a New Function
 1. Create a new file in ``config/transformations/`` (for example
    ``config/transformations/15_normalize.py``).
 2. Define ``DISPLAY_NAME`` for the GUI entry (optional).
-3. Define ``DEFAULT_LABEL`` for generated labels (optional).
-4. Implement ``transform(values)`` and return one value per input row.
-5. Choose **File > Reload Config Modules** (or restart PhysPlot) so the function appears in the Function dropdown.
+3. Implement ``transform(values)`` and return one value per input row.
+4. Choose **File → Reload Config Modules** (or restart PhysPlot) so the function
+   appears in the Function dropdown.
+
+Let an AI Assistant Write It
+----------------------------
+
+You can get a finished function without writing code. The guide file
+`config/transformations/AI_GUIDE.md
+<https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/transformations/AI_GUIDE.md>`_
+tells an AI assistant exactly what PhysPlot expects and includes a complete, tested
+example. :doc:`ai_assistant` explains the method for every kind of module.
+
+1. **Download the guide.** Open the link above and click **Download raw file** (the ↓
+   button).
+2. **Start a new chat** with ChatGPT, Claude, Gemini, Copilot or another assistant, and
+   attach ``AI_GUIDE.md``. Give it:
+
+   - the formula, with the units of the input and of the result;
+   - two or three example inputs with the results you expect, so it can check itself;
+   - optionally a few rows of the column.
+
+3. **Say what you want**, for example:
+
+   .. code-block:: text
+
+      My FTIR spectra have the X column in wavenumber (cm^-1). I want a transformation
+      that converts it to wavelength in nm so I can compare with UV-Vis data. Zero or
+      negative values should become empty cells. For example, 4000 cm^-1 should give
+      2500 nm. Please call it "cm^-1 to nm" in the menu.
+
+4. **Save the reply** in ``Documents/PhysPlot/config/transformations/`` under the file
+   name the assistant gives, such as ``20_wavenumber_to_wavelength.py`` (**File → Open
+   Config Folder** opens the ``config`` folder). Choose **File → Reload Config
+   Modules**, pick the function in **Function**, click **Apply** and check a few values.
+5. **If PhysPlot shows an error**, paste the whole message into the chat. The assistant
+   sends a corrected complete file; save it over the old one and reload.
+
+Keep the file name once you use the function: saved sequences refer to it by name.
+A transformation sees one column, so a calculation that combines two columns (sample
+divided by reference, for example) needs a different approach; the assistant will say so.
 
 Function Categories
 -------------------

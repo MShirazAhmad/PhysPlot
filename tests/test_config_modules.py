@@ -102,3 +102,29 @@ def test_templates_and_fit_styles_prefer_user_folder(monkeypatch, tmp_path):
     assert saved.parent == user_root / "config" / "figureforge_fit_styles"
     preset_names = {preset["name"] for preset in list_fit_style_presets()}
     assert {"Thin Dotted", "Default LSQ Fit"} <= preset_names
+
+
+def test_malformed_template_and_fit_style_files_are_skipped(monkeypatch, tmp_path):
+    """Valid JSON of the wrong shape (a list, a number name) must not break the menus."""
+    user_root = _user_root(monkeypatch, tmp_path)
+    monkeypatch.delenv("PHYSPLOT_STYLE_DIR", raising=False)
+    monkeypatch.delenv("PHYSPLOT_FIT_STYLE_DIR", raising=False)
+    from physplot_gui.fit_styles import list_fit_style_presets
+    from physplot_gui.plot_styles import list_style_modules
+
+    templates = user_root / "config" / "templates"
+    fit_styles = user_root / "config" / "figureforge_fit_styles"
+    templates.mkdir(parents=True, exist_ok=True)
+    fit_styles.mkdir(parents=True, exist_ok=True)
+    (templates / "list_template.json").write_text("[1, 2]", encoding="utf-8")
+    (templates / "numbered.json").write_text(json.dumps({"name": 7, "figure": {}}), encoding="utf-8")
+    (fit_styles / "list_style.json").write_text('["dashed"]', encoding="utf-8")
+    (fit_styles / "numbered.json").write_text(json.dumps({"name": 3, "line_style": "--"}), encoding="utf-8")
+
+    template_names = {entry["name"] for entry in list_style_modules()}
+    preset_names = {preset["name"] for preset in list_fit_style_presets()}
+
+    assert "7" in template_names and "Publication Style" in template_names
+    assert "list_template" not in template_names
+    assert "3" in preset_names and "Default LSQ Fit" in preset_names
+    assert "list_style" not in preset_names

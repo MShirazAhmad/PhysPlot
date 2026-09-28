@@ -12,6 +12,11 @@ playlists:
 
 ## Basics (Simple Mode)
 
+0. **[Install PhysPlot on Windows](https://youtu.be/fVADS4sBwEs)** (2:10): a fresh Windows 11 with no Python,
+   the one install command, then PhysPlot from the Start menu with its own taskbar icon.
+
+   [![Install PhysPlot on Windows](https://i.ytimg.com/vi/fVADS4sBwEs/mqdefault.jpg)](https://youtu.be/fVADS4sBwEs)
+
 1. **[The PhysPlot Window](https://youtu.be/JhQnXwG3moY)** (0:18): the spreadsheet,
    the column-role drop-downs, the three Simple Mode panels and the mode switch.
 

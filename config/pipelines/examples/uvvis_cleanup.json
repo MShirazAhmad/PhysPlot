@@ -1,0 +1,4 @@
+[
+  {"input": "Absorbance", "function": "subtract", "params": "value=0.02", "output": "Absorbance_corr"},
+  {"input": "Absorbance_corr", "function": "normalize_max", "params": "-", "output": "Absorbance_norm"}
+]

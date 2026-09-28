@@ -52,6 +52,12 @@ Plotter Module menu while its data is loaded. See [Extending PhysPlot](../extens
 file to the loader code to the result in the table, are on the
 [File-Loader Plugins](https://physplot.readthedocs.io/en/latest/extensions/fileloading.html) page.
 
+**Add a loader for your instrument with an AI assistant:** attach
+[data_importers/AI_GUIDE.md](https://github.com/MShirazAhmad/PhysPlot/blob/indevelopment/config/data_importers/AI_GUIDE.md) and one real file from the
+instrument to ChatGPT, Claude, Gemini or Copilot, say which columns are X and Y, and save
+the reply in `Documents/PhysPlot/config/data_importers/`. Step by step:
+[Build Modules with an AI Assistant](../extensions/ai_assistant.md#data-importers).
+
 The file dialog lists *Data Files* by default: the built-in types (`.csv`, `.txt`,
 `.dat`, `.tsv`, `.msa`, `.xls`, `.xlsx`, `.xrdml`) plus every extension a loader plugin
 declares in `FILE_EXTENSIONS` (for example `.ras` and `.jdx`). Switch to *All Files* for

@@ -24,8 +24,13 @@ AUTO_LOADED = {
 
 
 # Samples a user opens by choosing a loader plugin in the Data Loader menu, because a
-# built-in loader already owns their extension.
-PLUGIN_LOADED = {"Thermal/tga_calcium_oxalate.txt": "ta_instruments_loader.py"}
+# built-in loader already owns their extension, or because the loader is an AI-guide
+# example that ships switched off in config/data_importers/examples/.
+PLUGIN_LOADED = {
+    "Thermal/tga_calcium_oxalate.txt": "ta_instruments_loader.py",
+    "AI_Examples/methylene_blue.uvs": "examples/acme_uvvis_loader.py",
+    "AI_Examples/methylene_blue_single_scan.uvs": "examples/acme_uvvis_loader.py",
+}
 
 
 def _load_sample(name):
