@@ -16,6 +16,10 @@ class BasePlotter:
     category = "General"
     supported_dataset_types = ("generic",)
     supported_plot_types = ()
+    #: Column roles each plot type reads: ``{plot_type: (required, optional)}``. The GUI
+    #: offers only these roles in the table and fills in the required ones. Plotters
+    #: without it (or a plot type missing from it) offer every role.
+    role_requirements: dict = {}
 
     def can_plot(self, dataset) -> bool:
         if dataset is None:

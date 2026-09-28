@@ -23,6 +23,10 @@ class SubplotGridPlotter(BasePlotter):
     category = "General"
     supported_dataset_types = ("*",)
     supported_plot_types = ("subplots_by_group", "subplots_by_dataset")
+    role_requirements = {
+        "subplots_by_group": (("X", "Y", "Group"), ("Label",)),
+        "subplots_by_dataset": (("X", "Y"), ("Group", "Label")),
+    }
 
     def plot(self, dataset, plot_type=None, config=None):
         plot_type = plot_type or "subplots_by_group"

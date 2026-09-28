@@ -21,6 +21,10 @@ class ErrorBarPlotter(BasePlotter):
     category = "General"
     supported_dataset_types = ("*",)
     supported_plot_types = ("x_y_errorbar", "y_errorbar")
+    role_requirements = {
+        "x_y_errorbar": (("X", "Y", "X Error", "Y Error"), ()),
+        "y_errorbar": (("X", "Y", "Y Error"), ()),
+    }
 
     def plot(self, dataset, plot_type=None, config=None):
         plot_type = plot_type or "y_errorbar"

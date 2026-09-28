@@ -21,6 +21,10 @@ class HistogramPlotter(BasePlotter):
     category = "General"
     supported_dataset_types = ("*",)
     supported_plot_types = ("histogram", "density_histogram")
+    role_requirements = {
+        "histogram": (("Y",), ()),
+        "density_histogram": (("Y",), ()),
+    }
 
     def plot(self, dataset, plot_type=None, config=None):
         plot_type = plot_type or "histogram"

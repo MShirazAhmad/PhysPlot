@@ -136,10 +136,40 @@ def test_category_and_plot_type_menus_limit_roles_and_fill_them_in():
     combo = window.central_table.table.cellWidget(0, 2)
     assert combo.currentText() == "Z" and "Not used" in combo.toolTip()
 
-    # Other plotters offer every role and no category menu.
+    # Other plotters have no category menu and offer the roles they read.
     panel.plotter.setCurrentIndex(panel.plotter.findData("histogram"))
     assert panel.plot_category.isHidden()
+    combo = window.central_table.table.cellWidget(0, 1)
+    assert [combo.itemText(i) for i in range(combo.count())][:2] == ["Ignore", "Y"]
+    window.close()
+    app.processEvents()
+
+
+def test_picking_a_plot_type_or_plotter_makes_the_table_roles_follow_it():
+    frame = pd.DataFrame({"angle": [1.0, 2.0, 3.0], "intensity": [4.0, 5.0, 6.0], "err": [0.1, 0.1, 0.1]})
+    app, window, panel = _gui_window(frame)
+    panel.plotter.setCurrentIndex(panel.plotter.findData("basic"))
+    panel.select_plot_type("scatter")
+    panel._plot_type_chosen()
+    assert window.state.roles == {"angle": "X", "intensity": "Y", "err": "Ignore"}
+
+    # hist reads only Y: X is cleared, so the table shows exactly what the plot uses.
+    panel.select_plot_type("hist")
+    panel._plot_type_chosen()
+    assert window.state.roles == {"angle": "Ignore", "intensity": "Y", "err": "Ignore"}
     combo = window.central_table.table.cellWidget(0, 0)
-    assert combo.count() >= 10
+    assert [combo.itemText(i) for i in range(combo.count())] == ["Ignore", "Y", "Group", "Label", "Batch Key"]
+
+    # Back to scatter: X returns to the first free numeric column.
+    panel.select_plot_type("scatter")
+    panel._plot_type_chosen()
+    assert window.state.roles["angle"] == "X"
+
+    # Other plotters follow their own role_requirements.
+    panel.plotter.setCurrentIndex(panel.plotter.findData("errorbar"))
+    panel.select_plot_type("y_errorbar")
+    panel._plot_type_chosen()
+    assert window.state.roles == {"angle": "X", "intensity": "Y", "err": "Y Error"}
+    assert panel.plot_roles_hint.text() == "Uses: X, Y, Y Error"
     window.close()
     app.processEvents()

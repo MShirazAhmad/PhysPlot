@@ -650,6 +650,7 @@ class SimpleModePanel(QtWidgets.QWidget):
 
         self.plotter = AutoWidthComboBox()
         self.plotter.currentIndexChanged.connect(self._plotter_changed)
+        self.plotter.activated.connect(lambda _index: self._plot_type_chosen())
         # Category (the Matplotlib gallery sections, for the Basic Plotter) and Plot Type.
         self.plot_category = AutoWidthComboBox()
         self.plot_category.setToolTip("Plot category, as in the Matplotlib gallery")

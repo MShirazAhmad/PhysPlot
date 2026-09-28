@@ -82,9 +82,15 @@ grouped the same way. Pick a **Category**, then a **Plot Type** (shown as the Ma
 - The table's role menus then offer only the roles that plot type uses (plus **Ignore**,
   **Group**, **Label** and **Batch Key**). A column keeps a role the type does not use; it is
   shown greyed with the tooltip *Not used by the selected plot type*.
-- When you pick a category or plot type, the roles it still needs are given to the next
-  free columns (numeric columns for X, Y, Z…, text columns for Label and Group) and
-  recorded in the protocol. The status bar lists them, for example
+- When you pick a plotter, category or plot type, the table's role selections change to
+  match it. Data roles it does not read (X, Y, Y2, Z, U, V, W, X Error, Y Error) go back
+  to **Ignore**, then the roles it needs are given to the next free columns (numeric
+  columns for X, Y, Z…, text columns for Label and Group) and recorded in the protocol.
+  Group, Label, Batch Key and Fit Weight are never cleared. For example *hist(x)* leaves
+  only Y set; going back to *scatter(x, y)* puts X on the first free numeric column again.
+- The Histogram, Error Bar, Overlay and Subplot Grid plotters work the same way with the
+  roles they read. The Nanoindentation and Oliver–Pharr plotters find their columns by
+  name, so they offer every role. The status bar lists them, for example
   *Roles set for contourf(X, Y, Z): x → X, y → Y, z → Z*. The hint under **Fit Line**
   shows what the type uses, for example *Uses: X, Y (Y2 optional)*.
 - Gridded types (images, contours, surfaces, Hinton, hillshading) take a long table, one

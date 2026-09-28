@@ -334,7 +334,7 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
 from physplot.loaders.plugins import plugin_extensions
-from physplot.plotting_modules.gallery import plot_type_info as gallery_plot_type_info, roles_hint as gallery_roles_hint
+from physplot.plotting_modules.gallery import plot_type_info as gallery_plot_type_info
 from physplot.plotting_modules import PlotterRegistry
 from physplot.user_paths import (
     bundled_plugin_dir,
@@ -420,6 +420,10 @@ ROLE_LABELS = {
     "v": "V",
     "w": "W",
 }
+
+
+#: Roles that feed a plot's axes or error bars; a plot type that does not read one clears it.
+DATA_ROLES = {"X", "Y", "Y2", "Z", "U", "V", "W", "X Error", "Y Error"}
 
 
 #: File types the built-in loaders read, listed first in the *Import Data* dialog.
@@ -1124,16 +1128,35 @@ class MainWindow(QtWidgets.QMainWindow):
         return grouped if sum(len(c["types"]) for c in grouped) > 1 else None
 
     def _plot_type_roles(self, plotter_id: str, plot_type: str) -> dict | None:
-        """Return the catalogue entry (roles, optional, label, description) of a plot type."""
+        """Return the roles a plot type reads: ``{"id", "label", "roles", "optional", ...}``.
+
+        The Basic Plotter (and its Scatter/Line subclasses) use the gallery catalogue;
+        other plotters their ``role_requirements``. ``None`` means "every role" (plotters
+        that find their columns by name, loader plotters, unknown plot types).
+        """
         if not plotter_id or plotter_id in self._custom_plotters or not plot_type:
             return None
+        registry = PlotterRegistry.default()
         try:
-            base_type, _ = PlotterRegistry.default().resolve_plot_type(plotter_id, plot_type, {})
+            plotter = registry.get(plotter_id)
+            base_type, _ = registry.resolve_plot_type(plotter_id, plot_type, {})
         except Exception:
-            base_type = plot_type
-        if not getattr(PlotterRegistry.default().get(plotter_id), "plot_categories", None):
             return None
-        return gallery_plot_type_info(base_type)
+        if getattr(plotter, "plot_categories", None):
+            return gallery_plot_type_info(base_type)
+        requirements = getattr(plotter, "role_requirements", {}) or {}
+        if base_type not in requirements:
+            return None
+        roles, optional = requirements[base_type]
+        return {"id": base_type, "label": plot_type, "roles": tuple(roles), "optional": tuple(optional), "description": ""}
+
+    @staticmethod
+    def _roles_hint(info: dict) -> str:
+        """``"Uses: X, Y, Z"`` or ``"Uses: X, Y (Y2 optional)"`` for a plot type's roles."""
+        hint = "Uses: " + ", ".join(info["roles"])
+        if info["optional"]:
+            hint += f" ({', '.join(info['optional'])} optional)"
+        return hint
 
     def plot_type_selected(self, plotter_id: str, plot_type: str) -> dict:
         """Limit the table's role menus to the roles a plot type uses; return its hint.
@@ -1155,16 +1178,19 @@ class MainWindow(QtWidgets.QMainWindow):
         allowed = ["Ignore", *info["roles"], *info["optional"], "Group", "Label", "Batch Key"]
         if table is not None:
             table.set_allowed_roles(list(dict.fromkeys(allowed)))
-        return {"hint": gallery_roles_hint(info["id"]), "description": info.get("description", "")}
+        return {"hint": self._roles_hint(info), "description": info.get("description", "")}
 
     def assign_roles_for_plot_type(self, plotter_id: str, plot_type: str) -> list[tuple[str, str]]:
         """Give free columns the roles a plot type still needs, in table order.
 
-        Called when the user picks a category or plot type. Each required role no column
+        Called when the user picks a plotter, category or plot type. Data roles the plot
+        type does not read (X, Y, Y2, Z, U, V, W, X Error, Y Error) are first set back to
+        ``Ignore``; Group, Label, Batch Key and Fit Weight are kept. Each required role no column
         has yet goes to the next column whose role is ``Ignore``: a numeric column for
         X, Y, Z and the other axis roles, a text column (or any free column) for Label and
         Group. Each assignment goes through :meth:`set_column_role`, so it is recorded in
-        the protocol like a role picked by hand. Nothing happens for other plotters.
+        the protocol like a role picked by hand. Nothing happens for plotters that read
+        columns by name.
 
         :returns: The ``(column, role)`` pairs assigned.
         """
@@ -1175,6 +1201,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sync_table_to_backend()
         dataframe = dataset.dataframe
         assigned = []
+        # Data roles the plot type does not read go back to Ignore, so the table shows
+        # exactly what this plot uses. Group, Label, Batch Key and Fit Weight are kept.
+        used = set(info["roles"]) | set(info["optional"])
+        for column, role in list(self.state.roles.items()):
+            if role in DATA_ROLES and role not in used:
+                self.set_column_role(column, "Ignore")
+                assigned.append((column, "Ignore"))
         for role in info["roles"]:
             roles = self.state.roles
             if role in roles.values():
@@ -1191,7 +1224,11 @@ class MainWindow(QtWidgets.QMainWindow):
             self._refresh_all()
             self.status.set_message(
                 "Roles set for " + (info.get("label") or plot_type) + ": "
-                + ", ".join(f"{column} → {role}" for column, role in assigned)
+                + ", ".join(f"{column} → {role}" for column, role in assigned if role != "Ignore")
+                + (
+                    "; cleared " + ", ".join(column for column, role in assigned if role == "Ignore")
+                    if any(role == "Ignore" for _, role in assigned) else ""
+                )
             )
         return assigned
 

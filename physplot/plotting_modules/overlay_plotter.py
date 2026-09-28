@@ -21,6 +21,10 @@ class OverlayPlotter(BasePlotter):
     category = "General"
     supported_dataset_types = ("*",)
     supported_plot_types = ("overlay_by_group", "overlay_by_dataset")
+    role_requirements = {
+        "overlay_by_group": (("X", "Y", "Group"), ("Label",)),
+        "overlay_by_dataset": (("X", "Y"), ("Group", "Label")),
+    }
 
     def plot(self, dataset, plot_type=None, config=None):
         plot_type = plot_type or "overlay_by_group"
