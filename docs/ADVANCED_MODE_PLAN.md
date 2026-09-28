@@ -76,42 +76,42 @@ appear in statuses or replays. Tracked separately.
 
 ## Phase 2: Editable steps (parameters, reorder, enable/disable)
 
-Goal: users iterate on a protocol from the table without touching Python.
+Status: done (2026-09-25).
 
-Backend:
-
-1. Add to `WorkflowStep` (non-abstract, defaults provided):
-   `enabled: bool = True`, `describe() -> dict` returning editable fields as
-   `{name: {"value": ..., "type": "str|int|float|bool|column|choice",
-   "choices": [...]}}`, and `update(**fields)`. Implement `describe/update`
-   in every step under `physplot/steps/`. `to_code()` must emit
-   `enabled=False` when disabled, and `apply` must no-op when disabled.
-2. `PhysPlot.move_step(old_index, new_index)` and
-   `PhysPlot.insert_step(index, step)`.
-
-GUI:
-
-3. Step editor dialog (`physplot_gui/widgets/step_editor.py`): built from
-   `describe()`; `column` fields become a combo of current table columns,
-   `choice` fields a combo, others line edits with validation. Double-click
-   on a table row opens it. On accept, call `update(**fields)`, rebuild rows
-   with `_sequence_rows_from_steps`, and run Phase 1 detailed replay.
-4. Enable/disable checkbox column at the far left of the table.
-5. Reorder: "Move up" / "Move down" in the row context menu (drag-and-drop is
-   optional; the context menu is the requirement). `LoadDataStep` rows stay
-   pinned first.
-6. "Insert Protocol Module" and a new "Insert Step..." action should insert
-   after the selected row, not only append. Add an `index` parameter to
-   `MainWindow.insert_protocol_module`.
-
-Acceptance:
-
-- Editing `TransformColumnStep.function_name` in the dialog updates the code
-  view and the replay result.
-- A disabled step is skipped, shows `skipped`, and round-trips through
-  Export Sequence.py / Import Sequence.py.
-- Moving a `SetRoleStep` below a `PlotModuleStep` produces the expected
-  failure status rather than an exception dialog.
+- `physplot/steps/fields.py`: `field()` specs (`str`, `int`, `float`,
+  `bool`, `column`, `choice`, `path`, `literal`, `value`), `coerce_field`,
+  `format_field`.
+- `WorkflowStep` (`physplot/steps/base.py`): `enabled`, automatic
+  disabled-apply guard via `__init_subclass__`, `describe()` (subclasses
+  implement `_describe_fields()`), `validate(**fields)` (no mutation),
+  `update(**fields)`, `_set_field`, `template(columns)`, `step_label()`,
+  `_format_code()` which appends `enabled=False` only when disabled.
+- Every built-in step accepts `enabled=True`, describes its fields, and has a
+  template. Generated code for enabled steps is byte-identical to before.
+  `STEP_TYPES` in `physplot/steps/__init__.py` lists insertable types.
+- `execute_steps` reports disabled steps as `skipped` with
+  `StepResult.skip_reason = "disabled"` and keeps running; other reasons are
+  `"after_failure"` and `"not_run"`.
+- `PhysPlot.insert_step(index, step)` and `PhysPlot.move_step(old, new)`.
+- GUI: `physplot_gui/widgets/step_editor.py` (`StepEditorDialog`,
+  `choose_step_type`); table columns are now On, #, Operation, Details,
+  Target, Status (5), Delete (6); double-click edits; context menu has Edit,
+  Enable/Disable, Move up/down, Insert step after, Rerun. `MainWindow`:
+  `edit_timeline_step`, `apply_step_edits`, `set_timeline_row_enabled`,
+  `can_move_timeline_row`, `move_timeline_row`, `insert_step_dialog`,
+  `insert_steps`, `insert_protocol_module(path, after_row=None)`,
+  `_timeline_step_pairs`, `_commit_timeline`, `_resume_from_step`.
+  Protocol menu gained "Insert Step...".
+- Edits, toggles, moves and inserts resume from the first affected step
+  (`rerun_from`), falling back to a full replay without saved state.
+  Failures never open a modal dialog.
+- Tests: `tests/test_step_editing.py`; six GUI tests in
+  `tests/test_protocol_sequence_editor.py`.
+- Known limitations: the Plot Type choices in the editor are those of the
+  plotter selected when the dialog opened (the field is editable, so any
+  type can be typed). If rows drift out of one-to-one correspondence with
+  steps, row operations rebuild the rows from the steps and drop rows that
+  have no steps, such as tracking notes.
 
 ## Phase 3: Robust bulk runs with a results summary
 

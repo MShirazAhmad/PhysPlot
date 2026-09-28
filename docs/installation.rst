@@ -4,8 +4,8 @@ Installation
 Prerequisites
 -------------
 
-- Python 3.11, 3.12 or 3.13. The Figure Editor (FigureForge) does not support
-  newer Python versions yet and keeps numpy below 2.
+- Python 3.12, 3.13 or 3.14 (numpy 2.5 and scipy 1.18 need 3.12 or newer). The
+  Figure Editor is PhysPlot's own copy of FigureForge and installs with PhysPlot.
 - pip
 
 Python 3.12 is the recommended default because the Qt/FigureForge dependency
@@ -24,7 +24,7 @@ Open **Terminal** and paste:
 
 The script:
 
-- finds Python 3.11–3.13, or installs Python 3.12 with Homebrew (without
+- finds Python 3.12–3.14, or installs Python 3.12 with Homebrew (without
   Homebrew it asks you to install Python 3.12 from python.org first),
 - downloads PhysPlot and installs it with its dependencies into ``~/.physplot``
   (about 1 GB the first time),
@@ -44,7 +44,7 @@ Open **PowerShell** and paste:
 
    irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 
-The script finds Python 3.11–3.13 through the ``py`` launcher or ``PATH`` (or
+The script finds Python 3.12–3.14 through the ``py`` launcher or ``PATH`` (or
 installs Python 3.12 with ``winget``), downloads PhysPlot and installs it with its
 dependencies into ``%LOCALAPPDATA%\PhysPlot``, and adds a **PhysPlot** shortcut
 to the Start menu. Close PhysPlot and run the same command again to update.

@@ -24,7 +24,8 @@ Generate plot flow
 3. Optionally enable **LSQ fit** and enter a fit function, parameter names,
    and initial guesses.
 4. Click **Generate Plot**.
-5. For Basic Plotter output, PhysPlot opens the Figure Editor.
+5. The plot opens in a PhysPlot plot window with zoom, pan and save. Click
+   **Advanced Styling…** in its toolbar to open the same figure in the Figure Editor.
 
 Least-squares fitted line
 -------------------------
@@ -70,7 +71,7 @@ that recorded step instead of using a separate bulk plotting choice.
 Figure Editor
 -------------
 
-The Figure Editor opens with the generated Matplotlib figure and lets you inspect and edit the figure tree. It draws:
+Click **Advanced Styling…** in any plot window to open the Figure Editor with the generated Matplotlib figure and lets you inspect and edit the figure tree. It draws:
 
 - Main data series
 - Optional error bars (if **X Error** or **Y Error** columns are assigned)

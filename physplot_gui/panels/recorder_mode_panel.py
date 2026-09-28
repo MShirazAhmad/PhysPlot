@@ -184,8 +184,12 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 
 from .bulk_panel import BulkPanel
 
-STATUS_COLUMN = 4
-DELETE_COLUMN = 5
+ENABLED_COLUMN = 0
+NUMBER_COLUMN = 1
+TEXT_COLUMNS = (2, 3, 4)
+STATUS_COLUMN = 5
+DELETE_COLUMN = 6
+DISABLED_TEXT = "#94a3b8"
 STATUS_STYLES = {
     "ok": ("OK", "#12823b"),
     "failed": ("Failed", "#d21f2b"),
@@ -335,16 +339,22 @@ class SequenceTablePanel(QtWidgets.QFrame):
         header.addWidget(self.tracking_badge)
         layout.addLayout(header)
         self.stack = QtWidgets.QStackedWidget()
-        self.timeline = QtWidgets.QTableWidget(0, 6)
-        self.timeline.setHorizontalHeaderLabels(["#", "Operation", "Details", "Target/File/Column", "Status", "Delete"])
+        self._populating = False
+        self.timeline = QtWidgets.QTableWidget(0, 7)
+        self.timeline.setHorizontalHeaderLabels(["On", "#", "Operation", "Details", "Target/File/Column", "Status", "Delete"])
+        self.timeline.horizontalHeaderItem(ENABLED_COLUMN).setToolTip("Untick to keep a step in the sequence without running it.")
         header_view = self.timeline.horizontalHeader()
         header_view.setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
-        header_view.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
-        header_view.setSectionResizeMode(STATUS_COLUMN, QtWidgets.QHeaderView.ResizeToContents)
+        for column in (ENABLED_COLUMN, NUMBER_COLUMN, STATUS_COLUMN):
+            header_view.setSectionResizeMode(column, QtWidgets.QHeaderView.ResizeToContents)
         self.timeline.verticalHeader().hide()
+        self.timeline.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectionBehavior.SelectRows)
+        self.timeline.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         if show_delete:
             self.timeline.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
             self.timeline.customContextMenuRequested.connect(self._show_row_menu)
+            self.timeline.cellDoubleClicked.connect(self._row_double_clicked)
+            self.timeline.itemChanged.connect(self._item_changed)
         self.code_view = QtWidgets.QPlainTextEdit()
         self.code_view.setReadOnly(not editable_code)
         self.code_view.setObjectName("CodeView")
@@ -379,17 +389,37 @@ class SequenceTablePanel(QtWidgets.QFrame):
         self.tracking_badge.setStyleSheet("color:#12823b;font-weight:700;")
 
     def refresh_timeline(self, rows: list[dict]) -> None:
+        self._populating = True
+        try:
+            self._fill_rows(rows)
+        finally:
+            self._populating = False
+        if not (self.editable_code and self._code_dirty and self.stack.currentIndex() == 1):
+            if hasattr(self.actions, "sequence_code_text"):
+                source = self.actions.sequence_code_text()
+            else:
+                source = "\n".join(row.get("code") or self._fallback_code_line(row) for row in rows)
+            self._set_code_text(source)
+
+    def _fill_rows(self, rows: list[dict]) -> None:
         self.timeline.setRowCount(len(rows))
         for index, row in enumerate(rows):
+            enabled = self.actions.timeline_row_enabled(row) if hasattr(self.actions, "timeline_row_enabled") else None
+            self.timeline.setItem(index, ENABLED_COLUMN, self._enabled_item(enabled))
             values = [
                 str(index + 1),
                 row.get("action", ""),
                 row.get("details", ""),
                 row.get("target", ""),
             ]
-            for column, value in enumerate(values):
+            for column, value in enumerate(values, start=NUMBER_COLUMN):
                 item = QtWidgets.QTableWidgetItem(value)
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+                if enabled is False:
+                    item.setForeground(QtGui.QBrush(QtGui.QColor(DISABLED_TEXT)))
+                    font = item.font()
+                    font.setItalic(True)
+                    item.setFont(font)
                 self.timeline.setItem(index, column, item)
             self.timeline.setItem(index, STATUS_COLUMN, self._status_item(row))
             if self.show_delete:
@@ -400,12 +430,44 @@ class SequenceTablePanel(QtWidgets.QFrame):
                 item = QtWidgets.QTableWidgetItem("")
                 item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
                 self.timeline.setItem(index, DELETE_COLUMN, item)
-        if not (self.editable_code and self._code_dirty and self.stack.currentIndex() == 1):
-            if hasattr(self.actions, "sequence_code_text"):
-                source = self.actions.sequence_code_text()
-            else:
-                source = "\n".join(row.get("code") or self._fallback_code_line(row) for row in rows)
-            self._set_code_text(source)
+
+    def _enabled_item(self, enabled: bool | None) -> QtWidgets.QTableWidgetItem:
+        """Checkbox cell; rows without replayable steps get an empty cell."""
+        item = QtWidgets.QTableWidgetItem("")
+        flags = QtCore.Qt.ItemFlag.ItemIsEnabled | QtCore.Qt.ItemFlag.ItemIsSelectable
+        item.setData(QtCore.Qt.ItemDataRole.UserRole, enabled is not None)
+        if enabled is not None:
+            if self.show_delete:
+                flags |= QtCore.Qt.ItemFlag.ItemIsUserCheckable
+            state = QtCore.Qt.CheckState.Checked if enabled else QtCore.Qt.CheckState.Unchecked
+            item.setCheckState(state)
+            item.setToolTip("Enabled" if enabled else "Disabled: kept in the sequence but not run")
+        item.setFlags(flags)
+        return item
+
+    def enabled_state(self, index: int) -> bool | None:
+        """Return the row's checkbox state, or ``None`` for rows without steps."""
+        item = self.timeline.item(index, ENABLED_COLUMN)
+        if item is None or not item.data(QtCore.Qt.ItemDataRole.UserRole):
+            return None
+        return item.checkState() == QtCore.Qt.CheckState.Checked
+
+    def _item_changed(self, item: QtWidgets.QTableWidgetItem) -> None:
+        if self._populating or item.column() != ENABLED_COLUMN:
+            return
+        if not hasattr(self.actions, "set_timeline_row_enabled"):
+            return
+        row = item.row()
+        enabled = item.checkState() == QtCore.Qt.CheckState.Checked
+        # Defer: the handler rebuilds this table, which must not happen while
+        # Qt is still delivering the signal for one of its items.
+        QtCore.QTimer.singleShot(0, lambda: self.actions.set_timeline_row_enabled(row, enabled))
+
+    def _row_double_clicked(self, row: int, column: int) -> None:
+        if column in (ENABLED_COLUMN, DELETE_COLUMN):
+            return
+        if hasattr(self.actions, "edit_timeline_step"):
+            self.actions.edit_timeline_step(row)
 
     def _set_view_mode(self, index: int) -> None:
         if index == 0 and self.editable_code and self._code_dirty:
@@ -447,10 +509,36 @@ class SequenceTablePanel(QtWidgets.QFrame):
         index = self.timeline.rowAt(position.y())
         if index < 0:
             return
+        self.timeline.selectRow(index)
+        actions = self.actions
+        has_steps = self.enabled_state(index) is not None
         menu = QtWidgets.QMenu(self.timeline)
+
+        edit = menu.addAction("Edit step...")
+        edit.setEnabled(has_steps and hasattr(actions, "edit_timeline_step"))
+        edit.triggered.connect(lambda checked=False, i=index: actions.edit_timeline_step(i))
+
+        enabled = self.enabled_state(index)
+        toggle = menu.addAction("Disable step" if enabled is not False else "Enable step")
+        toggle.setEnabled(has_steps and hasattr(actions, "set_timeline_row_enabled"))
+        toggle.triggered.connect(lambda checked=False, i=index, on=not enabled: actions.set_timeline_row_enabled(i, on))
+
+        menu.addSeparator()
+        for label, delta in (("Move up", -1), ("Move down", 1)):
+            move = menu.addAction(label)
+            allowed = hasattr(actions, "can_move_timeline_row") and actions.can_move_timeline_row(index, delta)
+            move.setEnabled(allowed)
+            move.triggered.connect(lambda checked=False, i=index, d=delta: actions.move_timeline_row(i, d))
+
+        menu.addSeparator()
+        insert = menu.addAction("Insert step after...")
+        insert.setEnabled(hasattr(actions, "insert_step_dialog"))
+        insert.triggered.connect(lambda checked=False, i=index: actions.insert_step_dialog(after_row=i))
+
+        menu.addSeparator()
         rerun = menu.addAction("Rerun from this step")
-        rerun.setEnabled(hasattr(self.actions, "rerun_from_timeline_step"))
-        rerun.triggered.connect(lambda checked=False, i=index: self.actions.rerun_from_timeline_step(i))
+        rerun.setEnabled(has_steps and hasattr(actions, "rerun_from_timeline_step"))
+        rerun.triggered.connect(lambda checked=False, i=index: actions.rerun_from_timeline_step(i))
         menu.exec(self.timeline.viewport().mapToGlobal(position))
 
     def _delete_row(self, index: int) -> None:

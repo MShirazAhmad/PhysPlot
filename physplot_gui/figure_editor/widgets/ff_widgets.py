@@ -1,0 +1,4 @@
+from physplot_gui.figure_editor.widgets.custom_spinbox import SpinBox
+from physplot_gui.figure_editor.widgets.dict_property import DictProperty
+from physplot_gui.figure_editor.widgets.tuple_property import TupleProperty
+from physplot_gui.figure_editor.widgets.color_button import ColorButton

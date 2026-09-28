@@ -728,6 +728,18 @@ class SimpleModePanel(QtWidgets.QWidget):
         button_layout.addWidget(generate_button, 1)
         button_layout.addWidget(export_button, 1)
         layout.addLayout(button_layout, 4, 0, 1, 2)
+        # Where Generate Plot opens the figure: the simple plot window, or straight in the
+        # Advanced Figure Editor.
+        self.advanced_editor = QtWidgets.QCheckBox("Advanced Figure Editor")
+        self.advanced_editor.setToolTip(
+            "Ticked: plots open straight in the Figure Editor for detailed styling.\n"
+            "Unticked: plots open in a simple plot window (its Advanced Styling… button\n"
+            "still opens the Figure Editor)."
+        )
+        self.advanced_editor.setChecked(bool(getattr(self.actions, "open_in_figure_editor", False)))
+        if hasattr(self.actions, "set_open_in_figure_editor"):
+            self.advanced_editor.toggled.connect(self.actions.set_open_in_figure_editor)
+        layout.addWidget(self.advanced_editor, 5, 0, 1, 2)
         layout.setColumnStretch(1, 2)
         layout.setColumnStretch(3, 3)
         self.refresh_styles()

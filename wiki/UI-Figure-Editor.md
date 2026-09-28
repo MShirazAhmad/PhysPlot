@@ -2,20 +2,28 @@
 
 [UI Reference](UI-Reference) › Figure Editor and Plot Windows
 
-**Generate Plot** opens the figure in one of two kinds of window:
+**Generate Plot** (and **Plot → Generate Plot**, Ctrl+G, and opening a file with
+*Open With → PhysPlot*) opens every plot in a **plot window** with the standard
+Matplotlib toolbar. Click **Advanced Styling…** at the right of its toolbar to open the
+same figure in the **Figure Editor**, where you can restyle every part of it. To skip the
+plot window, tick **Advanced Figure Editor** under **Generate Plot** in the
+[Plotter Module](UI-Plotter-Module): plots then open straight in the Figure Editor.
+PhysPlot remembers the choice.
 
-- **Basic Plotter** plots (including **Plot → Generate Plot**, Ctrl+G) open in the
-  **Figure Editor**, where you can restyle every part of the figure.
-- **Every other plotter** opens a **plot window** with the standard Matplotlib toolbar.
-
-Both windows show a *copy* of the figure. Nothing you change in them is recorded in
-the protocol, and they do not change the table.
+Nothing you change in either window is recorded in the protocol, and neither changes
+the table.
 
 ## Figure Editor
 
-The Figure Editor is [FigureForge](https://github.com/nogula/FigureForge),
-which PhysPlot starts as a separate program with the PhysPlot icon. Closing it never
-affects the main window, and you can have several editors open at once.
+The Figure Editor is built into PhysPlot (it started from the MIT-licensed
+FigureForge project). It edits
+the plot window's figure itself, not a copy:
+
+- Every change you make in the editor shows in the plot window straight away.
+- Closing the editor keeps your changes in the plot window, so you can then save it
+  with the plot window's save button. The editor does not ask to save.
+- Clicking **Advanced Styling…** again brings the open editor to the front. Each
+  plot window has its own editor, so several can be open at once.
 
 ![Figure Editor window](images/walkthrough/walk_10_figure_editor.png)
 
@@ -23,7 +31,21 @@ affects the main window, and you can have several editors open at once.
 | --- | --- |
 | **Figure canvas** (centre) | The live figure. It redraws as you change properties. |
 | **Figure Explorer** (left) | A tree of the figure's parts: Figure → Axes → lines, scatter collections, texts, legend, spines, ticks. Select a part to edit it. |
+| **Toolbar** | **Export Figure** (PNG, PDF, SVG, EPS, TIFF or JPEG; DPI, size, transparent background; formatting *As shown* or any PhysPlot template, applied to the exported copy only; live preview), **Export Style** (saves only the formatting as a PhysPlot template, which then appears under **Template**) and **Copy Figure**. |
 | **Property Inspector** (below the explorer) | The selected part's properties: text, font family and size, colours, line style and width, marker and size, limits, scale, visibility. Edits apply immediately. |
+
+A blue guide strip above the figure explains clicking: before you click it shows a tip,
+and after each click it names the selected part and, where parts overlap, where you are
+in the cycle.
+
+**Click any part of the figure** (left or right button) to open its properties: click
+the title to edit the title, an axis label to edit that label, the data to edit the line
+or markers. The Property Inspector shows that part at once, and it is highlighted in the
+Figure Explorer. Where parts overlap, the one on top opens first (the title, not the
+axes behind it; a fit line, not the data under it). **Click the same spot again** to
+move to the next part there, for example from the fit line to the raw data and then to
+the axes; after the last one it starts again. The status bar at the bottom of the editor
+names what is selected, for example *Line2D - fit (1 of 3, click again for the next)*.
 
 ### Menus
 
@@ -98,13 +120,6 @@ independently of PhysPlot's LSQ fit. Select an axes, line or scatter series firs
 The fitted curve is added to the figure in the editor only. It is not recorded in the
 protocol, and **Export Data** does not write it to `fit.json`. For a fit that replays
 and is exported, use the **LSQ fit** fields in the [Plotter Module](UI-Plotter-Module).
-
-### When the Figure Editor is missing
-
-If FigureForge is not installed, Basic Plotter plots fail with *Plot failed: Figure
-Editor is not installed. Install it with `python -m pip install FigureForge`.*
-Install it into PhysPlot's environment, or use another plotter (for example the
-Scatter or Line Plotter), which opens a plot window instead.
 
 ## Plot windows
 

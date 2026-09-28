@@ -232,9 +232,9 @@ a state snapshot saved by an earlier run. *Import Sequence.py*, *Apply Code to T
   Cancelling a dialog leaves the data and the protocol unchanged.
 * Message boxes: *About PhysPlot*, *Fit Results*, *Sequence Manager* and the error warnings
   described below.
-* Plot windows: Basic Plotter figures open in the Figure Editor (a separate process); other
-  plotter modules open in a non-modal PhysPlot dialog titled
-  ``PhysPlot - <plotter>: <plot type>`` with the Matplotlib navigation toolbar.
+* Plot windows: every plot opens in a non-modal PhysPlot dialog titled
+  ``PhysPlot - <plotter>: <plot type>`` with the Matplotlib navigation toolbar and an
+  *Advanced Styling…* button that opens the figure in the Figure Editor (same process).
 * Status messages set by this module include ``Ready``, ``Transformation applied``,
   ``Enter or import data before applying a transformation``, ``Plot generated``,
   ``Plot preview updated``, ``Plot exported``, ``Exported``, ``Fit complete``,
@@ -248,27 +248,26 @@ a state snapshot saved by an earlier run. *Import Sequence.py*, *Apply Code to T
 
 .. rubric:: Figure Editor (FigureForge)
 
-Figures from the Basic Plotter open in FigureForge, which the UI calls the "Figure Editor".
-:meth:`MainWindow._open_figureforge_editor`:
+A plot window's *Advanced Styling…* button opens its figure in FigureForge, which the UI
+calls the "Figure Editor". PhysPlot ships its own editable copy in
+``physplot_gui/figure_editor`` (FigureForge 0.3.3, MIT License); the PyPI package is not used.
+:meth:`MainWindow._open_figure_editor`:
 
-1. Checks that the ``FigureForge`` package can be imported and otherwise raises a
-   ``RuntimeError`` that tells the user to run ``python -m pip install FigureForge``.
-2. Copies PhysPlot's Figure Editor plugins (the bundled ``config/figureforge_plugins`` folder,
-   then the per-user copy, whose files win) into FigureForge's own ``plugins`` package folder
-   and points FigureForge's ``preferences.json`` at that folder.
-3. Adds hidden placeholder artists (line, scatter, legend, annotation) to every axes.
-4. Pickles the figure to a temporary file and starts ``sys.executable -c <launcher> <file>``
-   with :class:`subprocess.Popen`. The launcher script imports PySide6 and FigureForge in that
-   new Python process, shows the FigureForge window with its plugin menu renamed "Figure
-   Editor", and deletes the temporary file when it exits. The child process gets
-   ``PHYSPLOT_STYLE_DIR`` (the folder new templates are written to) and ``PHYSPLOT_APP_ICON``.
-5. Returns at once, so PhysPlot stays usable and several editors can be open. About 1.2 s
-   later :meth:`MainWindow._check_figureforge_process` checks the process once and reports
-   "Figure Editor failed" with the captured error output if it has already exited with a
-   non-zero code.
+The editor uses the same PyQt6 and Matplotlib as the rest of PhysPlot and runs in the same
+process, on the same figure object:
 
-Edits made in the Figure Editor stay in that process: they are not sent back to PhysPlot and
-are not recorded in the protocol.
+1. Points FigureForge's ``preferences.json`` at the copy's built-in ``plugins`` folder.
+   PhysPlot's own plugins (the bundled ``config/figureforge_plugins`` folder, then the
+   per-user copy, whose files win) are loaded in place from the folders in
+   ``PHYSPLOT_FIGURE_EDITOR_PLUGIN_DIRS``; nothing is copied.
+2. Adds hidden placeholder artists (line, scatter, legend, annotation) to every axes.
+3. Opens the editor window on the figure (one editor per figure; a second click raises it).
+   Each redraw in the editor also redraws the plot window, so edits show there live.
+4. When the editor closes, the plot window takes the figure back with the edits. Nothing is
+   saved to a file and there is no save prompt.
+
+Edits made in the Figure Editor change the figure only; they are not recorded in the
+protocol.
 
 .. rubric:: Bulk runs
 
@@ -324,16 +323,11 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-import pickle
-import shutil
-import subprocess
+import re
 import sys
-import tempfile
-import textwrap
 from pathlib import Path
 
 from appdirs import user_config_dir
-from importlib.metadata import version as package_version
 import numpy as np
 import pandas as pd
 from physplot.qt_compat import QtCore, QtGui, QtWidgets
@@ -348,8 +342,9 @@ from physplot.user_paths import (
     user_physplot_dir,
     writable_plugin_dir,
 )
-from physplot.execution import STATUS_FAILED, STATUS_OK, STATUS_SKIPPED, first_failure
+from physplot.execution import SKIP_DISABLED, STATUS_FAILED, STATUS_OK, STATUS_SKIPPED, first_failure
 from physplot.workflow import discover_protocol_modules, load_workflow, load_workflow_source
+from physplot.steps import STEP_TYPES
 from physplot.steps import (
     CalculateColumnStep,
     DeleteColumnsStep,
@@ -366,11 +361,12 @@ from physplot_gui.app.gui_state import GuiState
 from physplot_gui.app.mode_manager import ModeManager
 from physplot_gui.app.plugin_discovery import discover_fileloaders, discover_functions, discover_loader_plotters
 from physplot_gui.fit_styles import list_fit_style_presets
-from physplot_gui.plot_styles import apply_style_module, list_style_modules, style_directory
+from physplot_gui.plot_styles import apply_style_module, list_style_modules
 from physplot_gui.style.theme import APP_STYLESHEET
 from physplot_gui.widgets.central_table import CentralTable
 from physplot_gui.widgets.mode_switcher import ModeSwitcher
 from physplot_gui.widgets.status_bar import PhysPlotStatusBar
+from physplot_gui.widgets.step_editor import StepEditorDialog, choose_step_type
 
 
 LOGO_WIDE = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlotWide1.png"
@@ -378,6 +374,15 @@ LOGO_ICON = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "PhysPlot
 LSF_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "lsf.jpeg"
 PHYSLAB_LOGO = Path(__file__).resolve().parents[2] / "physplot" / "inc" / "physlab.png"
 FIGUREFORGE_PLUGIN_DIR = bundled_plugin_dir("figureforge_plugins")
+#: PhysPlot's own copy of FigureForge (the Figure Editor), on the same PyQt6 as the rest of
+#: the GUI.
+FIGURE_EDITOR_PACKAGE_DIR = Path(__file__).resolve().parents[1] / "figure_editor"
+
+
+def figure_editor_version() -> str:
+    """Return ``__version__`` of PhysPlot's FigureForge copy without importing it."""
+    match = re.search(r'__version__\s*=\s*"([^"]+)"', (FIGURE_EDITOR_PACKAGE_DIR / "__init__.py").read_text())
+    return match.group(1) if match else "0"
 
 
 # Menu labels and descriptions for built-in transformations; sequences keep the
@@ -424,9 +429,19 @@ def data_file_filter() -> str:
 
     :returns: A Qt name filter such as ``"Data Files (*.csv ... *.ras);;All Files (*)"``.
     """
+    extensions = data_file_extensions()
+    return f"Data Files ({' '.join('*' + ext for ext in extensions)});;All Files (*)"
+
+
+def data_file_extensions() -> list[str]:
+    """Return every extension PhysPlot can open: built-in types, then loader-plugin types.
+
+    The installers register these with the operating system so *Open With > PhysPlot*
+    appears when a data file is right-clicked.
+    """
     extensions = list(BUILT_IN_DATA_EXTENSIONS)
     extensions += sorted(ext for ext in plugin_extensions() if ext not in extensions)
-    return f"Data Files ({' '.join('*' + ext for ext in extensions)});;All Files (*)"
+    return extensions
 
 
 def loader_label(step) -> str:
@@ -488,9 +503,9 @@ def figureforge_plugin_dirs() -> list[Path]:
     :func:`physplot.user_paths.plugin_search_dirs` lists the per-user
     ``Documents/PhysPlot/config/figureforge_plugins`` folder (or the one under
     ``PHYSPLOT_USER_DIR``) before the bundled ``config/figureforge_plugins`` folder. This
-    function reverses that order because :meth:`MainWindow._install_figureforge_plugins` copies
-    the folders one after another: a per-user plugin file with the same name as a bundled one is
-    copied last and so replaces it. Folders are returned whether or not they exist; the caller
+    function reverses that order because the Figure Editor loads the folders one after another:
+    a per-user plugin file with the same name as a bundled one is loaded last and so replaces
+    it. Folders are returned whether or not they exist; the caller
     skips missing ones.
 
     :returns: The plugin folders, bundled folder first.
@@ -519,7 +534,7 @@ class MainWindow(QtWidgets.QMainWindow):
     * Turn each action into calls on the backend :class:`physplot.PhysPlot` (``state.pp``) and
       record it as a protocol step with :meth:`_append_sequence`.
     * Keep every widget in step with the backend after each action (:meth:`_refresh_all`).
-    * Open plot windows (the Figure Editor subprocess or an in-app Matplotlib dialog) and
+    * Open plot windows (an in-app Matplotlib dialog and, from it, the Figure Editor) and
       report errors (:meth:`_error`).
 
     **Attributes**
@@ -555,8 +570,8 @@ class MainWindow(QtWidgets.QMainWindow):
         Loader-declared callable plotters by their ``"loader:<id>"`` identifier, rebuilt by
         :meth:`plotter_entries`.
 
-    Attributes created on first use: ``_figureforge_processes`` (running Figure Editor
-    processes and their temporary files), ``_module_plot_dialogs`` (open plot dialogs) and, for
+    Attributes created on first use: ``_figure_editors`` (open Figure Editor windows by
+    figure), ``_module_plot_dialogs`` (open plot dialogs) and, for
     the legacy plot windows, ``plot_config_window``, ``plot_config_ui``, ``plot_window`` and
     ``_main_window``.
 
@@ -592,6 +607,9 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(parent)
         self.state = GuiState()
         self._active_loader_entry = None
+        #: When true, plots open straight in the Figure Editor instead of a plot window
+        #: (Simple Mode's *Advanced Figure Editor* tick box; remembered by ``run_app``).
+        self.open_in_figure_editor = False
         self._custom_plotters: dict[str, dict] = {}
         self.last_error: tuple[str, Exception] | None = None
         ensure_user_physplot_dirs()
@@ -667,6 +685,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self._add_menu_action(protocol_menu, "Copy Sequence Code", self.copy_workflow_script)
         self._add_menu_action(protocol_menu, "Clear Sequence", self.clear_recording)
         protocol_menu.addSeparator()
+        self._add_menu_action(
+            protocol_menu, "Insert Step...", lambda: self.insert_step_dialog(after_row=self._selected_timeline_row())
+        )
         self.protocol_modules_menu = protocol_menu.addMenu("Insert Protocol Module")
         self._populate_protocol_modules_menu()
 
@@ -704,21 +725,23 @@ class MainWindow(QtWidgets.QMainWindow):
             placeholder.setEnabled(False)
             return
         for entry in entries:
-            action = self._add_menu_action(menu, entry["display_name"], lambda path=entry["path"]: self.insert_protocol_module(path))
+            action = self._add_menu_action(
+                menu,
+                entry["display_name"],
+                lambda path=entry["path"]: self.insert_protocol_module(path, after_row=self._selected_timeline_row()),
+            )
             if entry.get("description"):
                 action.setStatusTip(entry["description"])
                 action.setToolTip(entry["description"])
 
-    def insert_protocol_module(self, path) -> None:
-        """Append the steps of a reusable protocol module to the sequence."""
+    def insert_protocol_module(self, path, after_row: int | None = None) -> None:
+        """Insert a reusable protocol module after ``after_row`` (default: append)."""
         try:
             steps = load_workflow(path)
-            self.state.pp.workflow.extend(steps)
-            self.state.timeline.extend(self._sequence_rows_from_steps(steps))
-            self.status.set_message(f"Inserted protocol module {Path(path).stem}")
-            self._refresh_all()
         except Exception as exc:
             self._error("Insert protocol module failed", exc)
+            return
+        self.insert_steps(steps, after_row=after_row, message=f"Inserted protocol module {Path(path).stem}")
 
     def open_user_config_folder(self) -> None:
         root = ensure_user_physplot_dirs() / "config"
@@ -1251,6 +1274,19 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         if not path:
             return
+        self.load_file(path, loader)
+
+    def load_file(self, path, loader: str | dict = "auto") -> bool:
+        """Load ``path`` into the table and record a *File Loader* row, without a dialog.
+
+        This is :meth:`import_data` after the file has been chosen; see there for what each
+        kind of loader does. Errors are reported as "Import failed".
+
+        :param path: The data file.
+        :param loader: A backend loader id or an entry from :meth:`backend_loader_entries`.
+        :returns: ``True`` when the file was loaded.
+        """
+        path = str(path)
         try:
             loader_id = loader.get("loader_id") if isinstance(loader, dict) else loader
             loader_display = (
@@ -1309,8 +1345,30 @@ class MainWindow(QtWidgets.QMainWindow):
             )
             self.status.set_message("Ready")
             self._refresh_all()
+            return True
         except Exception as exc:
             self._error("Import failed", exc)
+            return False
+
+    def open_and_plot(self, path) -> None:
+        """Load a file with the Auto Loader and plot it, for *Open with PhysPlot*.
+
+        Used for files named on the command line (``physplot-gui data.csv``) and files the
+        operating system asks PhysPlot to open (right-click > *Open With* > PhysPlot, or a
+        double-click when PhysPlot is the default app). The Auto Loader picks the loader from
+        the file extension, including loader plugins' ``FILE_EXTENSIONS``. When the loaded
+        columns have both an X and a Y role, :meth:`generate_plot` draws them; otherwise the
+        table is left for the user to assign roles.
+
+        :param path: The data file.
+        """
+        if not self.load_file(path, "auto"):
+            return
+        roles = set(self.state.roles.values())
+        if {"X", "Y"} <= roles:
+            self.generate_plot()
+        else:
+            self.status.set_message("Loaded: assign X and Y roles, then Generate Plot")
 
     def _apply_loader_roles(self, loader: dict, columns) -> None:
         """Apply a loader plugin's ``DEFAULT_COLUMN_ROLES`` to the loaded columns.
@@ -1403,13 +1461,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self._error("Export failed", exc)
 
     def generate_plot(self) -> None:
-        """Plot the X and Y columns as a Basic Plotter scatter plot in the Figure Editor.
+        """Plot the X and Y columns as a Basic Plotter scatter plot in a PhysPlot plot window.
 
         Triggered by *Plot > Generate Plot* (``Ctrl+G``). The table is synced to the backend,
         then :meth:`physplot.PhysPlot.plot_with_module` draws ``("basic", "scatter")`` from the
         X and Y role columns and records a ``PlotModuleStep``. The Template selected in Simple
-        Mode (:meth:`_selected_style_module`) is applied to the figure, which then opens in the
-        Figure Editor (:meth:`_open_figureforge_editor`). A *Generate Plot* row with the
+        Mode (:meth:`_selected_style_module`) is applied to the figure, which then opens in a
+        PhysPlot plot window (:meth:`_show_module_figure`); its *Advanced Styling…* button
+        opens the figure in the Figure Editor. A *Generate Plot* row with the
         details ``Create <mode> plot`` (``Single`` in Simple Mode, ``Sequence`` in Advanced
         Mode; see :meth:`_current_plot_mode`) and the target ``X vs Y`` is linked to the
         recorded step, the status reads ``Plot generated`` and the window is refreshed.
@@ -1423,7 +1482,7 @@ class MainWindow(QtWidgets.QMainWindow):
             figure = self.state.pp.plot_with_module("basic", "scatter")
             workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
             apply_style_module(figure, self._selected_style_module())
-            self._open_figureforge_editor(figure)
+            self._show_module_figure(figure, "basic: scatter")
             self._append_sequence(
                 "Generate Plot",
                 f"Create {self._current_plot_mode()} plot",
@@ -1551,198 +1610,123 @@ class MainWindow(QtWidgets.QMainWindow):
                 "Select exactly one X column and one Y column from the column dropdowns before generating a plot."
             )
 
-    def _open_figureforge_editor(self, figure) -> None:
-        """Open a Matplotlib figure in the Figure Editor (FigureForge) in a new process.
+    def _open_figure_editor(self, figure, plot_canvas=None):
+        """Open a Matplotlib figure in the Figure Editor, inside PhysPlot, on the same figure.
 
-        Used for Basic Plotter figures by :meth:`generate_plot` and
-        :meth:`generate_module_plot`. Steps:
+        The Figure Editor is PhysPlot's own copy of FigureForge (``physplot_gui.figure_editor``),
+        running on the same PyQt6 and Matplotlib as the rest of PhysPlot. It edits the
+        figure object itself, not a copy:
 
-        1. When the ``FigureForge`` package cannot be found, raise a ``RuntimeError`` saying
-           the Figure Editor is not installed and giving ``python -m pip install FigureForge``.
-        2. Copy PhysPlot's Figure Editor plugins into FigureForge and point its preferences at
-           them (:meth:`_install_figureforge_plugins`).
-        3. Add hidden placeholder artists to the figure (:meth:`_prepare_figureforge_figure`).
-        4. Clean up editors that have already closed (:meth:`_reap_figureforge_processes`).
-        5. Pickle the figure into a temporary ``physplot_figureforge_*.pkl`` file and start
-           ``sys.executable -c <launcher> <file>`` with :class:`subprocess.Popen` in the
-           current working directory. Standard output is discarded and standard error is
-           captured. The environment adds ``PHYSPLOT_STYLE_DIR`` (from
-           :func:`physplot_gui.plot_styles.style_directory`, where templates saved in the
-           editor go) and ``PHYSPLOT_APP_ICON`` (the PhysPlot icon path).
-        6. Remember ``(process, temp file)`` in ``self._figureforge_processes`` and schedule
-           :meth:`_check_figureforge_process` to run once after 1200 ms.
+        1. PhysPlot's Figure Editor plugins are made available
+           (:meth:`_install_figure_editor_plugins`, which sets
+           ``PHYSPLOT_FIGURE_EDITOR_PLUGIN_DIRS``) and hidden placeholder artists are added to
+           the figure (:meth:`_prepare_figure_editor_figure`).
+        2. If an editor is already open for this figure it is raised instead.
+        3. The editor window takes the figure. While it is open, every redraw in the editor
+           also redraws ``plot_canvas`` (the PhysPlot plot window), so edits show there live.
+        4. When the editor closes, ``plot_canvas`` takes the figure back and redraws it; the
+           editor does not ask to save, because the edits already live in PhysPlot.
 
-        The launcher script, run in the new Python process, unpickles the figure, creates a
-        PySide6 ``QApplication`` with the PhysPlot icon, shows the FigureForge splash screen and
-        main window with the figure, renames FigureForge's plugin menu to "Figure Editor", runs
-        the event loop and deletes the temporary file when it ends.
-
-        The method returns without waiting for the editor, so PhysPlot stays usable and several
-        editors can be open at once. If starting the process fails, the temporary file is
-        deleted and the exception is re-raised; callers report it as "Plot failed".
-
-        :param figure: The Matplotlib figure to edit. Changes made in the editor are not sent
-            back to this figure.
-        :raises RuntimeError: When FigureForge or the plugin folder is missing.
+        :param figure: The Matplotlib figure to edit.
+        :param plot_canvas: The canvas of the PhysPlot plot window showing ``figure``, or
+            ``None``.
+        :returns: The editor window.
         """
-        if importlib.util.find_spec("FigureForge") is None:
-            raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
+        from physplot_gui.figure_editor.gui import MainWindow as FigureEditorWindow
+        from physplot_gui.figure_editor.main import create_splash
 
-        self._install_figureforge_plugins()
-        self._prepare_figureforge_figure(figure)
-        self._reap_figureforge_processes()
-        temp_file = tempfile.NamedTemporaryFile(
-            prefix="physplot_figureforge_",
-            suffix=".pkl",
-            delete=False,
-        )
-        temp_path = Path(temp_file.name)
-        try:
-            with temp_file:
-                pickle.dump(figure, temp_file)
-            launcher = textwrap.dedent(
-                """
-                import os
-                import pickle
-                import sys
+        self._figure_editors = getattr(self, "_figure_editors", {})
+        editor = self._figure_editors.get(id(figure))
+        if editor is not None:
+            editor.showNormal()
+            editor.raise_()
+            editor.activateWindow()
+            return editor
 
-                temp_path = sys.argv[1]
+        self._install_figure_editor_plugins()
+        self._prepare_figure_editor_figure(figure)
+        splash = create_splash()
+        editor = FigureEditorWindow(splash, figure)
+        splash.finish(editor)
+        editor.linked_managers.add(editor.fm)
+        editor.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        editor.plugin_menu.setTitle("Figure Editor")
+        editor.setStyleSheet(APP_STYLESHEET)  # same light look as the plot window
+        # One figure per editor: no "New Figure" tab unless the user adds another figure.
+        editor.tab_widget.setTabBarAutoHide(True)
+        editor.setWindowTitle(f"Figure Editor - {self.windowTitle() or 'PhysPlot'}")
+        if LOGO_ICON.exists():
+            editor.setWindowIcon(QtGui.QIcon(str(LOGO_ICON)))
+
+        syncing = {"busy": False}
+        if plot_canvas is not None:
+
+            def redraw_plot_window(_event=None):
+                # The plot window's own draw fires draw_event again; ignore that one.
+                if syncing["busy"]:
+                    return
+                syncing["busy"] = True
                 try:
-                    with open(temp_path, "rb") as handle:
-                        figure = pickle.load(handle)
-                    from PySide6.QtWidgets import QApplication
-                    from FigureForge.main import create_splash
-                    from FigureForge.gui import MainWindow
-
-                    app = QApplication.instance() or QApplication(sys.argv)
-                    icon_path = os.environ.get("PHYSPLOT_APP_ICON")
-                    if icon_path:
-                        from PySide6.QtGui import QIcon
-
-                        app.setWindowIcon(QIcon(icon_path))
-                    splash = create_splash()
-                    window = MainWindow(splash, figure)
-                    window.plugin_menu.setTitle("Figure Editor")
-                    window.show()
-                    splash.finish(window)
-                    app.exec()
+                    plot_canvas.draw()
+                except RuntimeError:
+                    pass  # the plot window was closed
                 finally:
-                    try:
-                        os.remove(temp_path)
-                    except OSError:
-                        pass
-                """
-            )
-            process = subprocess.Popen(
-                [sys.executable, "-c", launcher, str(temp_path)],
-                cwd=str(Path.cwd()),
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                text=True,
-                env={**os.environ, "PHYSPLOT_STYLE_DIR": str(style_directory()), "PHYSPLOT_APP_ICON": str(LOGO_ICON)},
-            )
-        except Exception:
+                    syncing["busy"] = False
+
+            editor.fm.canvas.mpl_connect("draw_event", redraw_plot_window)
+
+        def give_figure_back():
+            self._figure_editors.pop(id(figure), None)
+            if plot_canvas is None:
+                return
             try:
-                temp_path.unlink()
-            except OSError:
-                pass
-            raise
+                figure.set_canvas(plot_canvas)
+                plot_canvas.draw_idle()
+            except RuntimeError:
+                pass  # the plot window was closed first
 
-        self._figureforge_processes = getattr(self, "_figureforge_processes", [])
-        self._figureforge_processes.append((process, temp_path))
-        QtCore.QTimer.singleShot(1200, lambda: self._check_figureforge_process(process, temp_path))
-
-    def _check_figureforge_process(self, process, temp_path: Path) -> None:
-        """Report a Figure Editor process that failed right after starting.
-
-        Runs once, about 1.2 s after :meth:`_open_figureforge_editor` started the process. If
-        the process is still running, nothing happens (it is not checked again). Otherwise its
-        captured standard error is read, finished editors are cleaned up
-        (:meth:`_reap_figureforge_processes`) and, for a non-zero exit code, "Figure Editor
-        failed" is reported through :meth:`_error` with the error output (or "Figure Editor
-        exited with code N." when there is none). The temporary figure file is deleted if it
-        still exists.
-
-        :param process: The ``subprocess.Popen`` object of the editor.
-        :param temp_path: The temporary pickle file passed to the editor.
-        """
-        if process.poll() is None:
-            return
-        try:
-            _, stderr = process.communicate(timeout=0.1)
-        except Exception:
-            stderr = ""
-        self._reap_figureforge_processes()
-        if process.returncode:
-            detail = stderr.strip() or f"Figure Editor exited with code {process.returncode}."
-            self._error("Figure Editor failed", RuntimeError(detail))
-        try:
-            temp_path.unlink()
-        except OSError:
-            pass
-
-    def _reap_figureforge_processes(self) -> None:
-        """Forget Figure Editor processes that have exited and delete their temporary files.
-
-        Keeps only the still-running entries of ``self._figureforge_processes``. Called before
-        each new editor is opened and after a finished process is checked; errors while
-        deleting a file are ignored.
-        """
-        active = []
-        for process, temp_path in getattr(self, "_figureforge_processes", []):
-            if process.poll() is None:
-                active.append((process, temp_path))
-                continue
-            try:
-                temp_path.unlink()
-            except OSError:
-                pass
-        self._figureforge_processes = active
+        editor.destroyed.connect(give_figure_back)
+        self._figure_editors[id(figure)] = editor
+        editor.show()
+        editor.raise_()
+        return editor
 
     @staticmethod
-    def _install_figureforge_plugins() -> None:
-        """Copy PhysPlot's Figure Editor plugins into the installed FigureForge package.
+    def _install_figure_editor_plugins() -> None:
+        """Point the Figure Editor at its built-in plugins before it starts.
 
-        Every ``*.py`` file from the existing folders returned by
-        :func:`figureforge_plugin_dirs` (bundled ``config/figureforge_plugins`` first, then the
-        per-user copy, so a per-user file replaces a bundled file of the same name) is copied
-        into the ``plugins`` folder inside the FigureForge package, which is created when
-        missing. Existing files there with the same names are overwritten. FigureForge's
-        preferences are then pointed at that folder
-        (:meth:`_point_figureforge_at_plugin_dir`). Runs each time a figure is opened in the
-        editor.
+        PhysPlot's own plugins are not copied: the editor loads them in place from the
+        folders of :func:`figureforge_plugin_dirs`, passed to it in the
+        ``PHYSPLOT_FIGURE_EDITOR_PLUGIN_DIRS`` environment variable (a per-user file replaces a
+        bundled file of the same name). FigureForge's preferences are pointed at the
+        ``plugins`` folder of PhysPlot's FigureForge copy
+        (:meth:`_point_figure_editor_at_plugin_dir`). Runs each time a figure is opened.
 
-        :raises RuntimeError: When FigureForge is not installed, or when none of the plugin
-            folders exists (the message names ``FIGUREFORGE_PLUGIN_DIR``).
+        :raises RuntimeError: When none of the plugin folders exists (the message names
+            ``FIGUREFORGE_PLUGIN_DIR``).
         """
-        spec = importlib.util.find_spec("FigureForge")
-        if spec is None or not spec.submodule_search_locations:
-            raise RuntimeError("Figure Editor is not installed. Install it with `python -m pip install FigureForge`.")
-        source_dirs = [directory for directory in figureforge_plugin_dirs() if directory.exists()]
-        if not source_dirs:
+        if not any(directory.exists() for directory in figureforge_plugin_dirs()):
             raise RuntimeError(f"PhysPlot Figure Editor plugin directory is missing: {FIGUREFORGE_PLUGIN_DIR}")
-        plugin_dir = Path(next(iter(spec.submodule_search_locations))) / "plugins"
-        plugin_dir.mkdir(parents=True, exist_ok=True)
-        for source_dir in source_dirs:
-            for plugin_source in source_dir.glob("*.py"):
-                shutil.copy2(plugin_source, plugin_dir / plugin_source.name)
-        MainWindow._point_figureforge_at_plugin_dir(plugin_dir)
+        os.environ["PHYSPLOT_FIGURE_EDITOR_PLUGIN_DIRS"] = os.pathsep.join(
+            str(directory) for directory in figureforge_plugin_dirs() if directory.exists()
+        )
+        plugin_dir = FIGURE_EDITOR_PACKAGE_DIR / "plugins"
+        MainWindow._point_figure_editor_at_plugin_dir(plugin_dir)
 
     @staticmethod
-    def _point_figureforge_at_plugin_dir(plugin_dir: Path) -> None:
-        """Write FigureForge's ``preferences.json`` so it loads plugins from ``plugin_dir``.
+    def _point_figure_editor_at_plugin_dir(plugin_dir: Path) -> None:
+        """Write the Figure Editor's ``preferences.json`` so it loads plugins from ``plugin_dir``.
 
-        The file lives in ``appdirs.user_config_dir(<installed FigureForge version>,
-        "FigureForge")``, which is created when missing. Existing preferences are read (an
+        The file lives in ``appdirs.user_config_dir("FigureEditor", "PhysLab")``, which is created when missing. Existing preferences are read (an
         unreadable JSON file is treated as empty) and updated: ``plugin_directory`` is set to
         ``plugin_dir`` and ``plugin_requirements`` to ``plugin_dir / "requirements.txt"``,
         while ``theme``, ``debug``, ``show_welcome``, ``recent_files``, ``check_for_updates``
         and ``last_export_path`` keep their current values or get the defaults ``"light"``,
         ``False``, ``False``, ``[]``, ``False`` and ``""``. Other keys are kept.
 
-        :param plugin_dir: The FigureForge plugin folder the PhysPlot plugins were copied to.
+        :param plugin_dir: The Figure Editor's built-in plugin folder.
         """
-        config_dir = Path(user_config_dir(package_version("FigureForge"), "FigureForge"))
+        config_dir = Path(user_config_dir("FigureEditor", "PhysLab"))
         config_dir.mkdir(parents=True, exist_ok=True)
         preferences_path = config_dir / "preferences.json"
         if preferences_path.exists():
@@ -1767,7 +1751,7 @@ class MainWindow(QtWidgets.QMainWindow):
         preferences_path.write_text(json.dumps(preferences, indent=4), encoding="utf-8")
 
     @staticmethod
-    def _prepare_figureforge_figure(figure) -> None:
+    def _prepare_figure_editor_figure(figure) -> None:
         """Add hidden placeholder artists to every axes of a figure before editing.
 
         For each axes that lacks one, this adds an empty invisible line labelled
@@ -2139,15 +2123,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         * ``"basic"`` (Basic Plotter): :meth:`physplot.PhysPlot.plot_with_module` draws the
           figure and records a ``PlotModuleStep`` (including the fit settings); the Template is
-          applied and the figure opens in the Figure Editor (:meth:`_open_figureforge_editor`).
+          applied and the figure is shown in a PhysPlot plot dialog (:meth:`_show_module_figure`).
         * A loader-declared callable plotter (id ``"loader:<name>"``): run by
           :meth:`_run_custom_plotter`; no backend step is recorded, so the protocol row is
           display-only. Asking for an LSQ fit raises "LSQ fit from Simple Mode is available for
           backend plotter modules.". The Template is applied and the figure is shown in a
           PhysPlot plot dialog (:meth:`_show_module_figure`).
-        * Any other backend plotter: drawn and recorded like the Basic Plotter, with the
-          Template applied, but shown in a PhysPlot plot dialog titled
-          ``PhysPlot - <plotter>: <plot type>``.
+        * Any other backend plotter: drawn, recorded and shown like the Basic Plotter.
+
+        Every dialog is titled ``PhysPlot - <plotter>: <plot type>`` and its *Advanced
+        Styling…* button opens the figure in the Figure Editor.
 
         The Template is applied to the figure after the backend call and is not part of the
         recorded step. A *Generate Plot* row with the details ``Create <plotter> <plot type>``
@@ -2172,7 +2157,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 figure = self.state.pp.plot_with_module(plotter_id, plot_type, **plot_config)
                 workflow_index = len(self.state.pp.workflow) - 1 if self.state.pp.workflow else None
                 apply_style_module(figure, style_module)
-                self._open_figureforge_editor(figure)
+                self._show_module_figure(figure, f"{plotter_id}: {plot_type}")
             elif plotter_id in self._custom_plotters:
                 if fit_config:
                     raise ValueError("LSQ fit from Simple Mode is available for backend plotter modules.")
@@ -2271,8 +2256,12 @@ class MainWindow(QtWidgets.QMainWindow):
     def _show_module_figure(self, figure, title: str) -> None:
         """Show a figure in a non-modal PhysPlot plot dialog.
 
-        The dialog is titled ``PhysPlot - <title>``, opens at 820 x 620 px and holds the
-        Matplotlib navigation toolbar (pan, zoom, save) above a Qt canvas with the figure. A
+        Every plot PhysPlot draws opens here. The dialog is titled ``PhysPlot - <title>``,
+        opens at 820 x 620 px and holds the Matplotlib navigation toolbar (pan, zoom, save)
+        above a Qt canvas with the figure. The toolbar ends with an *Advanced Styling…*
+        button that opens the same figure in the Figure Editor. When
+        ``open_in_figure_editor`` is set (the *Advanced Figure Editor* tick box), the figure
+        opens straight in the Figure Editor instead and no plot window is made. A
         reference is kept in ``self._module_plot_dialogs`` and the dialog is shown without
         blocking, so several plots can stay open.
 
@@ -2283,18 +2272,49 @@ class MainWindow(QtWidgets.QMainWindow):
         from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
 
+        if self.open_in_figure_editor:
+            try:
+                self._open_figure_editor(figure)
+                return
+            except Exception as exc:  # fall back to the plot window
+                self._error("Figure Editor failed", exc)
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle(f"PhysPlot - {title}")
         dialog.resize(820, 620)
         layout = QtWidgets.QVBoxLayout(dialog)
         canvas = FigureCanvas(figure)
         toolbar = NavigationToolbar2QT(canvas, dialog)
+        styling = QtWidgets.QPushButton("Advanced Styling…")
+        styling.setToolTip("Open this plot in the Figure Editor for detailed styling.")
+        styling.clicked.connect(lambda: self._open_figure_editor_from_dialog(figure, canvas))
+        toolbar.addSeparator()
+        toolbar.addWidget(styling)
         layout.addWidget(toolbar)
         layout.addWidget(canvas)
         canvas.draw()
         self._module_plot_dialogs = getattr(self, "_module_plot_dialogs", [])
         self._module_plot_dialogs.append(dialog)
         dialog.show()
+
+    def set_open_in_figure_editor(self, enabled: bool) -> None:
+        """Open new plots in the Figure Editor (``True``) or a plot window (``False``).
+
+        Set by Simple Mode's *Advanced Figure Editor* tick box and saved in the PhysPlot
+        settings, so the choice is kept between sessions.
+        """
+        self.open_in_figure_editor = bool(enabled)
+        QtCore.QSettings("PhysLab", "PhysPlot").setValue("plot/open_in_figure_editor", self.open_in_figure_editor)
+
+    def _open_figure_editor_from_dialog(self, figure, canvas=None) -> None:
+        """Open a figure shown in a PhysPlot plot dialog in the Figure Editor.
+
+        Called by the dialog's *Advanced Styling…* button. The editor works on the same
+        figure and keeps ``canvas`` redrawn; errors are reported as "Figure Editor failed".
+        """
+        try:
+            self._open_figure_editor(figure, canvas)
+        except Exception as exc:
+            self._error("Figure Editor failed", exc)
 
     def delete_pipeline_step(self, index: int) -> None:
         """Remove one entry from the display list of applied transformations.
@@ -2656,6 +2676,8 @@ class MainWindow(QtWidgets.QMainWindow):
         failed = [result for result in row_results if result.status == STATUS_FAILED]
         if failed:
             return STATUS_FAILED, failed[0].error
+        if all(result.skip_reason == SKIP_DISABLED for result in row_results):
+            return STATUS_SKIPPED, "Disabled: kept in the sequence but not run."
         if any(result.status == STATUS_SKIPPED for result in row_results):
             failure = first_failure(list(results.values()))
             if failure is not None:
@@ -2687,6 +2709,223 @@ class MainWindow(QtWidgets.QMainWindow):
         self.state.timeline.clear()
         self.state.pp.workflow.clear()
         self._refresh_all()
+
+    # -- Editing the protocol sequence -------------------------------------
+    #
+    # Rows and steps are edited together: ``_timeline_step_pairs`` pairs each
+    # table row with its step objects, an edit rearranges those pairs, and
+    # ``_commit_timeline`` rebuilds ``pp.workflow`` and the row indices from
+    # them. The sequence then resumes from the first affected step with
+    # ``PhysPlot.rerun_from`` (Phase 1 snapshots), falling back to a full
+    # replay when no saved state applies. Failures are reported in the Status
+    # column and status bar, never in a modal dialog.
+
+    def timeline_row_enabled(self, row: dict) -> bool | None:
+        """Return whether a row's steps run, or ``None`` if it has no steps."""
+        steps = self._steps_for_row(row)
+        if not steps:
+            return None
+        return all(getattr(step, "enabled", True) for step in steps)
+
+    def _steps_for_row(self, row: dict) -> list:
+        workflow = self.state.pp.workflow
+        return [workflow[index] for index in self._row_workflow_indices(row) if 0 <= index < len(workflow)]
+
+    def _timeline_step_pairs(self) -> list[tuple[dict, list]]:
+        """Pair each row with its steps, rebuilding rows if they drifted.
+
+        Row operations need every step owned by exactly one row, in sequence
+        order. If rows no longer describe the sequence that way (for example
+        a step was recorded without a row), the rows are rebuilt from the
+        steps; rows without steps are dropped in that case.
+        """
+        workflow = self.state.pp.workflow
+        owned = [index for row in self.state.timeline for index in self._row_workflow_indices(row)]
+        if owned != list(range(len(workflow))):
+            self.state.timeline = self._sequence_rows_from_steps(workflow)
+        return [(row, self._steps_for_row(row)) for row in self.state.timeline]
+
+    def _pairs_and_row(self, row_index: int | None) -> tuple[list[tuple[dict, list]], int | None]:
+        """Return normalized pairs and ``row_index`` mapped onto them."""
+        if row_index is None or not 0 <= row_index < len(self.state.timeline):
+            return self._timeline_step_pairs(), None
+        anchor = self._steps_for_row(self.state.timeline[row_index])
+        pairs = self._timeline_step_pairs()
+        if row_index < len(pairs) and pairs[row_index][1] == anchor:
+            return pairs, row_index
+        for index, (_, steps) in enumerate(pairs):
+            if anchor and steps and steps[0] is anchor[0]:
+                return pairs, index
+        return pairs, None
+
+    def _commit_timeline(self, pairs: list[tuple[dict, list]]) -> None:
+        workflow = []
+        timeline = []
+        for row, steps in pairs:
+            row = dict(row)
+            indices = []
+            for step in steps:
+                workflow.append(step)
+                indices.append(len(workflow) - 1)
+            row["workflow_indices"] = indices or None
+            row["workflow_index"] = indices[-1] if indices else None
+            if steps:
+                row["code"] = self._sequence_code_for_steps(steps)
+            timeline.append(row)
+        self.state.pp.workflow[:] = workflow
+        self.state.timeline[:] = timeline
+
+    def _relabel_row(self, row: dict, steps: list) -> dict:
+        generated = self._sequence_rows_from_steps(steps)
+        if len(generated) == 1:
+            row = dict(row)
+            for key in ("action", "details", "target"):
+                row[key] = generated[0][key]
+        return row
+
+    def _step_position(self, step) -> int | None:
+        for index, candidate in enumerate(self.state.pp.workflow):
+            if candidate is step:
+                return index
+        return None
+
+    def _resume_from_step(self, step_index: int | None, message: str):
+        """Replay from ``step_index`` after an edit; returns the failing result."""
+        if step_index is None or not self.state.pp.workflow:
+            self.status.set_message(message)
+            self._refresh_all()
+            return None
+        try:
+            results = self.state.pp.rerun_from(step_index, allow_column_number_fallback=True)
+        except RuntimeError:
+            return self._run_current_sequence(message)
+        return self._show_sequence_results(results, message)
+
+    def _selected_timeline_row(self) -> int | None:
+        if self.state.mode != "Advanced":
+            return None
+        table = self.mode_manager.panels["Advanced"].sequence_builder.timeline
+        rows = {index.row() for index in table.selectionModel().selectedRows()}
+        return min(rows) if rows else None
+
+    def _table_columns(self) -> list[str]:
+        return list(self.central_table.column_names())
+
+    def edit_timeline_step(self, row_index: int) -> None:
+        """Open the step editor for a row and apply the result."""
+        if not 0 <= row_index < len(self.state.timeline):
+            return
+        steps = self._steps_for_row(self.state.timeline[row_index])
+        if not steps:
+            self.status.set_message(f"Row {row_index + 1} has no editable step")
+            return
+        dialog = StepEditorDialog(steps, self._table_columns(), self, title=f"Edit Row {row_index + 1}")
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted or dialog.result_values is None:
+            return
+        self.apply_step_edits(row_index, dialog.result_values)
+
+    def apply_step_edits(self, row_index: int, values: list[dict]):
+        """Update a row's steps with edited field values and replay from it.
+
+        ``values`` holds one field mapping per step in the row, as returned by
+        ``StepEditorDialog.validated_values()``. All steps are validated
+        before any is changed.
+        """
+        pairs, row_index = self._pairs_and_row(row_index)
+        if row_index is None:
+            return None
+        row, steps = pairs[row_index]
+        if len(values) != len(steps):
+            raise ValueError(f"Row {row_index + 1} has {len(steps)} step(s) but {len(values)} value set(s) were given.")
+        validated = [step.validate(**fields) for step, fields in zip(steps, values)]
+        for step, fields in zip(steps, validated):
+            step.update(**fields)
+        pairs[row_index] = (self._relabel_row(row, steps), steps)
+        self._commit_timeline(pairs)
+        return self._resume_from_step(self._step_position(steps[0]), f"Row {row_index + 1} updated")
+
+    def set_timeline_row_enabled(self, row_index: int, enabled: bool):
+        """Enable or disable every step in a row and replay from it."""
+        pairs, row_index = self._pairs_and_row(row_index)
+        if row_index is None or not pairs[row_index][1]:
+            return None
+        steps = pairs[row_index][1]
+        for step in steps:
+            step.enabled = bool(enabled)
+        self._commit_timeline(pairs)
+        state = "enabled" if enabled else "disabled"
+        return self._resume_from_step(self._step_position(steps[0]), f"Row {row_index + 1} {state}")
+
+    @staticmethod
+    def _is_pinned(steps: list) -> bool:
+        return any(isinstance(step, LoadDataStep) for step in steps)
+
+    def can_move_timeline_row(self, row_index: int, delta: int) -> bool:
+        """Rows that load data stay first; nothing moves above them."""
+        target = row_index + delta
+        if delta not in (-1, 1) or not 0 <= row_index < len(self.state.timeline) or not 0 <= target < len(self.state.timeline):
+            return False
+        return not (
+            self._is_pinned(self._steps_for_row(self.state.timeline[row_index]))
+            or self._is_pinned(self._steps_for_row(self.state.timeline[target]))
+        )
+
+    def move_timeline_row(self, row_index: int, delta: int):
+        """Swap a row with its neighbour and replay from the earlier one."""
+        if not self.can_move_timeline_row(row_index, delta):
+            return None
+        pairs, row_index = self._pairs_and_row(row_index)
+        target = None if row_index is None else row_index + delta
+        if target is None or not 0 <= target < len(pairs):
+            return None
+        pairs[row_index], pairs[target] = pairs[target], pairs[row_index]
+        self._commit_timeline(pairs)
+        self._select_timeline_row(target)
+        moved_steps = pairs[min(row_index, target)][1] or pairs[max(row_index, target)][1]
+        first = self._step_position(moved_steps[0]) if moved_steps else None
+        direction = "up" if delta < 0 else "down"
+        return self._resume_from_step(first, f"Row {row_index + 1} moved {direction}")
+
+    def _select_timeline_row(self, row_index: int) -> None:
+        panel = self.mode_manager.panels["Advanced"].sequence_builder
+        self._refresh_all()
+        panel.timeline.selectRow(row_index)
+
+    def insert_step_dialog(self, after_row: int | None = None) -> None:
+        """Ask for a step type, edit its fields, and insert it after ``after_row``."""
+        step_type = choose_step_type(self, STEP_TYPES)
+        if step_type is None:
+            return
+        columns = self._table_columns()
+        step = step_type.template(columns)
+        dialog = StepEditorDialog([step], columns, self, title=f"Insert {step_type.step_label()}")
+        if dialog.exec() != QtWidgets.QDialog.DialogCode.Accepted or dialog.result_values is None:
+            return
+        step.update(**dialog.result_values[0])
+        self.insert_steps([step], after_row=after_row, message=f"Inserted {step_type.step_label()}")
+
+    def insert_steps(self, steps: list, after_row: int | None = None, message: str = "Steps inserted"):
+        """Insert steps as new rows after ``after_row`` (``None`` appends).
+
+        New rows never go above the leading rows that load data.
+        """
+        steps = list(steps)
+        if not steps:
+            return None
+        pairs, after_row = self._pairs_and_row(after_row)
+        position = len(pairs) if after_row is None else after_row + 1
+        pinned = 0
+        while pinned < len(pairs) and self._is_pinned(pairs[pinned][1]):
+            pinned += 1
+        if not self._is_pinned(steps):
+            position = max(position, pinned)
+        new_pairs = [
+            (row, [steps[index] for index in self._row_workflow_indices(row)])
+            for row in self._sequence_rows_from_steps(steps)
+        ]
+        pairs[position:position] = new_pairs
+        self._commit_timeline(pairs)
+        return self._resume_from_step(self._step_position(steps[0]), message)
 
     def delete_timeline_step(self, index: int) -> None:
         if 0 <= index < len(self.state.timeline):

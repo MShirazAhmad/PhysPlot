@@ -17,3 +17,5 @@ recursive-exclude workflows *
 exclude PhysPlot_backend_revision.zip
 exclude pipeline.json
 exclude workflow.py
+recursive-include physplot_gui/figure_editor *
+global-exclude __pycache__ *.py[co]

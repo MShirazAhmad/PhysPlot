@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from matplotlib.figure import Figure
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox, QFormLayout, QLineEdit, QMessageBox, QVBoxLayout
 
 from physplot_gui.plot_styles import save_style_module, style_path_from_name
 
@@ -20,7 +20,7 @@ class SavePhysPlotStyleModule:
             return
 
         dialog = SaveStyleDialog()
-        if dialog.exec() != QDialog.Accepted:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         try:
@@ -33,7 +33,7 @@ class SavePhysPlotStyleModule:
     @staticmethod
     def _warn(message):
         box = QMessageBox()
-        box.setIcon(QMessageBox.Warning)
+        box.setIcon(QMessageBox.Icon.Warning)
         box.setWindowTitle("PhysPlot Template")
         box.setText("Could not save template.")
         box.setInformativeText(message)
@@ -53,7 +53,7 @@ class SaveStyleDialog(QDialog):
         form.addRow("Name:", self.name)
         form.addRow("Saved as:", self.path)
         layout.addLayout(form)
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

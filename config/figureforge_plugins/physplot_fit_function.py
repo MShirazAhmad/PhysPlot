@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.collections import PathCollection
 from matplotlib.lines import Line2D
-from PySide6.QtWidgets import (
+from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -35,7 +35,7 @@ class AddFitFunction:
             return
 
         dialog = FitFunctionDialog(series)
-        if dialog.exec() != QDialog.Accepted:
+        if dialog.exec() != QDialog.DialogCode.Accepted:
             return
 
         try:
@@ -149,7 +149,7 @@ class AddFitFunction:
     @staticmethod
     def _warn(message):
         box = QMessageBox()
-        box.setIcon(QMessageBox.Warning)
+        box.setIcon(QMessageBox.Icon.Warning)
         box.setWindowTitle("Fit Function")
         box.setText("Could not add fit function.")
         box.setInformativeText(message)
@@ -194,7 +194,7 @@ class FitFunctionDialog(QDialog):
         form.addRow("Show legend:", self.legend)
 
         layout.addLayout(form)
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

@@ -153,6 +153,32 @@ Important behavior:
   still-valid earlier snapshot is used.
 - GUI replays use `run_workflow_detailed(raise_on_error=False)`; headless
   `run_workflow` still raises the first error and keeps no snapshots.
+- Rows are editable (double-click or context menu), can be disabled with the
+  "On" checkbox, moved up/down, and inserted after the selected row. All of
+  it goes through `MainWindow._timeline_step_pairs` / `_commit_timeline`,
+  which rebuild `pp.workflow` from the row order, then `_resume_from_step`.
+  Rows containing a `LoadDataStep` are pinned first.
+
+#### Writing an editable step
+
+Steps describe their own editable fields; the GUI editor
+(`physplot_gui/widgets/step_editor.py`) has no step-specific code.
+
+- Subclass `physplot.steps.base.WorkflowStep`, accept `enabled=True` in
+  `__init__`, and store it on `self.enabled`.
+- Implement `_describe_fields()` returning `{name: field(value, type, ...)}`
+  built with `physplot.steps.fields.field`. Types: `str`, `int`, `float`,
+  `bool`, `column`, `choice`, `path`, `literal`, `value`. Use `optional=True`
+  for fields that may be blank and `number_field=` to link a column field to
+  its column-number fallback.
+- Override `_set_field(name, value)` only when a field does not map to an
+  attribute (see `SetRoleStep`).
+- Build `to_code()` with `self._format_code([(name, value), ...])` so
+  `enabled=False` round-trips; enabled steps produce the same code as before.
+- Provide `template(columns)` and add the class to `STEP_TYPES` in
+  `physplot/steps/__init__.py` to offer it in "Insert Step...".
+- `apply` is wrapped automatically so a disabled step is a no-op, and
+  `execute_steps` reports it as skipped with `skip_reason="disabled"`.
 
 ### Run Sequence
 

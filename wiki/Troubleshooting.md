@@ -52,7 +52,6 @@ Auto Loader has no loader for this extension:
 | `Transformation '…' returned None` | The plugin has no `return`. |
 | `Transformation '…' returned an array of shape … for a column of N rows` | Return one value per input row. |
 | `Bulk run stopped at <file>: …` | That input file failed. Earlier files were exported; fix or remove the file and run again. |
-| `Figure Editor is not installed.` | Install it with `python -m pip install FigureForge`. |
 
 ## A plugin is missing from a menu
 
@@ -68,7 +67,6 @@ one constant and is not a background fit; use `XRD: Baseline Remove` for that.
 
 ## Installation
 
-- PhysPlot needs **Python 3.11–3.13** because of the Figure Editor (FigureForge),
-  which also keeps **numpy below 2**. Newer numpy or Python versions will be possible
-  once FigureForge supports them.
+- PhysPlot needs **Python 3.12–3.14**: numpy 2.5 and scipy 1.18 need 3.12 or newer,
+  and PhysPlot is tested up to 3.14.
 - `.xls` files need `xlrd`, which PhysPlot installs with its dependencies.

@@ -4,7 +4,9 @@
 ``StepResult`` per step. Execution always stops at the first failing step:
 that step is reported as ``failed`` and every later step as ``skipped``. The
 caller chooses whether the failure is re-raised (``raise_on_error=True``, the
-behavior of ``PhysPlot.run_workflow``) or only reported.
+behavior of ``PhysPlot.run_workflow``) or only reported. Disabled steps
+(``step.enabled`` is false) are reported as ``skipped`` and do not stop the
+run.
 
 When a ``SnapshotStore`` is supplied, the backend state is captured before
 each executed step. ``PhysPlot.rerun_from`` restores one of these snapshots
@@ -31,6 +33,10 @@ STATUS_OK = "ok"
 STATUS_FAILED = "failed"
 STATUS_SKIPPED = "skipped"
 
+SKIP_DISABLED = "disabled"
+SKIP_AFTER_FAILURE = "after_failure"
+SKIP_NOT_RUN = "not_run"
+
 DEFAULT_SNAPSHOT_LIMIT = 20
 
 
@@ -43,6 +49,7 @@ class StepResult:
     status: str
     error: str | None = None
     duration_s: float = 0.0
+    skip_reason: str | None = None
 
     @property
     def step_name(self) -> str:
@@ -168,18 +175,25 @@ def execute_steps(
     prior_by_index = {result.index: result for result in (prior_results or [])}
     results: list[StepResult] = []
     for index in range(start_index):
-        results.append(prior_by_index.get(index) or StepResult(index, steps[index], STATUS_SKIPPED))
+        results.append(
+            prior_by_index.get(index) or StepResult(index, steps[index], STATUS_SKIPPED, skip_reason=SKIP_NOT_RUN)
+        )
 
     fingerprints = cumulative_fingerprints(steps) if snapshots is not None else None
 
     failure: BaseException | None = None
     for index in range(start_index, len(steps)):
         step = steps[index]
+        disabled = not getattr(step, "enabled", True)
         if failure is not None:
-            results.append(StepResult(index, step, STATUS_SKIPPED))
+            reason = SKIP_DISABLED if disabled else SKIP_AFTER_FAILURE
+            results.append(StepResult(index, step, STATUS_SKIPPED, skip_reason=reason))
             continue
         if snapshots is not None:
             snapshots.put(Snapshot.capture(physplot, index, fingerprints[index]))
+        if disabled:
+            results.append(StepResult(index, step, STATUS_SKIPPED, skip_reason=SKIP_DISABLED))
+            continue
         started = time.perf_counter()
         try:
             step.apply(physplot, allow_column_number_fallback=allow_column_number_fallback)

@@ -10,6 +10,19 @@ from .set_cell_value import SetCellValueStep
 from .set_role import SetRoleStep
 from .transform_column import TransformColumnStep
 
+# Step types offered by the GUI "Insert Step..." action, in menu order.
+STEP_TYPES = [
+    SetRoleStep,
+    TransformColumnStep,
+    CalculateColumnStep,
+    RenameColumnStep,
+    SetCellValueStep,
+    DeleteRowsStep,
+    DeleteColumnsStep,
+    PlotModuleStep,
+    LoadDataStep,
+]
+
 __all__ = [
     "CalculateColumnStep",
     "DeleteColumnsStep",
@@ -17,6 +30,7 @@ __all__ = [
     "LoadDataStep",
     "PlotModuleStep",
     "RenameColumnStep",
+    "STEP_TYPES",
     "SetCellValueStep",
     "SetRoleStep",
     "TransformColumnStep",

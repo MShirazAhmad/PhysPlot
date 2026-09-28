@@ -101,9 +101,11 @@ file, choose **File → Reload Config Modules**. See [Extending PhysPlot](../ext
 
 | Plotter | Opens in | Template | LSQ fit |
 | --- | --- | --- | --- |
-| **Basic Plotter** | The [Figure Editor](figure_editor.md), a separate window for detailed editing | Applied | Yes |
-| Other built-in and user plotters | A plot window titled *PhysPlot - <plotter>: <plot type>* with the Matplotlib toolbar | Applied | Yes |
-| Loader plotters | A plot window | Applied | No: *"LSQ fit from Simple Mode is available for backend plotter modules."* |
+| Built-in and user plotters (including **Basic Plotter**) | A plot window titled *PhysPlot - <plotter>: <plot type>* with the Matplotlib toolbar and **Advanced Styling…** (opens the [Figure Editor](figure_editor.md)) | Applied | Yes |
+| Loader plotters | The same plot window | Applied | No: *"LSQ fit from Simple Mode is available for backend plotter modules."* |
+
+Tick **Advanced Figure Editor** (under **Generate Plot**) to open plots straight in the
+[Figure Editor](figure_editor.md) instead of a plot window; PhysPlot remembers the choice.
 
 Each Generate Plot opens a new window; earlier windows stay open until you close them.
 **Plot → Generate Plot** (Ctrl+G) is a shortcut for the Basic Plotter scatter plot with
@@ -116,8 +118,8 @@ the file dialog. The default name is `physplot_plot.png`, and images are written
 300 dpi. The status bar shows *"Plot exported"*.
 
 - **No plot yet:** you get *Export plot failed: Generate a plot before exporting.*
-- **Figure Editor changes:** these are not included, because the editor works on its
-  own copy. Save from the editor's **File** menu instead.
+- **Figure Editor changes:** these are included when the edited figure is the latest
+  plot, because the editor edits the plot window's figure itself.
 
 ## When plotting fails
 
@@ -130,4 +132,3 @@ A *Plot failed* dialog explains the problem and nothing is recorded. Common mess
 | *LSQ initial guesses must match the parameter list.* | Give one Initial value per name in Params. |
 | *Not enough numeric points for the requested LSQ fit.* | The fit needs at least as many X/Y pairs as parameters. |
 | *Optimal parameters not found…* | The fit did not converge; try better Initial values or a simpler model. |
-| *Figure Editor is not installed…* | Install it with `python -m pip install FigureForge`, or use a plotter other than Basic. |

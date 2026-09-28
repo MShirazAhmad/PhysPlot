@@ -57,6 +57,31 @@ from the earliest point it can still trust, which is normally the start of
 the last full run. If no run has happened yet, apply the whole sequence
 first.
 
+Editing steps
+-------------
+
+Every row can be changed from the table without touching Python:
+
+- **Edit**: double-click a row, or right-click and choose **Edit step...**.
+  The editor lists the row's settings; fields marked ``*`` are required.
+  Column fields offer the current table columns. Invalid values, such as a
+  parameter that is not a ``{...}`` dictionary, are explained in red and the
+  dialog stays open. After **OK** the sequence resumes from that row.
+- **Enable or disable**: untick the **On** checkbox, or right-click and
+  choose **Disable step**. A disabled row stays in the sequence, is shown in
+  grey, and reports **Skipped**; the rows after it still run. Exported
+  sequence files keep the setting as ``enabled=False``.
+- **Reorder**: right-click and choose **Move up** or **Move down**. Rows that
+  load data stay first and nothing can move above them.
+- **Insert**: right-click a row and choose **Insert step after...**, or use
+  **Protocol > Insert Step...** and **Protocol > Insert Protocol Module**.
+  New rows go after the selected row, or at the end when no row is selected.
+
+Each of these changes replays the sequence from the first affected row, the
+same way **Rerun from this step** does. If the change breaks a later row, for
+example moving **Set Roles** below **Generate Plot**, that row shows
+**Failed** and the status bar explains why; no dialog interrupts you.
+
 Headless use
 ------------
 
@@ -83,3 +108,14 @@ The same behavior is available in Python:
 
 ``pp.run_workflow(steps)`` keeps its original behavior: it raises the first
 error. It also records per-step results on ``pp.last_results``.
+
+Steps can be edited in code with the same checks the editor uses:
+
+.. code-block:: python
+
+   step = steps[1]
+   print(step.describe())            # editable fields, types, and current values
+   step.update(function_name="divide", params={"divisor": 2})
+   step.update(enabled=False)        # keep the step but skip it
+   pp.move_step(3, 2)                # reorder pp.workflow
+   pp.insert_step(1, step)           # insert before position 1

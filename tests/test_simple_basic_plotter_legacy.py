@@ -12,32 +12,32 @@ from physplot_gui.plot_styles import apply_style_module, save_style_module
 from physplot_gui.app.main_window import MainWindow
 
 
-def test_basic_plotter_generate_opens_figureforge_editor(monkeypatch):
+def test_basic_plotter_generate_opens_plot_window(monkeypatch):
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     window = MainWindow()
     window.state.load_dataframe(pd.DataFrame({"Time": [0, 1], "Voltage": [1.0, 2.0]}), name="sample")
     window.state.pp.set_roles(x="Time", y="Voltage")
     window.central_table.set_dataframe(window.state.dataframe, window.state.roles)
 
-    calls = {"figureforge": 0, "module": 0}
-    monkeypatch.setattr(window, "_open_figureforge_editor", lambda figure: calls.__setitem__("figureforge", calls["figureforge"] + 1))
+    calls = {"editor": 0, "module": 0}
+    monkeypatch.setattr(window, "_open_figure_editor", lambda figure: calls.__setitem__("editor", calls["editor"] + 1))
     monkeypatch.setattr(window, "_show_module_figure", lambda *args: calls.__setitem__("module", calls["module"] + 1))
 
     window.generate_module_plot("basic", "scatter")
 
-    assert calls == {"figureforge": 1, "module": 0}
+    assert calls == {"editor": 0, "module": 1}
     assert window.state.timeline[-1]["details"] == "Create basic scatter"
     app.processEvents()
 
 
-def test_figureforge_editor_prepares_missing_editable_artists():
+def test_figure_editor_prepares_missing_editable_artists():
     app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
     window = MainWindow()
     window.state.load_dataframe(pd.DataFrame({"Time": [0, 1], "Voltage": [1.0, 2.0]}), name="sample")
     window.state.pp.set_roles(x="Time", y="Voltage")
     figure = window.state.pp.plot_with_module("basic", "scatter", record=False)
 
-    window._prepare_figureforge_figure(figure)
+    window._prepare_figure_editor_figure(figure)
     class_names = set()
 
     def collect(obj):
@@ -95,7 +95,7 @@ def test_style_selection_survives_simple_mode_refresh(tmp_path, monkeypatch):
     app.processEvents()
 
 
-def test_figureforge_template_plugin_menu_name():
+def test_figure_editor_template_plugin_menu_name():
     plugin_source = Path("config/figureforge_plugins/physplot_save_style_module.py").read_text(encoding="utf-8")
     assert 'name = "Save as Template"' in plugin_source
 
@@ -145,7 +145,7 @@ def test_plot_type_choice_survives_window_refresh(monkeypatch):
     window.central_table.set_dataframe(window.state.dataframe, window.state.roles)
     window._refresh_all()
     panel = window.mode_manager.panels["Simple"]
-    monkeypatch.setattr(window, "_open_figureforge_editor", lambda figure: None)
+    monkeypatch.setattr(window, "_open_figure_editor", lambda figure: None)
 
     panel.plotter.setCurrentIndex(panel.plotter.findData("basic"))
     panel.plot_type.setCurrentText("line")

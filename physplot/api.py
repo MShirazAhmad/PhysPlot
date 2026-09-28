@@ -349,6 +349,26 @@ class PhysPlot:
             snapshots=snapshots,
         )
 
+    def insert_step(self, index, step):
+        """Insert ``step`` into ``self.workflow`` before position ``index``.
+
+        ``index`` may equal ``len(self.workflow)`` to append. Negative indices
+        are rejected so positions stay unambiguous for the GUI.
+        """
+        if not 0 <= index <= len(self.workflow):
+            raise IndexError(f"Cannot insert at position {index + 1} in a sequence of {len(self.workflow)} steps.")
+        self.workflow.insert(index, step)
+        return step
+
+    def move_step(self, old_index, new_index):
+        """Move the step at ``old_index`` so it ends up at ``new_index``."""
+        count = len(self.workflow)
+        if not 0 <= old_index < count or not 0 <= new_index < count:
+            raise IndexError(f"Cannot move step {old_index + 1} to {new_index + 1} in a sequence of {count} steps.")
+        step = self.workflow.pop(old_index)
+        self.workflow.insert(new_index, step)
+        return step
+
     def rerun_from(
         self,
         index,

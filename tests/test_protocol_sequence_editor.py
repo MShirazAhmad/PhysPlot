@@ -7,9 +7,10 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 pytest.importorskip("PyQt6")
 
-from physplot.qt_compat import QtWidgets
+from physplot.qt_compat import QtCore, QtWidgets
 from physplot.steps import LoadDataStep, PlotModuleStep, SetRoleStep, TransformColumnStep
 from physplot_gui.app.main_window import MainWindow
+from physplot_gui.panels.recorder_mode_panel import STATUS_COLUMN
 
 
 def test_protocol_code_editor_updates_table_and_deletes_update_code():
@@ -115,8 +116,8 @@ def test_failing_step_shows_status_per_row_and_keeps_table(tmp_path):
     panel = window.mode_manager.panels["Advanced"].sequence_builder
     assert panel.timeline.rowCount() == 4
     assert [panel.status_text(row) for row in range(4)] == ["ok", "failed", "skipped", "skipped"]
-    assert "Volts" in panel.timeline.item(1, 4).toolTip()
-    assert "row 2" in panel.timeline.item(2, 4).toolTip()
+    assert "Volts" in panel.timeline.item(1, STATUS_COLUMN).toolTip()
+    assert "row 2" in panel.timeline.item(2, STATUS_COLUMN).toolTip()
     title, error = window.last_error
     assert title == "Apply sequence failed"
     assert str(error).startswith("Row 2 failed (TransformColumnStep)")
@@ -376,5 +377,192 @@ def test_simple_mode_input_defaults_to_y_column_and_function_labels(tmp_path, mo
     assert "02_square.py" in panel.function.itemData(square, QtCore.Qt.ItemDataRole.ToolTipRole)
     assert panel.function.findText("baseline_subtract") == -1
 
+    window.close()
+    app.quit()
+
+
+# -- Phase 2: editable, reorderable, and disableable rows --------------------
+
+
+def _window_with(steps):
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    window.mode_manager.set_mode("Advanced")
+    window.state.pp.workflow = list(steps)
+    window.state.timeline = window._sequence_rows_from_steps(window.state.pp.workflow)
+    window.apply_current_sequence()
+    panel = window.mode_manager.panels["Advanced"].sequence_builder
+    return app, window, panel
+
+
+def _csv(tmp_path):
+    data_path = tmp_path / "data.csv"
+    data_path.write_text("Time,Voltage\n1,2\n2,4\n3,8\n", encoding="utf-8")
+    return data_path
+
+
+def test_step_editor_changes_function_and_updates_code_and_table(tmp_path):
+    from physplot_gui.widgets.step_editor import StepEditorDialog
+
+    load = LoadDataStep(path=str(_csv(tmp_path)), loader="csv", dataset_name="data")
+    app, window, panel = _window_with(
+        [
+            load,
+            TransformColumnStep("Voltage", "multiply", "V_out", params={"factor": 1000}, input_column_number=2),
+            SetRoleStep(roles={"x": "Time", "y": "V_out"}),
+        ]
+    )
+    assert window.central_table.to_dataframe()["V_out"].tolist() == [2000, 4000, 8000]
+
+    dialog = StepEditorDialog(window._steps_for_row(window.state.timeline[1]), window._table_columns())
+    fields = dialog.widgets[0]
+    fields["function_name"].setCurrentText("divide")
+    fields["params"].setText("{'divisor': 2}")
+    fields["input_column"].setCurrentText("Time")
+    assert fields["input_column_number"].text() == "1"  # number fallback follows the column
+    fields["input_column"].setCurrentText("Voltage")
+
+    load_calls = []
+    original_apply = load.apply
+    load.apply = lambda *args, **kwargs: load_calls.append(1) or original_apply(*args, **kwargs)
+    window.apply_step_edits(1, dialog.validated_values())
+
+    code = panel.code_view.toPlainText()
+    assert "function_name='divide'" in code
+    assert "params={'divisor': 2}" in code
+    assert window.central_table.to_dataframe()["V_out"].tolist() == [1, 2, 4]
+    assert panel.timeline.item(1, 3).text() == "divide"
+    assert [panel.status_text(row) for row in range(3)] == ["ok", "ok", "ok"]
+    assert load_calls == []  # resumed from the edited row, the file was not reloaded
+
+    window.close()
+    app.quit()
+
+
+def test_step_editor_reports_invalid_values_without_closing():
+    from physplot_gui.widgets.step_editor import StepEditorDialog
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    step = TransformColumnStep("Voltage", "multiply", "V_out", params={"factor": 1000})
+    dialog = StepEditorDialog([step], ["Time", "Voltage"])
+    dialog.widgets[0]["params"].setText("[1, 2]")
+
+    dialog._try_accept()
+
+    assert dialog.result_values is None
+    assert not dialog.error_label.isHidden()
+    assert "Parameters must be a dict" in dialog.error_label.text()
+    assert step.params == {"factor": 1000}
+    app.quit()
+
+
+def test_disabled_row_is_skipped_and_round_trips_through_sequence_code(tmp_path):
+    app, window, panel = _window_with(
+        [
+            LoadDataStep(path=str(_csv(tmp_path)), loader="csv", dataset_name="data"),
+            TransformColumnStep("Voltage", "multiply", "V_mV", params={"factor": 1000}),
+            SetRoleStep(roles={"x": "Time", "y": "Voltage"}),
+        ]
+    )
+    assert "V_mV" in window.central_table.column_names()
+
+    # Untick the checkbox the way a user would; the change is applied on the next event loop turn.
+    panel.timeline.item(1, 0).setCheckState(QtCore.Qt.CheckState.Unchecked)
+    app.processEvents()
+
+    assert window.state.pp.workflow[1].enabled is False
+    assert [panel.status_text(row) for row in range(3)] == ["ok", "skipped", "ok"]
+    assert panel.timeline.item(1, STATUS_COLUMN).toolTip().startswith("Disabled")
+    assert panel.enabled_state(1) is False
+    assert "V_mV" not in window.central_table.column_names()
+    assert "enabled=False" in panel.code_view.toPlainText()
+
+    exported = tmp_path / "sequence.py"
+    window.state.pp.save_workflow(exported)
+    window.apply_sequence_code(exported.read_text(encoding="utf-8"))
+    assert [step.enabled for step in window.state.pp.workflow] == [True, False, True]
+    assert panel.enabled_state(1) is False
+
+    window.set_timeline_row_enabled(1, True)
+    assert "V_mV" in window.central_table.column_names()
+    assert panel.status_text(1) == "ok"
+
+    window.close()
+    app.quit()
+
+
+def test_moving_roles_below_plot_reports_failure_status_without_dialog(tmp_path):
+    app, window, panel = _window_with(
+        [
+            LoadDataStep(path=str(_csv(tmp_path)), loader="csv", dataset_name="data"),
+            TransformColumnStep("Voltage", "multiply", "V_mV", params={"factor": 1000}),
+            SetRoleStep(roles={"x": "Time", "y": "V_mV"}),
+            PlotModuleStep(plotter_id="basic", plot_type="scatter", config={}),
+        ]
+    )
+    assert [panel.status_text(row) for row in range(4)] == ["ok"] * 4
+    window.last_error = None
+
+    assert not window.can_move_timeline_row(0, 1)  # the Load Data row is pinned first
+    assert not window.can_move_timeline_row(1, -1)  # nothing moves above it
+    assert not window.can_move_timeline_row(3, 1)
+    window.move_timeline_row(2, 1)
+
+    assert [type(step) for step in window.state.pp.workflow] == [LoadDataStep, TransformColumnStep, PlotModuleStep, SetRoleStep]
+    assert [panel.timeline.item(row, 2).text() for row in range(4)] == ["File Loader", "Transform", "Generate Plot", "Set Roles"]
+    assert [panel.status_text(row) for row in range(4)] == ["ok", "ok", "failed", "skipped"]
+    assert "No column has role 'X'" in panel.timeline.item(2, STATUS_COLUMN).toolTip()
+    assert window.last_error is None
+    assert window.status.status.text().startswith("Status: Row 3 failed (PlotModuleStep)")
+    assert panel.timeline.selectionModel().selectedRows()[0].row() == 3
+
+    window.move_timeline_row(3, -1)
+    assert [panel.status_text(row) for row in range(4)] == ["ok"] * 4
+
+    window.close()
+    app.quit()
+
+
+def test_insert_steps_and_protocol_modules_after_selected_row(tmp_path):
+    app, window, panel = _window_with(
+        [
+            LoadDataStep(path=str(_csv(tmp_path)), loader="csv", dataset_name="data"),
+            SetRoleStep(roles={"x": "Time", "y": "Voltage"}),
+        ]
+    )
+    # Load Data and its role setup share one row.
+    assert panel.timeline.rowCount() == 1
+
+    window.insert_steps([TransformColumnStep("Voltage", "multiply", "V_mV", params={"factor": 1000})], after_row=0)
+    assert [panel.timeline.item(row, 2).text() for row in range(2)] == ["File Loader", "Transform"]
+    assert window.central_table.to_dataframe()["V_mV"].tolist() == [2000, 4000, 8000]
+
+    module = tmp_path / "time_ms.py"
+    module.write_text(
+        "from physplot.steps import TransformColumnStep\n"
+        "WORKFLOW_STEPS = [TransformColumnStep('Time', 'multiply', 'T_ms', params={'factor': 1000})]\n",
+        encoding="utf-8",
+    )
+    window.insert_protocol_module(module, after_row=0)
+    assert [panel.timeline.item(row, 3).text() for row in range(3)] == ["csv loader (column names and role setup)", "multiply", "multiply"]
+    assert window.state.pp.workflow[2].output == "T_ms"
+    assert window.state.pp.workflow[3].output == "V_mV"
+
+    # With no row selected, inserting appends; nothing goes above the Load Data row.
+    window.insert_steps([SetRoleStep(roles={"x": "T_ms", "y": "V_mV"})])
+    window.insert_steps([TransformColumnStep("Time", "add", "T_plus", params={"value": 1})], after_row=None)
+    assert type(window.state.pp.workflow[0]) is LoadDataStep
+    assert [panel.status_text(row) for row in range(panel.timeline.rowCount())] == ["ok"] * 5
+    assert window.state.roles["T_ms"] == "X"
+
+    window.close()
+    app.quit()
+
+
+def test_protocol_menu_offers_insert_step():
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    labels = [action.text() for action in window.protocol_menu.actions()]
+    assert "Insert Step..." in labels
     window.close()
     app.quit()

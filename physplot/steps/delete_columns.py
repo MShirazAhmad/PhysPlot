@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .base import WorkflowStep
+from .fields import field
 
 MODULE_ID = "physplot.steps.delete_columns"
 MODULE_VERSION = "1.0.0"
@@ -12,10 +13,14 @@ MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
 
 
+
 class DeleteColumnsStep(WorkflowStep):
-    def __init__(self, columns, column_numbers=None):
+    display_name = "Delete Columns"
+
+    def __init__(self, columns, column_numbers=None, enabled=True):
         self.columns = list(columns or [])
         self.column_numbers = list(column_numbers or [])
+        self.enabled = enabled
 
     def apply(self, physplot, allow_column_number_fallback: bool = False):
         references = list(self.columns)
@@ -29,10 +34,24 @@ class DeleteColumnsStep(WorkflowStep):
                 references.extend(self.columns[len(references) :])
         return physplot.delete_columns(references)
 
+    @classmethod
+    def template(cls, columns=()):
+        columns = list(columns)
+        if not columns:
+            return cls(["Column 1"], [1])
+        return cls([columns[-1]], [len(columns)])
+
+    def _describe_fields(self) -> dict:
+        return {
+            "columns": field(self.columns, "literal", label="Columns", python_type=list, help="For example ['Time', 'Error']."),
+            "column_numbers": field(
+                self.column_numbers,
+                "literal",
+                label="Column numbers",
+                python_type=list,
+                help="Used when a named column is missing and column-number fallback is on.",
+            ),
+        }
+
     def to_code(self) -> str:
-        return (
-            "DeleteColumnsStep(\n"
-            f"    columns={self.columns!r},\n"
-            f"    column_numbers={self.column_numbers!r},\n"
-            ")"
-        )
+        return self._format_code([("columns", self.columns), ("column_numbers", self.column_numbers)])

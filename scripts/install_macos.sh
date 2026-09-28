@@ -29,14 +29,14 @@ fail() { printf '\033[1;31mError:\033[0m %s\n' "$*" >&2; exit 1; }
 [[ "$(uname -s)" == "Darwin" ]] || fail "This installer is for macOS. On Windows, use the PhysPlot installer."
 [[ "$INSTALL_DIR" != *" "* ]] || fail "PHYSPLOT_HOME must not contain spaces: $INSTALL_DIR"
 
-# PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13.
+# PhysPlot needs Python 3.12-3.14 (numpy and scipy need 3.12+; tested up to 3.14).
 python_ok() {
-    "$1" -c 'import sys; sys.exit(0 if (3, 11) <= sys.version_info[:2] <= (3, 13) else 1)' >/dev/null 2>&1
+    "$1" -c 'import sys; sys.exit(0 if (3, 12) <= sys.version_info[:2] <= (3, 14) else 1)' >/dev/null 2>&1
 }
 
 find_python() {
     local candidate path version
-    for version in 3.12 3.13 3.11; do
+    for version in 3.12 3.13 3.14; do
         for candidate in "python$version" "/opt/homebrew/bin/python$version" "/usr/local/bin/python$version" \
             "/Library/Frameworks/Python.framework/Versions/$version/bin/python$version"; do
             path="$(command -v "$candidate" 2>/dev/null)" || continue
@@ -50,14 +50,14 @@ find_python() {
     return 1
 }
 
-say "Looking for Python 3.11-3.13"
+say "Looking for Python 3.12-3.14"
 if ! PYTHON="$(find_python)"; then
     if command -v brew >/dev/null 2>&1; then
         say "Installing Python 3.12 with Homebrew"
         brew install python@3.12
         PYTHON="$(brew --prefix python@3.12)/bin/python3.12"
     else
-        fail "Python 3.11-3.13 is required. Install Python 3.12 from https://www.python.org/downloads/macos/ (or Homebrew), then run this command again."
+        fail "Python 3.12-3.14 is required. Install Python 3.12 from https://www.python.org/downloads/macos/ (or Homebrew), then run this command again."
     fi
 fi
 python_ok "$PYTHON" || fail "Could not use $PYTHON."
@@ -94,6 +94,11 @@ say "Installing PhysPlot and its dependencies (about 1 GB the first time; this c
 "$VENV/bin/python" -c "import physplot, physplot_gui" || fail "PhysPlot did not install correctly."
 
 say "Creating $APP"
+# Data file types for Finder's right-click "Open With > PhysPlot" (built-in loaders plus
+# every loader plugin's FILE_EXTENSIONS). "Alternate" rank: PhysPlot is offered, never
+# made the default app on its own.
+EXTENSIONS_XML="$("$VENV/bin/python" -c 'from physplot_gui.app.main_window import data_file_extensions
+print("".join("<string>%s</string>" % e.lstrip(".") for e in data_file_extensions()))' 2>/dev/null || echo '<string>csv</string><string>txt</string>')"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -109,6 +114,16 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleShortVersionString</key><string>$("$VENV/bin/python" -c 'import physplot; print(physplot.__version__)')</string>
     <key>LSMinimumSystemVersion</key><string>11.0</string>
     <key>NSHighResolutionCapable</key><true/>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key><string>Data File</string>
+            <key>CFBundleTypeRole</key><string>Viewer</string>
+            <key>LSHandlerRank</key><string>Alternate</string>
+            <key>CFBundleTypeExtensions</key>
+            <array>$EXTENSIONS_XML</array>
+        </dict>
+    </array>
 </dict>
 </plist>
 PLIST
@@ -130,6 +145,7 @@ say "PhysPlot is installed."
 cat <<DONE
 
   Open it:        $APP  (or search Spotlight for "PhysPlot")
+  Data files:     right-click a data file > Open With > PhysPlot
   Terminal:       $VENV/bin/physplot-gui
   Command line:   $VENV/bin/physplot run-workflow Sequence.py --input data.csv --output out/
   Sample data:    $SOURCE/test_data

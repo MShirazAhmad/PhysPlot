@@ -110,7 +110,7 @@ Open **Terminal** and paste:
 curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_macos.sh | bash
 ```
 
-The script finds Python 3.11–3.13 (or installs Python 3.12 with Homebrew), installs
+The script finds Python 3.12–3.14 (or installs Python 3.12 with Homebrew), installs
 PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** in
 `~/Applications`. Run it again to update; uninstall with
 `rm -rf ~/.physplot ~/Applications/PhysPlot.app`.
@@ -125,7 +125,7 @@ Open **PowerShell** and paste:
 irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 ```
 
-The script finds Python 3.11–3.13 (or installs Python 3.12 with `winget`), installs
+The script finds Python 3.12–3.14 (or installs Python 3.12 with `winget`), installs
 PhysPlot and its dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot**
 Start-menu shortcut. Close PhysPlot and run it again to update.
 

@@ -40,9 +40,9 @@ are derived from the template name by :func:`style_path_from_name`.
 
 Setting the ``PHYSPLOT_STYLE_DIR`` environment variable (``STYLE_DIR_ENV``) replaces all
 of the above with one folder that is both searched and written to; bundled templates are
-then not listed. When the main window launches the Figure Editor, it sets
-``PHYSPLOT_STYLE_DIR`` to its own :func:`style_directory` in the editor's environment, so
-**Save as Template** writes into the folder that the **Template** dropdown reads.
+then not listed. The Figure Editor runs inside PhysPlot and uses the same
+:func:`style_directory`, so **Save as Template** writes into the folder that the
+**Template** dropdown reads.
 
 .. rubric:: File format
 

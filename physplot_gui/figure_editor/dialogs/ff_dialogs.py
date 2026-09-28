@@ -1,0 +1,3 @@
+from physplot_gui.figure_editor.dialogs.new_plugin_dialog import NewPluginDialog
+from physplot_gui.figure_editor.dialogs.save_work_dialog import SaveWorkDialog
+from physplot_gui.figure_editor.dialogs.physplot_export import ExportFigureDialog, export_style

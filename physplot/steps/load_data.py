@@ -7,6 +7,7 @@ from pathlib import Path
 from physplot.loaders.plugins import load_plugin_module, plugin_dataframe
 
 from .base import WorkflowStep
+from .fields import field, safe_choices
 
 MODULE_ID = "physplot.steps.load_data"
 MODULE_VERSION = "1.0.0"
@@ -14,6 +15,7 @@ MODULE_REVISION = "2026-09-25-r1"
 MODULE_API_VERSION = "1"
 MODULE_COMPATIBILITY = "v1"
 MODULE_STATUS = "stable"
+
 
 
 class LoadDataStep(WorkflowStep):
@@ -24,11 +26,14 @@ class LoadDataStep(WorkflowStep):
     this keeps exported sequences runnable outside the GUI.
     """
 
-    def __init__(self, path=None, loader="auto", dataset_name=None, loader_plugin=None):
+    display_name = "Load Data"
+
+    def __init__(self, path=None, loader="auto", dataset_name=None, loader_plugin=None, enabled=True):
         self.path = path
         self.loader = loader
         self.dataset_name = dataset_name
         self.loader_plugin = loader_plugin
+        self.enabled = enabled
 
     def apply(self, physplot, allow_column_number_fallback: bool = False):
         """Load from a path, or no-op when a caller already supplied active data."""
@@ -53,17 +58,38 @@ class LoadDataStep(WorkflowStep):
             loader_plugin=self.loader_plugin,
         )
 
+    @classmethod
+    def template(cls, columns=()):
+        return cls(path=None, loader="auto")
+
+    def _describe_fields(self) -> dict:
+        from physplot.loaders import list_loaders
+
+        loaders = safe_choices(lambda: [loader.loader_id for loader in list_loaders()]) or ["auto"]
+        if self.loader not in loaders:
+            loaders.append(self.loader)
+        return {
+            "path": field(self.path, "path", label="File", optional=True, help="Blank keeps the data already in the table."),
+            "loader": field(self.loader, "choice", label="Loader", choices=loaders),
+            "dataset_name": field(self.dataset_name, "str", label="Dataset name", optional=True),
+            "loader_plugin": field(
+                self.loader_plugin,
+                "path",
+                label="Loader plugin",
+                optional=True,
+                help="A config/data_importers file; overrides Loader when set.",
+            ),
+        }
+
     def to_code(self) -> str:
-        return (
-            "LoadDataStep(\n"
-            f"    path={self.path!r},\n"
-            f"    loader={self.loader!r},\n"
-            f"    dataset_name={self.dataset_name!r},\n"
-            f"    loader_plugin={self.loader_plugin!r},\n"
-            ")"
+        return self._format_code(
+            [
+                ("path", self.path),
+                ("loader", self.loader),
+                ("dataset_name", self.dataset_name),
+                ("loader_plugin", self.loader_plugin),
+            ]
         )
-
-
 def load_input(physplot, path, steps, loader="auto") -> list:
     """Load ``path`` the way ``steps`` loads data and return the remaining steps.
 

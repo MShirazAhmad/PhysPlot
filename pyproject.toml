@@ -7,7 +7,7 @@ name = "python-physplot"
 version = "1.0.0"
 description = "Scientific plotting, workflow recording, and publication-ready plot generation for researchers."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = "LicenseRef-PolyForm-Noncommercial-1.0.0"
 license-files = ["LICENSE"]
 authors = [
@@ -30,30 +30,30 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
 dependencies = [
-    "appdirs>=1.4",
-    "FigureForge>=0.3.3",
-    "matplotlib>=3.8",
-    "numpy>=1.24",
-    "openpyxl>=3.1",
-    "pandas>=2.0",
-    "PyQt6>=6.6",
-    "scipy>=1.10",
-    "xlrd>=2.0",
+    "appdirs>=1.4.4",
+    "matplotlib>=3.11",
+    "numpy>=2.5",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0",
+    "PyQt6>=6.11",
+    # Figure Editor (physplot_gui/figure_editor, PhysPlot's PyQt6 copy of FigureForge 0.3.3).
+    "requests>=2.34",
+    "scipy>=1.18",
+    "xlrd>=2.0.2",
 ]
 
 [project.optional-dependencies]
 dev = [
     "build>=1.2",
     "pyinstaller>=6.0",
-    "pytest>=8",
-    "twine>=5",
+    "pytest>=9.1",
+    "twine>=6",
 ]
 
 [project.scripts]
@@ -77,6 +77,7 @@ exclude = ["tests*", "docs*", "outputs*", "workflows*", "test_data*"]
 
 [tool.setuptools.package-data]
 physplot = ["inc/*.png"]
+"physplot_gui.figure_editor" = ["LICENSE", "structure.json", "resources/**/*", "plugins/*.png", "plugins/*.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -2,7 +2,7 @@
 #
 #   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/scripts/install_windows.ps1 | iex
 #
-# Needs nothing installed first: without Python 3.11-3.13 it installs Python 3.12 for
+# Needs nothing installed first: without Python 3.12-3.14 it installs Python 3.12 for
 # this user (with winget, or from python.org). Creates %LOCALAPPDATA%\PhysPlot (Python
 # environment and PhysPlot source) and a Start menu shortcut. Close PhysPlot, then run
 # the same command again to update.
@@ -27,14 +27,13 @@
     $venv = Join-Path $installDir 'venv'
     $venvPython = Join-Path $venv 'Scripts\python.exe'
     $venvPythonw = Join-Path $venv 'Scripts\pythonw.exe'
-    # PhysPlot's Figure Editor (FigureForge) supports Python 3.11-3.13. On Windows on ARM
-    # it also needs the x64 build of Python (run by Windows' built-in emulation):
-    # FigureForge requires numpy<2, which has no ARM64 wheels, so a native ARM64 Python
-    # would try to compile numpy. sysconfig names the build (platform.machine() gives the
-    # CPU, ARM64, even in x64 Python 3.12). The check has no double quotes: Windows PowerShell 5.1
+    # PhysPlot needs Python 3.12-3.14 (numpy and scipy need 3.12+; tested up to 3.14).
+    # On Windows on ARM it uses the x64 build of Python (run by Windows' built-in
+    # emulation), where every dependency has a ready-made wheel. sysconfig names the build
+    # (platform.machine() gives the CPU, ARM64, even in x64 Python 3.12). The check has no double quotes: Windows PowerShell 5.1
     # drops them from native-command arguments.
     $arm64 = ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') -or ($env:PROCESSOR_ARCHITEW6432 -eq 'ARM64')
-    $versionCheck = 'import sys, sysconfig; print(sys.executable) if (3, 11) <= sys.version_info[:2] <= (3, 13) and sysconfig.get_platform() != ''win-arm64'' else sys.exit(1)'
+    $versionCheck = 'import sys, sysconfig; print(sys.executable) if (3, 12) <= sys.version_info[:2] <= (3, 14) and sysconfig.get_platform() != ''win-arm64'' else sys.exit(1)'
 
     function Say([string]$message) { Write-Host "==> $message" -ForegroundColor Cyan }
 
@@ -47,14 +46,14 @@
         if ($LASTEXITCODE -ne 0) { throw "$what failed (exit code $LASTEXITCODE)." }
     }
 
-    # Return the full path of a Python 3.11-3.13, or $null.
+    # Return the full path of a Python 3.12-3.14, or $null.
     function Find-Python {
         $previous = $ErrorActionPreference
         $ErrorActionPreference = 'Continue'
         try {
             if (Get-Command py -ErrorAction SilentlyContinue) {
                 # "-3.12" selects the x64 or x86-64 build; ARM64 builds are tagged "-3.12-arm64".
-                foreach ($version in '3.12', '3.13', '3.11') {
+                foreach ($version in '3.12', '3.13', '3.14') {
                     $path = & py "-$version" -c $versionCheck 2>$null
                     if ($LASTEXITCODE -eq 0 -and $path) { return ([string]$path).Trim() }
                 }
@@ -80,7 +79,7 @@
     }
 
     # Both ways install Python for this user only, so no administrator rights are needed.
-    Say 'Looking for Python 3.11-3.13'
+    Say 'Looking for Python 3.12-3.14'
     $python = Find-Python
     if (-not $python) {
         if (Get-Command winget -ErrorAction SilentlyContinue) {
@@ -118,7 +117,7 @@
         }
         if (-not $python) {
             $build = if ($arm64) { 'the "Windows installer (64-bit)" (x64, not ARM64) of Python 3.12' } else { 'Python 3.12' }
-            throw "Python 3.11-3.13 is required. Install $build from https://www.python.org/downloads/windows/ (tick `"Add python.exe to PATH`"), then run this command again."
+            throw "Python 3.12-3.14 is required. Install $build from https://www.python.org/downloads/windows/ (tick `"Add python.exe to PATH`"), then run this command again."
         }
     }
     Say "Using $python"
@@ -191,15 +190,44 @@
         Write-Warning "Could not create the Start menu shortcut ($($_.Exception.Message)). Start PhysPlot with: & '$venvPythonw' -m physplot_gui"
     }
 
+    # Right-click "Open with > PhysPlot" for data files (built-in loaders plus every loader
+    # plugin's FILE_EXTENSIONS). Per-user keys only; existing default apps are left alone.
+    $progId = 'PhysPlot.DataFile'
+    try {
+        Say 'Registering PhysPlot in the Open with menu for data files'
+        $classes = 'HKCU:\Software\Classes'
+        $command = "`"$venvPythonw`" -m physplot_gui `"%1`""
+        New-Item -Path "$classes\$progId\shell\open\command" -Force | Out-Null
+        Set-ItemProperty -Path "$classes\$progId" -Name '(default)' -Value 'PhysPlot data file'
+        Set-ItemProperty -Path "$classes\$progId" -Name 'FriendlyTypeName' -Value 'PhysPlot data file'
+        Set-ItemProperty -Path "$classes\$progId\shell\open\command" -Name '(default)' -Value $command
+        $icon = Join-Path $source 'installer\icons\PhysPlot.ico'
+        if (Test-Path $icon) {
+            New-Item -Path "$classes\$progId\DefaultIcon" -Force | Out-Null
+            Set-ItemProperty -Path "$classes\$progId\DefaultIcon" -Name '(default)' -Value $icon
+        }
+        $extensions = & $venvPython -c 'from physplot_gui.app.main_window import data_file_extensions; print(*data_file_extensions())'
+        foreach ($ext in ("$extensions".Trim() -split ' ')) {
+            if (-not $ext) { continue }
+            $key = "$classes\$ext\OpenWithProgids"
+            New-Item -Path $key -Force | Out-Null
+            New-ItemProperty -Path $key -Name $progId -PropertyType String -Value '' -Force | Out-Null
+        }
+    } catch {
+        Write-Warning "Could not register PhysPlot for data files ($($_.Exception.Message))."
+    }
+
     Say 'PhysPlot is installed.'
     Write-Host ''
     Write-Host "  Open it:        Start menu > PhysPlot"
+    Write-Host "  Data files:     right-click a data file > Open with > PhysPlot"
     Write-Host "  Terminal:       & '$venv\Scripts\physplot-gui.exe'"
     Write-Host "  Command line:   & '$venv\Scripts\physplot.exe' run-workflow Sequence.py --input data.csv --output out"
     Write-Host "  Sample data:    $source\test_data"
     Write-Host '  Update:         close PhysPlot, then run the same install command again'
     $uninstall = "Remove-Item -Recurse -Force '$installDir'"
     if ($shortcutPath -and (Test-Path $shortcutPath)) { $uninstall += "; Remove-Item '$shortcutPath'" }
+    $uninstall += "; Remove-Item -Recurse 'HKCU:\Software\Classes\$progId'"
     Write-Host "  Uninstall:      $uninstall"
     Write-Host ''
 }

@@ -12,7 +12,7 @@ curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment
 
 This does three things:
 
-1. **Python.** Finds Python 3.11–3.13 on your Mac. If there is none, it installs
+1. **Python.** Finds Python 3.12–3.14 on your Mac. If there is none, it installs
    Python 3.12 with Homebrew; without Homebrew, it asks you to install Python 3.12
    from [python.org](https://www.python.org/downloads/macos/) and run the command again.
 2. **PhysPlot.** Downloads PhysPlot and installs it with its dependencies into
@@ -41,7 +41,7 @@ irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/indevelopment/script
 
 This does the same three things as on macOS:
 
-1. **Python.** Finds Python 3.11–3.13 (through the `py` launcher or `PATH`). If there
+1. **Python.** Finds Python 3.12–3.14 (through the `py` launcher or `PATH`). If there
    is none, it installs Python 3.12 with `winget`; accept its prompts. Without
    `winget`, it asks you to install Python 3.12 from
    [python.org](https://www.python.org/downloads/windows/) (tick *Add python.exe to
@@ -62,8 +62,8 @@ A classic setup program (`PhysPlot-<version>-Windows-Setup.exe`) can also be bui
 
 ### From source (any system)
 
-PhysPlot needs Python 3.11–3.13. The upper limit comes from the Figure Editor
-(FigureForge), which also keeps numpy below 2.
+PhysPlot needs Python 3.12–3.14. numpy 2.5 and scipy 1.18 need 3.12 or newer; PhysPlot is
+tested up to 3.14.
 
 ```bash
 git clone https://github.com/MShirazAhmad/PhysPlot.git
