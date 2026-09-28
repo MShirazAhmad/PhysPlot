@@ -92,6 +92,37 @@ modules.
 
 ---
 
+# Branches
+
+PhysPlot is developed on three branches. Pick the one that matches how much change you
+want:
+
+| Branch | Channel | Purpose | Who it is for | Documentation |
+| --- | --- | --- | --- | --- |
+| [`main`](https://github.com/MShirazAhmad/PhysPlot/tree/main) | **Stable** | Tested releases. Changes arrive here only after they have been used on `indevelopment`. | Everyday use, teaching, lab work. | [main](https://physplot.readthedocs.io/en/main/) |
+| [`indevelopment`](https://github.com/MShirazAhmad/PhysPlot/tree/indevelopment) | **Development** | The next release. New work is finished and reviewed here; it is the repository's default branch and builds the default documentation. | Trying new features before a release; contributors. | [latest](https://physplot.readthedocs.io/en/latest/) (default) |
+| [`bleedingedge`](https://github.com/MShirazAhmad/PhysPlot/tree/bleedingedge) | **Bleeding edge** | Experiments and the newest features first (for example new plot types and editor tools). It may break; what works well moves on to `indevelopment`. | Early testers who want the newest features and can report problems. | [bleedingedge](https://physplot.readthedocs.io/en/bleedingedge/) |
+
+Changes flow `bleedingedge` → `indevelopment` → `main`.
+
+**Install a particular branch.** The one-command installers below accept the branch in
+`PHYSPLOT_REF`, for example on macOS:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_macos.sh | PHYSPLOT_REF=main bash
+```
+
+and on Windows (PowerShell):
+
+```powershell
+$env:PHYSPLOT_REF='main'; irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/install_windows.ps1 | iex
+```
+
+Replace `main` with `indevelopment` or `bleedingedge` in both places. From source, check
+out the branch with `git clone -b <branch> https://github.com/MShirazAhmad/PhysPlot.git`.
+
+---
+
 # Installation
 
 ## Option 1 — macOS: one command (Recommended on Mac)
