@@ -334,7 +334,7 @@ class CentralTable(QtWidgets.QWidget):
             for column_index, column_name in enumerate(self._column_names):
                 combo = self.table.cellWidget(0, column_index)
                 if isinstance(combo, QtWidgets.QComboBox):
-                    combo.setCurrentText(roles.get(column_name, "Ignore"))
+                    self._fill_role_combo(combo, roles.get(column_name, "Ignore"))
         finally:
             self._loading = False
 
@@ -497,12 +497,52 @@ class CentralTable(QtWidgets.QWidget):
         """
         combo = QtWidgets.QComboBox()
         combo.setObjectName("RoleCombo")
-        combo.addItems(ROLE_OPTIONS)
-        combo.setCurrentText(role)
+        self._fill_role_combo(combo, role)
         combo.currentTextChanged.connect(
             lambda selected_role, col=column_index: self._role_combo_changed(col, selected_role)
         )
         self.table.setCellWidget(0, column_index, combo)
+
+    def set_allowed_roles(self, roles: list[str] | None) -> None:
+        """Offer only ``roles`` in the role dropdowns (``None`` offers every role).
+
+        Set from the selected plot type, so each column's menu lists what that plot can
+        use (for ``contourf``: Ignore, X, Y, Z, Group, Label, Batch Key). A column whose
+        current role is not in the list keeps it; that entry is greyed and its tooltip
+        says the plot type does not use it. No role changes and nothing is emitted.
+
+        :param roles: Role names in menu order, or ``None``.
+        """
+        roles = list(roles) if roles else None
+        if roles == getattr(self, "_allowed_roles", None):
+            return
+        self._allowed_roles = roles
+        self._loading = True
+        try:
+            for column_index in range(len(self._column_names)):
+                combo = self.table.cellWidget(0, column_index)
+                if isinstance(combo, QtWidgets.QComboBox):
+                    self._fill_role_combo(combo, combo.currentText() or "Ignore")
+        finally:
+            self._loading = False
+
+    def _fill_role_combo(self, combo, role: str) -> None:
+        """Fill a role dropdown with the allowed roles (plus ``role`` if it is not one)."""
+        allowed = getattr(self, "_allowed_roles", None) or ROLE_OPTIONS
+        items = [option for option in ROLE_OPTIONS if option in allowed]
+        combo.blockSignals(True)
+        combo.clear()
+        combo.addItems(items)
+        if role not in items:
+            combo.addItem(role)
+            index = combo.count() - 1
+            combo.setItemData(index, QtGui.QBrush(QtGui.QColor("#94a3b8")), QtCore.Qt.ItemDataRole.ForegroundRole)
+            combo.setItemData(index, "Not used by the selected plot type", QtCore.Qt.ItemDataRole.ToolTipRole)
+        combo.setCurrentText(role)
+        unused = role not in items
+        combo.setToolTip("Not used by the selected plot type" if unused else "")
+        combo.setStyleSheet("color: #94a3b8;" if unused else "")
+        combo.blockSignals(False)
 
     def _role_combo_changed(self, column_index: int, role: str) -> None:
         """Record a role picked in a dropdown and emit :attr:`role_changed`.

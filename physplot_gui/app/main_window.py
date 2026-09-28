@@ -334,6 +334,7 @@ from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
 from physplot.loaders.plugins import plugin_extensions
+from physplot.plotting_modules.gallery import plot_type_info as gallery_plot_type_info, roles_hint as gallery_roles_hint
 from physplot.plotting_modules import PlotterRegistry
 from physplot.user_paths import (
     bundled_plugin_dir,
@@ -413,6 +414,11 @@ ROLE_LABELS = {
     "label": "Label",
     "batch_key": "Batch Key",
     "fit_weight": "Fit Weight",
+    "y2": "Y2",
+    "z": "Z",
+    "u": "U",
+    "v": "V",
+    "w": "W",
 }
 
 
@@ -1081,6 +1087,113 @@ class MainWindow(QtWidgets.QMainWindow):
             return list(self._custom_plotters[plotter_id].get("plot_types") or ["publication_ready"])
         dataset = self.state.pp.dataset
         return PlotterRegistry.default().list_plot_types(plotter_id, dataset) if plotter_id else []
+
+    def plot_type_categories(self, plotter_id: str) -> list[dict] | None:
+        """Return the plotter's plot types grouped into categories, or ``None``.
+
+        The Basic Plotter groups its types like the Matplotlib gallery
+        (:data:`physplot.plotting_modules.gallery.PLOT_CATEGORIES`). Only the types the
+        plotter offers are kept (a subclass such as the Line Plotter offers fewer), and
+        plot-type presets from ``config/plot_types`` go in a last *Presets* category.
+        Plotters without categories return ``None`` and keep the flat Plot Type menu.
+
+        :param plotter_id: Id of the selected plotter.
+        :returns: ``[{"name": str, "types": [{"id", "label", "description"}, ...]}, ...]``.
+        """
+        if not plotter_id or plotter_id in self._custom_plotters:
+            return None
+        registry = PlotterRegistry.default()
+        plotter = registry.get(plotter_id)
+        categories = getattr(plotter, "plot_categories", None)
+        if not categories:
+            return None
+        offered = self.plot_type_entries(plotter_id)
+        grouped, seen = [], set()
+        for category in categories:
+            types = [dict(entry) for entry in category["types"] if entry["id"] in offered]
+            seen.update(entry["id"] for entry in types)
+            if types:
+                grouped.append({"name": category["name"], "types": types})
+        presets = [
+            {"id": entry, "label": entry, "description": "Plot type preset from config/plot_types."}
+            for entry in offered
+            if entry not in seen
+        ]
+        if presets:
+            grouped.append({"name": "Presets", "types": presets})
+        return grouped if sum(len(c["types"]) for c in grouped) > 1 else None
+
+    def _plot_type_roles(self, plotter_id: str, plot_type: str) -> dict | None:
+        """Return the catalogue entry (roles, optional, label, description) of a plot type."""
+        if not plotter_id or plotter_id in self._custom_plotters or not plot_type:
+            return None
+        try:
+            base_type, _ = PlotterRegistry.default().resolve_plot_type(plotter_id, plot_type, {})
+        except Exception:
+            base_type = plot_type
+        if not getattr(PlotterRegistry.default().get(plotter_id), "plot_categories", None):
+            return None
+        return gallery_plot_type_info(base_type)
+
+    def plot_type_selected(self, plotter_id: str, plot_type: str) -> dict:
+        """Limit the table's role menus to the roles a plot type uses; return its hint.
+
+        Called by Simple Mode whenever **Plot Type** changes (also during refreshes); it
+        never changes a role. For a catalogued plot type the role menus offer ``Ignore``,
+        the roles it uses, and ``Group``, ``Label`` and ``Batch Key``; a column keeps a
+        role the plot type does not use (shown greyed as "not used by this plot type").
+        Other plotters offer every role.
+
+        :returns: ``{"hint": "Uses: X, Y, Z", "description": ...}`` (empty for other plotters).
+        """
+        info = self._plot_type_roles(plotter_id, plot_type)
+        table = getattr(self, "central_table", None)  # not built yet while panels are created
+        if info is None:
+            if table is not None:
+                table.set_allowed_roles(None)
+            return {"hint": "", "description": ""}
+        allowed = ["Ignore", *info["roles"], *info["optional"], "Group", "Label", "Batch Key"]
+        if table is not None:
+            table.set_allowed_roles(list(dict.fromkeys(allowed)))
+        return {"hint": gallery_roles_hint(info["id"]), "description": info.get("description", "")}
+
+    def assign_roles_for_plot_type(self, plotter_id: str, plot_type: str) -> list[tuple[str, str]]:
+        """Give free columns the roles a plot type still needs, in table order.
+
+        Called when the user picks a category or plot type. Each required role no column
+        has yet goes to the next column whose role is ``Ignore``: a numeric column for
+        X, Y, Z and the other axis roles, a text column (or any free column) for Label and
+        Group. Each assignment goes through :meth:`set_column_role`, so it is recorded in
+        the protocol like a role picked by hand. Nothing happens for other plotters.
+
+        :returns: The ``(column, role)`` pairs assigned.
+        """
+        info = self._plot_type_roles(plotter_id, plot_type)
+        dataset = self.state.pp.dataset
+        if info is None or dataset is None:
+            return []
+        self.sync_table_to_backend()
+        dataframe = dataset.dataframe
+        assigned = []
+        for role in info["roles"]:
+            roles = self.state.roles
+            if role in roles.values():
+                continue
+            free = [column for column in dataframe.columns if roles.get(column, "Ignore") == "Ignore"]
+            numeric = [c for c in free if pd.to_numeric(dataframe[c], errors="coerce").notna().any()]
+            text = [c for c in free if c not in numeric]
+            pool = (text or free) if role in ("Label", "Group") else numeric
+            if not pool:
+                continue
+            self.set_column_role(pool[0], role)
+            assigned.append((pool[0], role))
+        if assigned:
+            self._refresh_all()
+            self.status.set_message(
+                "Roles set for " + (info.get("label") or plot_type) + ": "
+                + ", ".join(f"{column} → {role}" for column, role in assigned)
+            )
+        return assigned
 
     def style_module_entries(self) -> list[dict]:
         """Return the entries of the Simple Mode *Template* dropdown.
@@ -3209,6 +3322,11 @@ class MainWindow(QtWidgets.QMainWindow):
             "Label": "label",
             "Batch Key": "batch_key",
             "Fit Weight": "fit_weight",
+            "Y2": "y2",
+            "Z": "z",
+            "U": "u",
+            "V": "v",
+            "W": "w",
         }.get(role, role)
 
     @staticmethod

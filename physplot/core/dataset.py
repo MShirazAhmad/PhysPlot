@@ -28,8 +28,13 @@ VALID_ROLES = {
     "Label",
     "Batch Key",
     "Fit Weight",
+    "Y2",
+    "Z",
+    "U",
+    "V",
+    "W",
 }
-SINGLETON_ROLES = {"X", "Y", "X Error", "Y Error", "Fit Weight"}
+SINGLETON_ROLES = {"X", "Y", "X Error", "Y Error", "Fit Weight", "Y2", "Z", "U", "V", "W"}
 
 
 @dataclass
@@ -269,6 +274,11 @@ def _normalize_role(role: str) -> str:
         "fit_weight": "Fit Weight",
         "weight": "Fit Weight",
         "ignore": "Ignore",
+        "y2": "Y2",
+        "z": "Z",
+        "u": "U",
+        "v": "V",
+        "w": "W",
     }
     normalized = mapping.get(str(role).strip().lower(), str(role).strip())
     if normalized not in VALID_ROLES:

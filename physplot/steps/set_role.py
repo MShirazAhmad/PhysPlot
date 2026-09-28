@@ -21,6 +21,11 @@ ROLE_FIELDS = (
     ("yerr", "Y error column"),
     ("group", "Group column"),
     ("label", "Label column"),
+    ("y2", "Y2 column"),
+    ("z", "Z column"),
+    ("u", "U column"),
+    ("v", "V column"),
+    ("w", "W column"),
 )
 
 

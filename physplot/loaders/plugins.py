@@ -38,6 +38,11 @@ ROLE_NAMES = {
     "y-error": "Y Error",
     "group": "Group",
     "label": "Label",
+    "y2": "Y2",
+    "z": "Z",
+    "u": "U",
+    "v": "V",
+    "w": "W",
 }
 
 

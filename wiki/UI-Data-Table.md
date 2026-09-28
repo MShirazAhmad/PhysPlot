@@ -36,6 +36,9 @@ from it and writes to it. Every edit you make here is also recorded in the proto
 | **X** | Horizontal axis. Only one column can be X; choosing X for another column moves it. |
 | **Y** | Vertical axis, and the default **Input** of the Mathematical Transformation panel. Only one column can be Y. |
 | **X Error** / **Y Error** | Error-bar sizes, used by the Error Bar Plotter. One column each. |
+| **Y2** | A second Y series: fill between, stacked and grouped bars, twin axes, second histogram, cross-correlation. One column only. |
+| **Z** | The value over X and Y: colour for images, contours and surfaces, height in 3D. One column only. |
+| **U** / **V** / **W** | Vector components for quiver, barbs and streamplot (U, V) and 3D quiver (U, V, W). One column each. |
 | **Group** | Splits rows into series by value, used by the Overlay and Subplot Grid plotters. |
 | **Label** | Splits rows into series like **Group** when no Group column is set. |
 | **Batch Key** | Stored with the data for batch workflows. No built-in plotter uses it yet. |

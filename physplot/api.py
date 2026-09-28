@@ -63,6 +63,11 @@ class PhysPlot:
             "label": "Label",
             "batch_key": "Batch Key",
             "fit_weight": "Fit Weight",
+            "y2": "Y2",
+            "z": "Z",
+            "u": "U",
+            "v": "V",
+            "w": "W",
         }
         for role, column_reference in roles.items():
             if column_reference is not None:

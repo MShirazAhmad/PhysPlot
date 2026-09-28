@@ -148,15 +148,15 @@ def test_plot_type_choice_survives_window_refresh(monkeypatch):
     monkeypatch.setattr(window, "_open_figure_editor", lambda figure: None)
 
     panel.plotter.setCurrentIndex(panel.plotter.findData("basic"))
-    panel.plot_type.setCurrentText("line")
+    assert panel.select_plot_type("line")
     panel._generate_plot()
 
     # Generating (and any other table change) refreshes the plotter lists.
     assert window.state.timeline[-1]["details"] == "Create basic line"
-    assert panel.plot_type.currentText() == "line"
+    assert panel.current_plot_type() == "line"
 
     # A plotter that does not offer the previous type falls back to its first type.
     panel.plotter.setCurrentIndex(panel.plotter.findData("histogram"))
-    assert panel.plot_type.currentText() == "histogram"
+    assert panel.current_plot_type() == "histogram"
     window.close()
     app.processEvents()

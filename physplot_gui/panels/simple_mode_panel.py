@@ -650,7 +650,17 @@ class SimpleModePanel(QtWidgets.QWidget):
 
         self.plotter = AutoWidthComboBox()
         self.plotter.currentIndexChanged.connect(self._plotter_changed)
+        # Category (the Matplotlib gallery sections, for the Basic Plotter) and Plot Type.
+        self.plot_category = AutoWidthComboBox()
+        self.plot_category.setToolTip("Plot category, as in the Matplotlib gallery")
+        self.plot_category.currentIndexChanged.connect(self._category_changed)
+        self.plot_category.activated.connect(lambda _index: self._plot_type_chosen())
         self.plot_type = AutoWidthComboBox()
+        self.plot_type.currentIndexChanged.connect(self._plot_type_changed)
+        self.plot_type.activated.connect(lambda _index: self._plot_type_chosen())
+        self.plot_roles_hint = QtWidgets.QLabel("")
+        self.plot_roles_hint.setStyleSheet("color: #475569;")
+        self.plot_roles_hint.setWordWrap(True)
         self.style_module = AutoWidthComboBox()
         self.fit_enabled = QtWidgets.QCheckBox("LSQ fit")
         self.fit_expression = QtWidgets.QLineEdit("a*x + b")
@@ -685,14 +695,18 @@ class SimpleModePanel(QtWidgets.QWidget):
         # Left column: what to plot.
         layout.addWidget(QtWidgets.QLabel("Plotter Module:"), 1, 0)
         layout.addWidget(self.plotter, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Plot Type:"), 2, 0)
-        layout.addWidget(self.plot_type, 2, 1)
-        layout.addWidget(QtWidgets.QLabel("Template:"), 3, 0)
+        # Category has its own row (hidden with its label for plotters without categories).
+        self.plot_category_label = QtWidgets.QLabel("Category:")
+        layout.addWidget(self.plot_category_label, 2, 0)
+        layout.addWidget(self.plot_category, 2, 1)
+        layout.addWidget(QtWidgets.QLabel("Plot Type:"), 3, 0)
+        layout.addWidget(self.plot_type, 3, 1)
+        layout.addWidget(QtWidgets.QLabel("Template:"), 4, 0)
         style_layout = QtWidgets.QHBoxLayout()
         style_layout.setSpacing(6)
         style_layout.addWidget(self.style_module, 1)
         style_layout.addWidget(reload_styles_button)
-        layout.addLayout(style_layout, 3, 1)
+        layout.addLayout(style_layout, 4, 1)
 
         # Right column: optional least-squares fit.
         fit_layout = QtWidgets.QHBoxLayout()
@@ -727,7 +741,7 @@ class SimpleModePanel(QtWidgets.QWidget):
         button_layout.setSpacing(8)
         button_layout.addWidget(generate_button, 1)
         button_layout.addWidget(export_button, 1)
-        layout.addLayout(button_layout, 4, 0, 1, 2)
+        layout.addLayout(button_layout, 5, 0, 1, 2)
         # Where Generate Plot opens the figure: the simple plot window, or straight in the
         # Advanced Figure Editor.
         self.advanced_editor = QtWidgets.QCheckBox("Advanced Figure Editor")
@@ -739,7 +753,8 @@ class SimpleModePanel(QtWidgets.QWidget):
         self.advanced_editor.setChecked(bool(getattr(self.actions, "open_in_figure_editor", False)))
         if hasattr(self.actions, "set_open_in_figure_editor"):
             self.advanced_editor.toggled.connect(self.actions.set_open_in_figure_editor)
-        layout.addWidget(self.advanced_editor, 5, 0, 1, 2)
+        layout.addWidget(self.advanced_editor, 6, 0, 1, 2)
+        layout.addWidget(self.plot_roles_hint, 5, 2, 2, 2, QtCore.Qt.AlignmentFlag.AlignTop)
         layout.setColumnStretch(1, 2)
         layout.setColumnStretch(3, 3)
         self.refresh_styles()
@@ -964,24 +979,107 @@ class SimpleModePanel(QtWidgets.QWidget):
         return str(path) if path else None
 
     def _plotter_changed(self) -> None:
-        """Refill **Plot Type** for the plotter selected in **Plotter Module**.
+        """Refill **Category** and **Plot Type** for the selected plotter module.
 
         Connected to the plotter menu's ``currentIndexChanged`` and called by
-        :meth:`refresh_plotters`. The menu is cleared and filled from
-        ``actions.plot_type_entries(plotter_id)``; it stays empty when no
-        plotter is selected. The previous plot type stays selected when the
-        new list still offers it, so a refresh after a transformation or a
-        generated plot does not reset the user's choice.
+        :meth:`refresh_plotters`. When the plotter groups its plot types
+        (``actions.plot_type_categories``, the Matplotlib gallery sections for the
+        Basic Plotter) the **Category** menu is shown and **Plot Type** lists that
+        category's types by their Matplotlib call; otherwise **Category** is hidden
+        and **Plot Type** lists ``actions.plot_type_entries(plotter_id)``. The
+        previous category and plot type stay selected when still offered, so a
+        refresh does not reset the user's choice.
         """
         plotter_id = self.plotter.currentData()
-        current = self.plot_type.currentText()
-        self.plot_type.clear()
+        current = self.current_plot_type()
+        current_category = self.plot_category.currentText()
+        categories = self.actions.plot_type_categories(plotter_id) if plotter_id else None
+        self._categories = categories or []
+        self.plot_category.blockSignals(True)
+        self.plot_category.clear()
+        for category in self._categories:
+            self.plot_category.addItem(category["name"])
+        self.plot_category.blockSignals(False)
+        self.plot_category.setVisible(len(self._categories) > 1)
+        self.plot_category_label.setVisible(len(self._categories) > 1)
         if not plotter_id:
+            self.plot_type.clear()
             return
-        self.plot_type.addItems(self.actions.plot_type_entries(plotter_id))
-        index = self.plot_type.findText(current)
-        if index >= 0:
-            self.plot_type.setCurrentIndex(index)
+        if self._categories:
+            target = next(
+                (c["name"] for c in self._categories if any(t["id"] == current for t in c["types"])),
+                current_category if self.plot_category.findText(current_category) >= 0 else self._categories[0]["name"],
+            )
+            self.plot_category.blockSignals(True)
+            self.plot_category.setCurrentText(target)
+            self.plot_category.blockSignals(False)
+            self._fill_plot_types(current)
+        else:
+            self.plot_type.blockSignals(True)
+            self.plot_type.clear()
+            for entry in self.actions.plot_type_entries(plotter_id):
+                self.plot_type.addItem(entry, entry)
+            index = self.plot_type.findData(current)
+            self.plot_type.setCurrentIndex(index if index >= 0 else 0)
+            self.plot_type.blockSignals(False)
+            self._plot_type_changed()
+
+    def _fill_plot_types(self, keep=None) -> None:
+        """Fill **Plot Type** with the selected category's types (label shown, id stored)."""
+        category = next((c for c in self._categories if c["name"] == self.plot_category.currentText()), None)
+        self.plot_type.blockSignals(True)
+        self.plot_type.clear()
+        for entry in (category or {}).get("types", []):
+            self.plot_type.addItem(entry["label"], entry["id"])
+            self.plot_type.setItemData(
+                self.plot_type.count() - 1, entry.get("description", ""), QtCore.Qt.ItemDataRole.ToolTipRole
+            )
+        index = self.plot_type.findData(keep) if keep else -1
+        self.plot_type.setCurrentIndex(index if index >= 0 else 0)
+        self.plot_type.blockSignals(False)
+        self._plot_type_changed()
+
+    def _category_changed(self) -> None:
+        """Show the plot types of the category chosen in **Category**."""
+        if getattr(self, "_categories", None):
+            self._fill_plot_types()
+
+    def _plot_type_changed(self) -> None:
+        """Show which columns the plot type uses and limit the table's role menus to them.
+
+        Runs on every change, including refreshes: it never changes roles itself.
+        """
+        plot_type = self.current_plot_type()
+        info = self.actions.plot_type_selected(self.plotter.currentData(), plot_type) if plot_type else None
+        hint = (info or {}).get("hint", "")
+        self.plot_roles_hint.setText(hint)
+        self.plot_type.setToolTip((info or {}).get("description", "") or hint)
+
+    def _plot_type_chosen(self) -> None:
+        """The user picked a category or plot type: fill in the roles it needs.
+
+        Free numeric columns (role Ignore) get the roles the plot type still lacks,
+        recorded as protocol rows, so the plot can be generated straight away.
+        """
+        plot_type = self.current_plot_type()
+        if plot_type:
+            self.actions.assign_roles_for_plot_type(self.plotter.currentData(), plot_type)
+
+    def current_plot_type(self) -> str:
+        """Return the id of the selected plot type (for example ``"contourf"``)."""
+        return self.plot_type.currentData() or self.plot_type.currentText()
+
+    def select_plot_type(self, plot_type: str) -> bool:
+        """Select ``plot_type`` by id, switching **Category** if needed. Returns success."""
+        for category in getattr(self, "_categories", []):
+            if any(t["id"] == plot_type for t in category["types"]):
+                self.plot_category.setCurrentText(category["name"])
+                break
+        index = self.plot_type.findData(plot_type)
+        if index < 0:
+            return False
+        self.plot_type.setCurrentIndex(index)
+        return True
 
     def _fit_style_changed(self) -> None:
         """Copy the chosen **Fit Style** preset into the **Fit Line** controls.
@@ -1043,7 +1141,7 @@ class SimpleModePanel(QtWidgets.QWidget):
         """
         self.actions.generate_module_plot(
             self.plotter.currentData(),
-            self.plot_type.currentText(),
+            self.current_plot_type(),
             self.current_style_module(),
             fit_config=self._fit_config(),
         )

@@ -100,7 +100,7 @@ The window below has an XRD scan loaded (`test_data/XRD/schema1.5_scan.XRDML`).
    Double-click a header to rename the column. Right-click it to rename, copy,
    paste or delete the column.
 3. **Role row.** Each column's dropdown sets its role: `Ignore`, `X`, `Y`,
-   `X Error`, `Y Error`, `Group`, `Label`, `Batch Key` or `Fit Weight`. Loaders
+   `X Error`, `Y Error`, `Y2`, `Z`, `U`, `V`, `W`, `Group`, `Label`, `Batch Key` or `Fit Weight`. Loaders
    suggest roles. Here `2Theta` is X and `Intensity` is Y.
 4. **Data cells.** Values can be edited, pasted (⌘V / Ctrl+V) or cleared.
    Right-click a row number to copy, paste or delete rows. Every edit is recorded
