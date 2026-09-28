@@ -81,8 +81,9 @@ its own window with the Matplotlib toolbar (zoom, pan, save).
 A *Generate Plot* step is recorded, holding the plotter, plot type and any LSQ fit
 settings. Every bulk output will get this same plot.
 
-> The **Basic Plotter** would open the plot in the Figure Editor instead. Neither
-> Figure Editor edits nor the **Template** choice are recorded, so they don't appear
+> **Advanced Styling…** in the plot window (or the **Advanced Figure Editor** tick box)
+> opens the plot in the Figure Editor. Neither Figure Editor edits nor the **Template**
+> choice are recorded, so they don't appear
 > in replays or bulk outputs. See [Figure Editor](UI-Figure-Editor).
 
 ## 5. Review the protocol

@@ -51,7 +51,13 @@ in the generated figure, and the fit configuration is saved in the
 Built-in plotter modules
 ------------------------
 
-- **Basic Plotter**: ``scatter``, ``line``, ``scatter_line``
+- **Basic Plotter**: 84 plot types in the Matplotlib gallery's categories (Lines,
+  bars and markers; Statistics; Images, contours and fields; Pie and polar charts; 3D
+  plotting; Specialty plots), from ``scatter`` and ``line`` to ``contourf``,
+  ``plot_surface`` and ``radar``. Choose a **Category**, then a **Plot Type**; the
+  table's role menus then offer only the roles it uses (X, Y, Y2, Z, U, V, W, errors,
+  Group, Label) and picking it fills them in. See the *Plotter Module* UI reference for
+  the full list.
 - **Histogram Plotter**: ``histogram``, ``density_histogram``
 - **Scatter Plotter**: ``scatter``
 - **Line Plotter**: ``line``

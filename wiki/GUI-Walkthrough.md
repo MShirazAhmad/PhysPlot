@@ -85,17 +85,20 @@ Set the `Intensity_bg` role to **Y** (and `Intensity` to **Ignore**), then confi
 1. **Plotter Module.** `Basic Plotter` here. Others include Histogram, Error Bar,
    Overlay, Subplot Grid, Nanoindentation, Oliver-Pharr and your own modules from
    `config/plotter_modules/`.
-2. **Plot Type.** `line` for a diffractogram (`scatter`, `line` or `scatter_line` for
-   Basic Plotter).
+2. **Category** and **Plot Type.** *Lines, bars and markers* → `plot(x, y) – line` for a
+   diffractogram. The Basic Plotter has 84 plot types in the Matplotlib gallery's
+   categories; picking one sets the table's roles to what it uses.
 3. **Template.** Applies a saved style (fonts, sizes, colours). **Reload** re-reads
    `config/templates/`.
 4. **LSQ fit.** Tick to overlay a least-squares fit. Enter **Fit Function** (for example
    `a*x + b`), **Params / Initial** guesses, **Fit Style** and **Fit Line** (label, line
    style, width, legend).
-5. **Generate Plot.** Renders the plot and opens it in the Figure Editor.
+5. **Generate Plot.** Renders the plot and opens it in a plot window. Its
+   **Advanced Styling…** button opens the same figure in the Figure Editor (or tick
+   **Advanced Figure Editor** to open plots there directly).
 6. **Export Plot.** Saves the current figure to an image file.
 
-The **Figure Editor** (FigureForge) opens in its own window:
+The **Figure Editor** opens inside PhysPlot and edits the plot window's figure directly:
 
 ![Figure Editor window](images/walkthrough/walk_10_figure_editor.png)
 

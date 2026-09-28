@@ -5,11 +5,11 @@ Prerequisites
 -------------
 
 - Python 3.12, 3.13 or 3.14 (numpy 2.5 and scipy 1.18 need 3.12 or newer). The
-  Figure Editor is PhysPlot's own copy of FigureForge and installs with PhysPlot.
+  Figure Editor is built into PhysPlot.
 - pip
 
-Python 3.12 is the recommended default because the Qt/FigureForge dependency
-stack has reliable wheels on macOS and Windows. PhysPlot is not yet published on
+Python 3.12 is the recommended default because the PyQt6 and scientific
+dependency stack has reliable wheels on macOS and Windows. PhysPlot is not yet published on
 PyPI; install it with the one-command installers below (macOS or Windows), the
 Windows setup program, or from source.
 

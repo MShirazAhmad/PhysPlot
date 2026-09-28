@@ -58,7 +58,7 @@ of the window on Windows and Linux.
 
 | Item | Shortcut | What it does |
 | --- | --- | --- |
-| **Generate Plot** | Ctrl+G | Plots the **X** and **Y** columns with the Basic Plotter as a scatter plot, applies the selected Template, and opens the result in the [Figure Editor](UI-Figure-Editor). It records a *Generate Plot* step. For another plotter or plot type, use the [Plotter Module](UI-Plotter-Module) panel. |
+| **Generate Plot** | Ctrl+G | Plots the **X** and **Y** columns with the Basic Plotter as a scatter plot, applies the selected Template, and opens the result in a plot window (or straight in the [Figure Editor](UI-Figure-Editor) when **Advanced Figure Editor** is ticked). It records a *Generate Plot* step. For another plotter or plot type, use the [Plotter Module](UI-Plotter-Module) panel. |
 | **Update Integrated Preview** | — | Refreshes the Plotter Module and plot-type lists for the current data and adds a note row to the protocol table. It does not create a replayable step. |
 
 ### Help

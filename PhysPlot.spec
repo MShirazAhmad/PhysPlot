@@ -20,6 +20,8 @@ for root, dirs, files in os.walk('config'):
         datas.append((os.path.join(root, name), root))
 hiddenimports = []
 datas += collect_data_files('physplot')
+# The Figure Editor's structure.json, icons and plugin images live in physplot_gui.
+datas += collect_data_files('physplot_gui')
 hiddenimports += collect_submodules('physplot')
 hiddenimports += collect_submodules('physplot_gui')
 

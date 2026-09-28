@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import (
     QMenu,
     QTabWidget,
     QLabel,
+    QSizePolicy,
 )
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QDesktopServices, QIcon, QAction, QPixmap
@@ -229,13 +230,15 @@ class MainWindow(QMainWindow):
         # names the selected part and, where parts overlap, its place in the cycle.
         self.click_guide = QLabel(CLICK_GUIDE)
         self.click_guide.setWordWrap(True)
+        # A thin strip: never take height from the figure.
+        self.click_guide.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
         self.click_guide.setStyleSheet(
             "background: #eef4fd; color: #0f3a73; border: 1px solid #c9dcf5;"
             "border-radius: 4px; padding: 6px 10px;"
         )
         self.fm.selectionMessage.connect(self.show_click_guide)
-        figure_layout.addWidget(self.click_guide)
-        figure_layout.addWidget(self.fm.canvas)
+        figure_layout.addWidget(self.click_guide, 0)
+        figure_layout.addWidget(self.fm.canvas, 1)  # the figure takes all spare height
         self.tab_widget.addTab(figure_widget, "New Figure")
 
         self.fe = self.fm.fe

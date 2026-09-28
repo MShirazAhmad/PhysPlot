@@ -53,10 +53,10 @@ names what is selected, for example *Line2D - fit (1 of 3, click again for the n
 
 | Menu | Items |
 | --- | --- |
-| **File** | **New** (Ctrl+N), **Open…** (Ctrl+O), **Open Recent**, **Save** (Ctrl+S) and **Save As…** (Ctrl+Shift+S) as an editable figure file (`.pkl`, reopenable in the editor). **Export** (Ctrl+E) writes an image (PNG, PDF, SVG, …) with a DPI you choose. **Quit** (Ctrl+Q). |
+| **File** | **New** (Ctrl+N), **Open…** (Ctrl+O), **Open Recent**, **Save** (Ctrl+S) and **Save As…** (Ctrl+Shift+S) as an editable figure file (`.pkl`, reopenable in the editor). **Export Figure…** (Ctrl+E) and **Export Style…** (Ctrl+Shift+E), described under the toolbar above. **Quit** (Ctrl+Q). |
 | **Edit** | **Open in Matplotlib**, **Copy Figure** (Ctrl+C, as an image), **Delete Item** (Del, removes the selected part), **Preferences**. |
-| **Figure Editor** | PhysPlot's tools: **Fitting ▸ Add Fit Function** and **PhysPlot ▸ Save as Template** (below), plus FigureForge's **Open Plugins Folder…**, **Reload Plugins**, **Plugins Documentation** and **New Plugin**. |
-| **Help** | FigureForge's **About**, **Help** and **Report Bug**. |
+| **Figure Editor** | PhysPlot's tools: **Fitting ▸ Add Fit Function** and **PhysPlot ▸ Save as Template** (below), plus **Open Plugins Folder…**, **Reload Plugins**, **Plugins Documentation** (PhysPlot docs) and **New Plugin**. |
+| **Help** | **PhysPlot Documentation** and **Report an Issue** (PhysPlot's GitHub issues). |
 
 To keep an edited figure, use **File → Export** (image) or **File → Save** (editable)
 here. The main window's **Export Plot** saves PhysPlot's own copy, without your

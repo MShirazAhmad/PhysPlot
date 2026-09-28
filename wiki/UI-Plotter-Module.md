@@ -202,7 +202,7 @@ grouped the same way. Pick a **Category**, then a **Plot Type** (shown as the Ma
 ## Plotters and plot types
 
 ![Plotter Module menu](images/ui/ui_plotter_menu.png)
-![Plot Type menu for the Basic Plotter](images/ui/ui_plot_type_menu.png)
+![Category (1) and Plot Type (2) for the Basic Plotter](images/ui/ui_plot_type_menu.png)
 
 | Plotter | Plot types | Needs | Shown for |
 | --- | --- | --- | --- |

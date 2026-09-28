@@ -27,6 +27,10 @@ class ColorButton(QPushButton):
             self.colorChanged.emit(self.color)  # Emit the signal
 
     def update_button_color(self):
+        # PhysPlot: label text in black or white, whichever reads on the swatch, and the
+        # hex code instead of "Choose Color".
+        text = "#000000" if self.color.lightnessF() > 0.55 else "#ffffff"
+        self.setText(self.color.name())
         self.setStyleSheet(
-            f"#color_button {{ background-color: {self.color.name()}; }}"
+            f"#color_button {{ background-color: {self.color.name()}; color: {text}; }}"
         )

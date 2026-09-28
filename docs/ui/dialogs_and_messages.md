@@ -59,7 +59,7 @@ Config Folder** opens it.
 | **Role update failed** | Changing a role dropdown | Rare. The role could not be stored; try again after the table has data. |
 | **Column rename failed** | Renaming a column | The backend rejected the new name. |
 | **Rename Column** *(warning)* | Rename dialog | *Column name cannot be empty.* or *Column '…' already exists.* → choose another name. |
-| **Plot failed** | Generate Plot | *No column has role 'X'.* → set roles. *Column '…' does not contain numeric data.* → choose numeric columns. LSQ messages → see [Plotter Module](plotter_module.md#when-plotting-fails). *Figure Editor is not installed…* → install FigureForge or use another plotter. |
+| **Plot failed** | Generate Plot | *No column has role 'X'.* → set roles. *Column '…' does not contain numeric data.* → choose numeric columns. LSQ messages → see [Plotter Module](plotter_module.md#when-plotting-fails). *No column has role 'Z'.* (or U, V, Y2…) → pick the plot type again so its roles are filled in, or set them in the table. |
 | **Figure Editor failed** | Shortly after Generate Plot with the Basic Plotter | The editor process exited with an error; the text is its error output. See [Troubleshooting](https://github.com/MShirazAhmad/PhysPlot/wiki/Troubleshooting). |
 | **Export plot failed** | Export Plot | *Generate a plot before exporting.* → press Generate Plot first. |
 | **Apply sequence failed** | Apply This Sequence | *Build or import a protocol sequence first.*, or *Row N failed (StepName): error* → fix or delete that row and apply again. |

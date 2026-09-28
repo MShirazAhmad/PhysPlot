@@ -26,6 +26,7 @@ ROLE_FIELDS = (
     ("u", "U column"),
     ("v", "V column"),
     ("w", "W column"),
+    ("ignore", "Column to clear (Ignore)"),
 )
 
 

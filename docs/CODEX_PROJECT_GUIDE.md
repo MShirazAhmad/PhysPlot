@@ -440,8 +440,8 @@ Expected result:
 
 - All backend tests pass.
 - GUI smoke tests pass or skip only when PyQt6 is unavailable.
-- Direct GUI launch succeeds in a Python version supported by the Qt/FigureForge
-  dependency stack; Python 3.12 is the current safe local choice on macOS.
+- Direct GUI launch succeeds on Python 3.12-3.14 (numpy 2.5 and scipy 1.18 need
+  3.12+); Python 3.12 is the current safe local choice on macOS.
 - `twine check` passes for both wheel and source distribution.
 
 ## Release Checklist

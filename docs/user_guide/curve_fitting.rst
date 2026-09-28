@@ -9,9 +9,9 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Adding Fit Functions
 Modern Figure Editor fitting
 ----------------------------
 
-For Basic Plotter output, click **Generate Plot** to open the Figure Editor.
-Select an axes, line, or scatter series and choose **Figure Editor > Fitting >
-Add Fit Function**.
+Click **Generate Plot**, then **Advanced Styling…** in the plot window to open the
+Figure Editor. Select an axes, line, or scatter series (click it on the figure) and
+choose **Figure Editor > Fitting > Add Fit Function**.
 
 The fit dialog accepts a Python-style expression and parameter guesses. Examples:
 

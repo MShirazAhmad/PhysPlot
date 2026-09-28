@@ -52,7 +52,9 @@ Reuse or Run in Bulk
 - Automated batch processing
 - Headless command-line execution
 - Python API
-- FigureForge-powered figure editor
+- 84 Matplotlib plot types in gallery categories, with column roles that follow the plot type
+- Built-in Figure Editor: click any part of a figure to restyle it, export in any format
+- Open data files straight from Finder or Explorer (right-click > Open With > PhysPlot)
 - Plugin-friendly architecture
 
 ---

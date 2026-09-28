@@ -58,10 +58,11 @@ def friendly_name(artist) -> str:
                 name = "Y label"
             elif artist in (ax.title, getattr(ax, "_left_title", None), getattr(ax, "_right_title", None)):
                 name = "Title"
-    if cls == "Rectangle" and axes is None:
-        name = "Figure background"
-    elif cls == "Rectangle" and axes is not None and artist is axes.patch:
-        name = "Plot background"
+    if cls == "Rectangle":
+        if any(artist is ax.patch for ax in getattr(figure, "axes", [])):
+            name = "Plot background"
+        elif figure is not None and artist is figure.patch:
+            name = "Figure background"
     parent_tick = getattr(artist, "_physplot_parent_tick", None)
     if parent_tick is not None:
         if artist in (parent_tick.tick1line, parent_tick.tick2line):

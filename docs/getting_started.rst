@@ -167,7 +167,8 @@ values sit near zero between the peaks.
    :alt: Figure Editor
    :width: 900px
 
-**Figure 8. The Figure Editor (FigureForge).** **Figure Explorer** lists the
+**Figure 8. The Figure Editor.** Open it with **Advanced Styling…** in a plot window;
+click any part of the figure to edit it. **Figure Explorer** lists the
 figure's parts. **Property Inspector** edits titles, labels, legends, axes,
 spines, markers, lines, and fonts. Save the styling with
 **Figure Editor > PhysPlot > Save as Template**, then choose it in Simple Mode's

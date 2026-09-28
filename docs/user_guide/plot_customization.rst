@@ -6,7 +6,10 @@ For a full step-by-step flow, see :ref:`GUI Walkthrough — Generating and Forma
 Figure Editor options
 ---------------------
 
-For Basic Plotter output, PhysPlot opens the Figure Editor. The Figure Editor property inspector lets you control:
+Every plot opens in a plot window; click **Advanced Styling…** in its toolbar (or tick
+**Advanced Figure Editor** under **Generate Plot**) to open it in the Figure Editor, which
+edits the same figure. Click any part of the figure to select it; click the same spot
+again to cycle through overlapping parts. The property inspector lets you control:
 
 - Figure size, DPI, face color, and layout.
 - Axes labels, title, bounds, scale, spines, grid, and tick label styling.

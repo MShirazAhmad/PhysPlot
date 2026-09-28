@@ -26,6 +26,7 @@ on the right. Help/About links live in the native menu bar.
 ```text
 physplot/                  Backend API, datasets, loaders, plotters, steps
 physplot_gui/              PyQt6 desktop GUI
+physplot_gui/figure_editor/ Built-in Figure Editor (PyQt6; started from FigureForge, MIT)
 config/data_importers/     Data Importer loaders (title + load_data)
 config/transformations/    Mathematical Transformation functions (transform)
 config/plotter_modules/    Plotter Modules (plot() or BasePlotter subclasses)
@@ -100,6 +101,20 @@ Discovery lives in `physplot/user_paths.py`, `physplot/plotting_modules/user_mod
   and reflected in the table.
 - Generated workflow files must be normal Python that can run in notebooks or
   headless CLI workflows.
+- Every plot opens in a PhysPlot plot window; its **Advanced Styling…** button (or
+  the **Advanced Figure Editor** tick box) opens the built-in Figure Editor
+  (`physplot_gui/figure_editor`) in the same process, on the same figure. Keep it
+  PyQt6 only (no PySide6) and free of FigureForge branding; keep its `LICENSE`.
+- Basic Plotter plot types come from `physplot/plotting_modules/gallery.py`
+  (`PLOT_CATEGORIES`, grouped like the Matplotlib gallery). Each type lists the
+  roles it reads; the GUI limits the table's role menus to them and fills them in.
+  Other plotters declare `role_requirements`. Keep `scatter` the default type.
+- Column roles live in several places that must stay in step: `VALID_ROLES` and
+  `_normalize_role` (`physplot/core/dataset.py`), `PhysPlot.set_roles`
+  (`physplot/api.py`), `ROLE_FIELDS` (`physplot/steps/set_role.py`), `ROLE_OPTIONS`
+  (`physplot_gui/widgets/column_role_header.py`), and `ROLE_LABELS` / `_role_key`
+  (`physplot_gui/app/main_window.py`). Clearing a role records
+  `SetRoleStep({"ignore": column})`.
 
 ## Package Identity
 

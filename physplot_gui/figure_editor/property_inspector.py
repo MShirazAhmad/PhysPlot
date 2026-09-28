@@ -103,6 +103,8 @@ class PropertyInspector(QWidget):
             self._add_value(value_widget, name, row)
         elif value_type == "multiline":
             value_widget = QPlainTextEdit()
+            # PhysPlot: a few lines tall, so the other properties stay in view.
+            value_widget.setMaximumHeight(72)
             value_widget.setPlainText(value)
             value_widget.textChanged.connect(
                 lambda n=name, w=value_widget: self.on_value_changed(n, w)

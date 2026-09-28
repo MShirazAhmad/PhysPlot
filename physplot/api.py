@@ -68,6 +68,7 @@ class PhysPlot:
             "u": "U",
             "v": "V",
             "w": "W",
+            "ignore": "Ignore",
         }
         for role, column_reference in roles.items():
             if column_reference is not None:

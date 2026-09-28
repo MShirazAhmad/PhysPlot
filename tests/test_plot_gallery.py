@@ -173,3 +173,31 @@ def test_picking_a_plot_type_or_plotter_makes_the_table_roles_follow_it():
     assert panel.plot_roles_hint.text() == "Uses: X, Y, Y Error"
     window.close()
     app.processEvents()
+
+
+def test_cleared_roles_are_recorded_so_replay_matches_the_table():
+    from physplot.steps import SetRoleStep
+
+    frame = pd.DataFrame({"angle": [1.0, 2.0, 3.0], "intensity": [4.0, 5.0, 6.0]})
+    app, window, panel = _gui_window(frame)
+    panel.plotter.setCurrentIndex(panel.plotter.findData("basic"))
+    panel.select_plot_type("scatter")
+    panel._plot_type_chosen()
+    panel.select_plot_type("hist")
+    panel._plot_type_chosen()
+    assert window.state.timeline[-1]["action"] == "Clear Role"
+    steps = [s for s in window.state.pp.workflow if isinstance(s, SetRoleStep)]
+    assert steps[-1].roles == {"ignore": "angle"}
+
+    # Replaying the recorded steps ends with the same roles as the table.
+    from physplot import PhysPlot
+
+    replay = PhysPlot()
+    replay.load(frame, loader="dataframe", dataset_name="grid")
+    for step in steps:
+        step.apply(replay)
+    assert replay.dataset.column_roles == window.state.roles
+    rows = window._sequence_rows_from_steps(steps)
+    assert rows[-1]["action"] == "Clear Role"
+    window.close()
+    app.processEvents()

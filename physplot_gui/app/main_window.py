@@ -419,6 +419,7 @@ ROLE_LABELS = {
     "u": "U",
     "v": "V",
     "w": "W",
+    "ignore": "Ignore",
 }
 
 
@@ -1942,7 +1943,9 @@ class MainWindow(QtWidgets.QMainWindow):
         which then becomes Ignore). For every role except ``Ignore`` a row is recorded with the
         action ``Set <role>``, the details ``Set column as <role>``, the column as target and a
         ``SetRoleStep`` such as ``SetRoleStep({"x": "Time"})`` (role names are converted by
-        :meth:`_role_key`). Choosing ``Ignore`` changes the dataset but records nothing. The
+        :meth:`_role_key`). Choosing ``Ignore`` for a column that had a role records a
+        *Clear Role* row with ``SetRoleStep({"ignore": column})`` so a replay ends with the
+        same roles; for a column that was already Ignore nothing is recorded. The
         role dropdowns are then redrawn from the backend roles and the status bar counts
         updated; :meth:`_refresh_all` is not called, so the new row shows in Build Protocol at
         the next full refresh.
@@ -1954,6 +1957,7 @@ class MainWindow(QtWidgets.QMainWindow):
         :param role: The chosen role label, for example ``"X"`` or ``"Y Error"``.
         """
         try:
+            previous = self.state.roles.get(column, "Ignore")
             self.state.set_role(column, role)
             if role != "Ignore":
                 key = self._role_key(role)
@@ -1962,6 +1966,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     f"Set column as {role}",
                     column,
                     workflow_step=SetRoleStep({key: column}),
+                )
+            elif previous != "Ignore":
+                # Clearing a role is recorded too, so a replay ends with the same roles.
+                self._append_sequence(
+                    "Clear Role",
+                    f"Clear {previous} (set column to Ignore)",
+                    column,
+                    workflow_step=SetRoleStep({"ignore": column}),
                 )
             self.central_table.set_roles(self.state.roles)
             self.status.update_state(self.state)
@@ -3364,6 +3376,7 @@ class MainWindow(QtWidgets.QMainWindow):
             "U": "u",
             "V": "v",
             "W": "w",
+            "Ignore": "ignore",
         }.get(role, role)
 
     @staticmethod
@@ -3380,7 +3393,8 @@ class MainWindow(QtWidgets.QMainWindow):
           :func:`loader_label`), and the file name. When the next step is a ``SetRoleStep``,
           it joins this row and the details end in "(column names and role setup)";
           otherwise "(column names)".
-        * ``SetRoleStep`` with one role: "Set <Role>", "Set column as <Role>", the column.
+        * ``SetRoleStep`` with one role: "Set <Role>", "Set column as <Role>", the column
+          (``{"ignore": column}``: "Clear Role", "Clear role (set column to Ignore)").
           With several roles: "Set Roles", ``<Role>: <column>`` pairs, "Table".
         * ``TransformColumnStep``: "Transform", :func:`transform_label`, ``<input> -> <output>``.
         * ``CalculateColumnStep``: "Calculate", the formula as written, the output column.
@@ -3422,7 +3436,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 roles = {ROLE_LABELS.get(key, key): column for key, column in (step.roles or {}).items()}
                 if len(roles) == 1:
                     (role, column), = roles.items()
-                    row = {"action": f"Set {role}", "details": f"Set column as {role}", "target": str(column)}
+                    if role == "Ignore":
+                        row = {"action": "Clear Role", "details": "Clear role (set column to Ignore)", "target": str(column)}
+                    else:
+                        row = {"action": f"Set {role}", "details": f"Set column as {role}", "target": str(column)}
                 else:
                     pairs = ", ".join(f"{role}: {column}" for role, column in roles.items())
                     row = {"action": "Set Roles", "details": pairs, "target": "Table"}
