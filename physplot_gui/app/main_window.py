@@ -339,7 +339,7 @@ import pandas as pd
 from physplot.qt_compat import QtCore, QtGui, QtWidgets
 from physplot.core.transformations import list_transforms
 from physplot.loaders import list_loaders
-from physplot.loaders.plugins import plugin_extensions
+from physplot.loaders.plugins import plugin_dataframe, plugin_extensions
 from physplot.plotting_modules import PlotterRegistry
 from physplot.user_paths import (
     bundled_plugin_dir,
@@ -432,8 +432,10 @@ def data_file_filter() -> str:
 def loader_label(step) -> str:
     """Return the *Data Loader* menu label for a recorded ``LoadDataStep``.
 
-    A loader plugin is named by its ``DISPLAY_NAME`` (matched on the plugin file name, or the
-    file name itself when the plugin is missing); a built-in loader by its menu name, for
+    A loader plugin is named by its ``title`` (the *Data Loader* label from
+    :func:`~physplot_gui.app.plugin_discovery.discover_fileloaders`, which falls back to the
+    file stem in title case), matched on the plugin file name; when the plugin is missing,
+    the file stem itself is used. A built-in loader is named by its menu name, for
     example ``"auto"`` becomes "Auto Loader". This is the text a live import records, so rows
     rebuilt from a saved sequence read the same as the rows recorded while working.
 
@@ -1211,11 +1213,13 @@ class MainWindow(QtWidgets.QMainWindow):
         Cancelling does nothing.
 
         **Loader plugin** (an entry with a ``module``, from ``config/data_importers``): the
-        plugin's ``load_data(path)`` is called. A returned DataFrame keeps its column names
-        unless the plugin defines ``COLUMN_NAMES`` (or ``column_names``); any other result is
-        turned into an array and named from those names or ``Column N`` (see
-        :meth:`_plugin_column_names`). A 1-D result becomes one column; anything that is not
-        2-D raises "Loader must return a 2D table-like array.". The table is loaded into the
+        plugin's ``load_data(path)`` is called and its result is turned into a table by
+        :func:`physplot.loaders.plugins.plugin_dataframe`, exactly as replays and bulk runs
+        do. A returned DataFrame keeps its own column names (``COLUMN_NAMES`` is ignored);
+        any other result is turned into an array whose columns are named from
+        ``COLUMN_NAMES`` (or ``column_names``), with ``Column N`` for missing names. A 1-D
+        result becomes one column; anything that is not 2-D raises "Loader plugins must
+        return a 2D table.". The table is loaded into the
         backend through the ``dataframe`` loader under the file's stem, the plugin path and
         name are stored in the dataset
         metadata (``loader_plugin``, ``loader_name``), the plugin's ``DEFAULT_COLUMN_ROLES`` are
@@ -1261,21 +1265,8 @@ class MainWindow(QtWidgets.QMainWindow):
             if isinstance(loader, dict) and not loader.get("enabled", True):
                 raise ValueError(f"{loader.get('display_name', 'Selected loader')} is not available yet.")
             if isinstance(loader, dict) and loader.get("module") is not None:
-                loaded = loader["module"].load_data(path)
-                if isinstance(loaded, pd.DataFrame):
-                    table_data = loaded.to_numpy()
-                    column_names = self._plugin_column_names(loader["module"], len(loaded.columns), list(loaded.columns))
-                else:
-                    table_data = np.asarray(loaded)
-                    column_names = self._plugin_column_names(loader["module"], table_data.shape[1] if table_data.ndim > 1 else 1)
-                if table_data.ndim == 1:
-                    table_data = table_data.reshape(-1, 1)
-                if table_data.ndim != 2:
-                    raise ValueError("Loader must return a 2D table-like array.")
-                df = pd.DataFrame(
-                    table_data,
-                    columns=column_names,
-                )
+                # Same table as a replayed LoadDataStep, so recorded column names match.
+                df = plugin_dataframe(loader["module"], loader["module"].load_data(path))
                 self.state.load_dataframe(df, name=Path(path).stem)
                 self.state.pp.dataset.metadata["loader_plugin"] = str(loader.get("path", ""))
                 self.state.pp.dataset.metadata["loader_name"] = loader.get("display_name")
@@ -1343,29 +1334,6 @@ class MainWindow(QtWidgets.QMainWindow):
             normalized = role_map.get(str(role).strip().lower(), str(role).strip())
             if normalized:
                 self.state.set_role(str(column), normalized)
-
-    @staticmethod
-    def _plugin_column_names(module, column_count: int, fallback_names=None) -> list[str]:
-        """Return exactly ``column_count`` column names for data from a loader plugin.
-
-        Names come from the plugin's ``COLUMN_NAMES`` or ``column_names`` attribute (called
-        first when it is a function), otherwise from ``fallback_names``. Each name is converted
-        to text and stripped, and blank names are dropped. Missing trailing names are filled
-        with ``Column N``, where N is the column's position, and surplus names are cut off.
-
-        :param module: The imported loader plugin module.
-        :param column_count: Number of columns the loaded data has.
-        :param fallback_names: Names to use when the plugin declares none, for example the
-            columns of a returned DataFrame.
-        :returns: The column names, one per column.
-        """
-        raw_names = getattr(module, "COLUMN_NAMES", None) or getattr(module, "column_names", None)
-        if callable(raw_names):
-            raw_names = raw_names()
-        names = [str(name).strip() for name in (raw_names or fallback_names or []) if str(name).strip()]
-        if len(names) < column_count:
-            names.extend(f"Column {index}" for index in range(len(names) + 1, column_count + 1))
-        return names[:column_count]
 
     def import_folder(self) -> None:
         """Ask for a folder and report the choice in the status bar.

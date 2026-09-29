@@ -67,7 +67,8 @@ def load_data(file_path):
 ```
 
 - `load_data` returns a DataFrame or a 2D table.
-- `COLUMN_NAMES` and `DEFAULT_COLUMN_ROLES` name the columns and preset their roles.
+- `COLUMN_NAMES` names the columns of a 2D table; a DataFrame keeps its own names.
+  `DEFAULT_COLUMN_ROLES` presets the roles.
 - `FILE_EXTENSIONS` lets **Auto Loader** pick this plugin for those files, so they
   load the same way in the GUI, in replayed and exported sequences, and in bulk runs.
   Without it, choose the loader in **Data Loader** by hand.

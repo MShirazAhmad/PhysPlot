@@ -7,8 +7,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 pytest.importorskip("PyQt6")
 
+from physplot import PhysPlot
 from physplot.qt_compat import QtWidgets
 from physplot.steps import LoadDataStep, PlotModuleStep, SetRoleStep, TransformColumnStep
+from physplot.steps.load_data import load_input
+from physplot.workflow import load_workflow_source
 from physplot_gui.app.main_window import MainWindow
 
 
@@ -217,6 +220,61 @@ def test_simple_mode_plugin_transform_is_recorded_and_replays(tmp_path, monkeypa
 
     assert window.last_error is None
     assert window.central_table.to_dataframe()["Voltage_sq"].tolist() == [16.5, 25.5]
+
+    window.close()
+    app.quit()
+
+
+# Returns a DataFrame and also declares COLUMN_NAMES, which a DataFrame ignores.
+DATAFRAME_LOADER = '''
+import pandas as pd
+
+title = "Frame loader"
+COLUMN_NAMES = ["t", "s"]
+DEFAULT_COLUMN_ROLES = ["X", "Y"]
+
+
+def load_data(file_path):
+    return pd.read_csv(file_path)
+'''
+
+
+def test_dataframe_loader_import_recorded_in_gui_replays_on_another_file(tmp_path, monkeypatch):
+    importers = tmp_path / "PhysPlotUser" / "config" / "data_importers"
+    importers.mkdir(parents=True)
+    (importers / "frame_loader.py").write_text(DATAFRAME_LOADER, encoding="utf-8")
+    monkeypatch.setenv("PHYSPLOT_USER_DIR", str(tmp_path / "PhysPlotUser"))
+    first = tmp_path / "first.csv"
+    first.write_text("Time,Signal\n0,1.0\n1,2.0\n", encoding="utf-8")
+    second = tmp_path / "second.csv"
+    second.write_text("Time,Signal\n0,4.0\n1,5.0\n2,6.0\n", encoding="utf-8")
+
+    app = QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
+    window = MainWindow()
+    monkeypatch.setattr(QtWidgets.QFileDialog, "getOpenFileName", staticmethod(lambda *a, **k: (str(first), "")))
+    entry = next(e for e in window.backend_loader_entries() if e["display_name"] == "Frame loader")
+    window.import_data(entry)
+
+    assert window.last_error is None
+    assert window.central_table.column_names()[:2] == ["Time", "Signal"]
+    assert window.state.roles == {"Time": "X", "Signal": "Y"}
+
+    panel = window.mode_manager.panels["Simple"]
+    panel.input_column.setCurrentIndex(panel.input_column.findData("Signal"))
+    panel.function.setCurrentIndex(panel.function.findText("x^2"))
+    panel.output_column.setEditText("Signal_sq")
+    panel._apply()
+    assert window.last_error is None
+
+    # Replay the recorded sequence headlessly on another file, as run-workflow does.
+    steps = load_workflow_source(window.sequence_code_text())
+    assert [type(step) for step in steps] == [LoadDataStep, SetRoleStep, TransformColumnStep]
+    pp = PhysPlot()
+    pp.run_workflow(load_input(pp, second, steps))
+
+    assert list(pp.dataset.dataframe.columns) == ["Time", "Signal", "Signal_sq"]
+    assert pp.dataset.dataframe["Signal_sq"].tolist() == [16.0, 25.0, 36.0]
+    assert pp.dataset.column_roles["Time"] == "X" and pp.dataset.column_roles["Signal"] == "Y"
 
     window.close()
     app.quit()

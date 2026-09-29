@@ -66,9 +66,9 @@ optional least-squares fit)::
     file dialog (built-in types, loader-plugin types such as ``.ras``, or all files).
     A backend loader reads the file through ``PhysPlot.load`` and applies the
     dataset's suggested column roles. A loader plugin's ``load_data(path)`` is
-    called instead; its columns are named from ``COLUMN_NAMES`` or the returned
-    DataFrame's headers (missing names become ``Column N``) and its
-    ``DEFAULT_COLUMN_ROLES`` are applied. The
+    called instead; a returned DataFrame keeps its headers, any other result is
+    named from ``COLUMN_NAMES`` (missing names become ``Column N``), as in
+    replays and bulk runs, and its ``DEFAULT_COLUMN_ROLES`` are applied. The
     table is replaced by the new data and one **File Loader** protocol row is
     recorded that holds a ``LoadDataStep`` plus, when any column has a role
     other than *Ignore*, a ``SetRoleStep``. The status bar shows ``Ready``; an

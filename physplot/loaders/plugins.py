@@ -93,7 +93,12 @@ def load_plugin_module(path):
 
 
 def plugin_dataframe(module, loaded) -> pd.DataFrame:
-    """Turn a plugin's ``load_data`` result into a DataFrame with its column names."""
+    """Turn a plugin's ``load_data`` result into a DataFrame.
+
+    A DataFrame keeps its own column names and ``COLUMN_NAMES`` is ignored; any other
+    result is named from ``COLUMN_NAMES``. The GUI import and every replay go through
+    here, so a recorded sequence finds the same columns in both.
+    """
     if isinstance(loaded, pd.DataFrame):
         return loaded.copy()
     table = np.asarray(loaded)

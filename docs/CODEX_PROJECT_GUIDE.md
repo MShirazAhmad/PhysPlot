@@ -357,18 +357,21 @@ WORKFLOW_STEPS = [
 Personal file loaders live in `config/data_importers/`. A loader can define column names,
 default roles, and allowed plotter metadata. The GUI discovers it automatically.
 
+A returned DataFrame keeps its own column names, so name its columns in `load_data`.
+`COLUMN_NAMES` names the columns of an array or list-of-rows result only; for a
+DataFrame it is ignored. The GUI and replayed sequences apply this rule the same way.
+
 ```python
 # config/data_importers/my_instrument_loader.py
 import pandas as pd
 
-DISPLAY_NAME = "My Instrument Loader"
-COLUMN_NAMES = ["Time", "Signal", "Error", "Sample"]
+title = "My Instrument Loader"
 DEFAULT_COLUMN_ROLES = ["X", "Y", "Y Error", "Group"]
 
 
 def load_data(path):
-    """Return a DataFrame or 2D table-like object."""
-    return pd.read_csv(path)
+    """Return a DataFrame whose column names the sequence steps will use."""
+    return pd.read_csv(path, header=0, names=["Time", "Signal", "Error", "Sample"])
 
 
 def publication_plot(dataset, plot_type="publication_ready", config=None):
