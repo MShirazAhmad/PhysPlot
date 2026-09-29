@@ -51,9 +51,18 @@ The script finds Python 3.12–3.14 through the ``py`` launcher or ``PATH`` (or
 installs Python 3.12 for your user, with ``winget`` or from python.org), downloads PhysPlot and installs it with its
 dependencies into ``%LOCALAPPDATA%\PhysPlot``, and adds a **PhysPlot** shortcut
 to the Start menu. Close PhysPlot and run the same command again to update.
-Uninstall by deleting ``%LOCALAPPDATA%\PhysPlot`` and the Start-menu shortcut;
-your files in ``Documents\PhysPlot`` are kept. Set ``$env:PHYSPLOT_REF`` first
-to install another branch or tag.
+Set ``$env:PHYSPLOT_REF`` first to install another branch or tag.
+
+To uninstall, close PhysPlot and run:
+
+.. code-block:: powershell
+
+   irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_windows.ps1 | iex
+
+It removes PhysPlot, its Start-menu shortcut, the *Open with* entries and its
+settings, and keeps your files in ``Documents\PhysPlot`` and Python. Set
+``$env:PHYSPLOT_REMOVE_USER_FILES = "1"`` and/or ``$env:PHYSPLOT_REMOVE_PYTHON = "1"``
+first to remove those too (removing Python affects other programs that use it).
 
 Install from source
 -------------------

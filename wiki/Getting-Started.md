@@ -56,9 +56,11 @@ This does the same three things as on macOS:
 3. **Shortcut.** Adds **PhysPlot** to the Start menu, with the PhysPlot icon.
 
 - **Update:** close PhysPlot, then run the same command again.
-- **Uninstall:** delete `%LOCALAPPDATA%\PhysPlot` and the PhysPlot Start-menu
-  shortcut (the script prints the exact command). Your files in
-  `Documents\PhysPlot\` are kept.
+- **Uninstall:** close PhysPlot, then run
+  `irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_windows.ps1 | iex`.
+  Your files in `Documents\PhysPlot\` and Python are kept; run
+  `$env:PHYSPLOT_REMOVE_USER_FILES = "1"` and/or `$env:PHYSPLOT_REMOVE_PYTHON = "1"`
+  first to remove them too.
 - **A specific version:** run `$env:PHYSPLOT_REF = "<branch or tag>"` first.
 
 A classic setup program (`PhysPlot-<version>-Windows-Setup.exe`) can also be built with

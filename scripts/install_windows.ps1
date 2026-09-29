@@ -6,7 +6,7 @@
 # this user (with winget, or from python.org). Creates %LOCALAPPDATA%\PhysPlot (Python
 # environment and PhysPlot source) and a Start menu shortcut. Close PhysPlot, then run
 # the same command again to update.
-# Uninstall: delete %LOCALAPPDATA%\PhysPlot and the PhysPlot Start menu shortcut.
+# Uninstall: irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_windows.ps1 | iex
 #
 # Optional environment variables:
 #   PHYSPLOT_REF      branch or tag to install (default: main, the stable branch)
@@ -254,10 +254,7 @@
     Write-Host "  Command line:   & '$venv\Scripts\physplot.exe' run-workflow Sequence.py --input data.csv --output out"
     Write-Host "  Sample data:    $source\test_data"
     Write-Host '  Update:         close PhysPlot, then run the same install command again'
-    $uninstall = "Remove-Item -Recurse -Force '$installDir'"
-    if ($shortcutPath -and (Test-Path $shortcutPath)) { $uninstall += "; Remove-Item '$shortcutPath'" }
-    $uninstall += "; Remove-Item -Recurse 'HKCU:\Software\Classes\$progId'"
-    Write-Host "  Uninstall:      $uninstall"
+    Write-Host "  Uninstall:      irm https://raw.githubusercontent.com/$repo/main/scripts/uninstall_windows.ps1 | iex"
     Write-Host ''
     if ($env:PHYSPLOT_RELAUNCH -eq '1') {
         Say 'Reopening PhysPlot'

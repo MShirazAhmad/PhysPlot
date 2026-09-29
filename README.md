@@ -155,6 +155,17 @@ Python 3.12 for you (with `winget`, or from python.org), installs PhysPlot and i
 dependencies into `%LOCALAPPDATA%\PhysPlot`, and adds a **PhysPlot** Start-menu
 shortcut. Close PhysPlot and run it again to update.
 
+To uninstall, close PhysPlot and run:
+
+```powershell
+irm https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_windows.ps1 | iex
+```
+
+It removes PhysPlot, its Start-menu shortcut, the *Open with* entries and its settings,
+and keeps your files in `Documents\PhysPlot` and Python. Run
+`$env:PHYSPLOT_REMOVE_USER_FILES = "1"` and/or `$env:PHYSPLOT_REMOVE_PYTHON = "1"`
+first to remove those too (removing Python affects other programs that use it).
+
 <a href="https://youtu.be/fVADS4sBwEs"><img src="https://i.ytimg.com/vi/fVADS4sBwEs/mqdefault.jpg" alt="Install PhysPlot on Windows" width="320"></a><br>
 <sub><b>Video:</b> <a href="https://youtu.be/fVADS4sBwEs">Install PhysPlot on Windows</a> (2:10), on a fresh Windows 11 with no Python.</sub>
 
