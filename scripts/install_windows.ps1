@@ -123,6 +123,22 @@
     }
     Say "Using $python"
 
+    # A running PhysPlot locks files in the environment (numpy's DLLs), and pip then
+    # fails with "Access is denied". Help > Check for Updates starts this installer and
+    # then quits, so wait a little for PhysPlot to close before giving up.
+    function Get-RunningPhysPlot {
+        $prefix = (Join-Path $installDir '')
+        Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) }
+    }
+    if (Get-RunningPhysPlot) {
+        Say 'Waiting for PhysPlot to close'
+        $deadline = (Get-Date).AddSeconds(20)
+        while ((Get-RunningPhysPlot) -and ((Get-Date) -lt $deadline)) { Start-Sleep -Milliseconds 500 }
+        if (Get-RunningPhysPlot) {
+            throw 'PhysPlot is still open. Close every PhysPlot window (and any PhysPlot command running in a terminal), then run this command again.'
+        }
+    }
+
     New-Item -ItemType Directory -Force -Path $installDir | Out-Null
     if ($env:PHYSPLOT_SOURCE) {
         $source = (Resolve-Path $env:PHYSPLOT_SOURCE).Path
