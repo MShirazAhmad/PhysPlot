@@ -30,10 +30,18 @@ The script:
   (about 1 GB the first time),
 - creates **PhysPlot.app** in ``~/Applications``.
 
-Run the same command again to update. Uninstall with
-``rm -rf ~/.physplot ~/Applications/PhysPlot.app``; your files in
-``Documents/PhysPlot`` are kept. Set ``PHYSPLOT_REF`` to install another branch
-or tag (``curl … | PHYSPLOT_REF=<ref> bash``).
+Run the same command again to update. Set ``PHYSPLOT_REF`` to install another
+branch or tag (``curl … | PHYSPLOT_REF=<ref> bash``).
+
+To uninstall, quit PhysPlot and run:
+
+.. code-block:: bash
+
+   curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_macos.sh | bash
+
+It removes PhysPlot, PhysPlot.app and its settings, and keeps your files in
+``Documents/PhysPlot`` and Python. Put ``PHYSPLOT_REMOVE_USER_FILES=1`` and/or
+``PHYSPLOT_REMOVE_PYTHON=1`` before ``bash`` to remove those too.
 
 Windows: one command
 --------------------

@@ -137,8 +137,16 @@ curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/
 
 The script finds Python 3.12–3.14 (or installs Python 3.12 with Homebrew), installs
 PhysPlot and its dependencies into `~/.physplot`, and creates **PhysPlot.app** in
-`~/Applications`. Run it again to update; uninstall with
-`rm -rf ~/.physplot ~/Applications/PhysPlot.app`.
+`~/Applications`. Run it again to update. To uninstall, quit PhysPlot and run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_macos.sh | bash
+```
+
+It removes PhysPlot, PhysPlot.app and its settings, and keeps your files in
+`~/Documents/PhysPlot` and Python. Put `PHYSPLOT_REMOVE_USER_FILES=1` and/or
+`PHYSPLOT_REMOVE_PYTHON=1` before `bash` to remove those too (Homebrew's Python is kept
+while other formulae need it).
 
 ---
 

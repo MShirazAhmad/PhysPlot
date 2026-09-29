@@ -5,7 +5,7 @@
 #
 # Creates ~/.physplot (Python environment and PhysPlot source) and
 # ~/Applications/PhysPlot.app. Run the same command again to update.
-# Uninstall: rm -rf ~/.physplot ~/Applications/PhysPlot.app
+# Uninstall: curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_macos.sh | bash
 #
 # Optional environment variables:
 #   PHYSPLOT_REF      branch or tag to install (default: main, the stable branch)
@@ -167,7 +167,7 @@ cat <<DONE
   Command line:   $VENV/bin/physplot run-workflow Sequence.py --input data.csv --output out/
   Sample data:    $SOURCE/test_data
   Update:         run the same install command again
-  Uninstall:      rm -rf "$INSTALL_DIR" "$APP"
+  Uninstall:      curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_macos.sh | bash
 
 DONE
 

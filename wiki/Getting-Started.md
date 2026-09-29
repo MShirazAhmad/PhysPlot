@@ -24,8 +24,11 @@ Then open PhysPlot from Spotlight (⌘ Space, type *PhysPlot*), Launchpad or
 `~/Applications`.
 
 - **Update:** run the same command again.
-- **Uninstall:** `rm -rf ~/.physplot ~/Applications/PhysPlot.app`. Your own files in
-  `Documents/PhysPlot/` are kept.
+- **Uninstall:** quit PhysPlot, then run
+  `curl -fsSL https://raw.githubusercontent.com/MShirazAhmad/PhysPlot/main/scripts/uninstall_macos.sh | bash`.
+  Your files in `Documents/PhysPlot/` and Python are kept; put
+  `PHYSPLOT_REMOVE_USER_FILES=1` and/or `PHYSPLOT_REMOVE_PYTHON=1` before `bash` to
+  remove them too.
 - **Command line:** the install also provides `~/.physplot/venv/bin/physplot` (see
   [Bulk Runs and Headless Use](Bulk-Runs-and-Headless)).
 - **A specific version:** the command installs `main` (Stable). For another branch
