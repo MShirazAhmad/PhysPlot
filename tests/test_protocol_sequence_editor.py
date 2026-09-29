@@ -544,7 +544,7 @@ def test_insert_steps_and_protocol_modules_after_selected_row(tmp_path):
         encoding="utf-8",
     )
     window.insert_protocol_module(module, after_row=0)
-    assert [panel.timeline.item(row, 3).text() for row in range(3)] == ["csv loader (column names and role setup)", "multiply", "multiply"]
+    assert [panel.timeline.item(row, 3).text() for row in range(3)] == ["CSV Loader (column names and role setup)", "multiply", "multiply"]
     assert window.state.pp.workflow[2].output == "T_ms"
     assert window.state.pp.workflow[3].output == "V_mV"
 

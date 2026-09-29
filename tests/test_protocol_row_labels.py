@@ -58,7 +58,7 @@ def test_role_change_row_appears_in_build_protocol_without_a_full_refresh(monkey
     app.processEvents()
 
     assert timeline.rowCount() == rows_before + 1
-    assert timeline.item(rows_before, 1).text() == "Set Group"
+    assert timeline.item(rows_before, 2).text() == "Set Group"
     window.close()
     app.processEvents()
 
